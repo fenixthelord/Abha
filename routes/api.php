@@ -20,10 +20,13 @@ use App\Http\Controllers\UserAuthController;
 ;
 Route::post('/register',[UserAuthController::class,'register']);
 Route::post('login',[UserAuthController::class,'login']);
-Route::post('logout',[UserAuthController::class,'logout'])
+Route::post('logout',[UserAuthController::class,'logout']);
+Route::post('/upload',[UserAuthController::class,'addImage'])
+
     ->middleware('auth:sanctum');
 Route::get('token', function () {return ('Welcome to Abha');})->middleware('auth:sanctum');
 
 Route::post('/send-message', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
 Route::Get('/receive-message', [\App\Http\Controllers\ChatController::class, 'receiveMessage']);
+
 
