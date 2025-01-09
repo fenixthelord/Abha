@@ -24,7 +24,6 @@ class UserAuthController extends Controller
             'email' => 'required|email|unique:users,email,',
             'password' => 'required|min:8',
             'phone' => 'required|unique:users,phone|numeric',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'gender' => 'required|in:male,female',
             'alt' => 'string'
         ]);
@@ -79,6 +78,12 @@ class UserAuthController extends Controller
     public function addImage(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+            if ($validator->fails()) {
+                return $this->requiredField($validator->errors()->first());
+            }
             $data=auth()->user();
             $image=$this->uploadImagePublic($request,$data,$request->type);
             return $this->apiResponse($image);
