@@ -20,7 +20,7 @@ use App\Http\Controllers\UserAuthController;
 ;
 Route::post('/register',[UserAuthController::class,'register']);
 Route::post('login',[UserAuthController::class,'login']);
-Route::Get('logout',[UserAuthController::class,'logout']);
+Route::Post('logout',[UserAuthController::class,'logout']);
 Route::post('/upload',[UserAuthController::class,'addImage'])
 
     ->middleware('auth:sanctum');

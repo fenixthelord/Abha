@@ -98,9 +98,14 @@ class UserAuthController extends Controller
 
     public function logout(Request $request)
     {
+        try {
         auth()->user()->tokens()->delete();
-
         return $this->apiResponse("logged out");
+        }
+        catch (\Exception $ex)
+        {
+            return $this->apiResponse(null, false, $ex->getMessage(), $ex->getCode());
+        }
     }
 }
 
