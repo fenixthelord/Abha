@@ -6,9 +6,9 @@ use App\Http\Traits\FileUploader;
 use App\Http\Traits\GeneralTrait;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
 
 
 class UserAuthController extends Controller
@@ -68,13 +68,12 @@ class UserAuthController extends Controller
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->apiResponse($data, true, null, 200);
             }
+        } catch
+        (\Exception $ex) {
+            return $this->apiResponse(null, false, $ex->getMessage(), 500);
         }
-
-        catch
-            (\Exception $ex) {
-                return $this->apiResponse(null, false, $ex->getMessage(), 500);
-            }
     }
+
     public function addImage(Request $request)
     {
         try {
@@ -84,26 +83,22 @@ class UserAuthController extends Controller
             if ($validator->fails()) {
                 return $this->requiredField($validator->errors()->first());
             }
-            $data=auth()->user();
-            $image=$this->uploadImagePublic($request,$data,$request->type);
+            $data = auth()->user();
+            $image = $this->uploadImagePublic($request, $data, $request->type);
             return $this->apiResponse($image);
-        }
-        catch (\Exception $ex)
-        {
-            return $this->apiResponse(null,false,$ex->getMessage(),401);
+        } catch (\Exception $ex) {
+            return $this->apiResponse(null, false, $ex->getMessage(), 401);
         }
     }
-
 
 
     public function logout(Request $request)
     {
         try {
-        auth()->user()->tokens()->delete();
-        return $this->apiResponse("logged out");
-        }
-        catch (\Exception $ex)
-        {
+
+            Auth::user()->tokens()->delete();
+            return $this->apiResponse("logged out");
+        } catch (\Exception $ex) {
             return $this->apiResponse(null, false, $ex->getMessage(), $ex->getCode());
         }
     }
