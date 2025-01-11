@@ -17,3 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::prefix('roles-and-permissions')->group(function (){
+    Route::get('/', [RoleAndPermissionController::class,'index']);
+    Route::post('/create',[RoleAndPermissionController::class,'store']);
+    Route::put('/{id}',[RoleAndPermissionController::class,'update']);
+    Route::delete('/{id}',[RoleAndPermissionController::class,'destroy']);
+});
