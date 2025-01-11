@@ -16,7 +16,8 @@ class ChangeLang
      */
     public function handle(Request $request, Closure $next)
     {
-        $lang = ($request->hasHeader('Accept-Language')) ? $request->header('Accept-Language') : 'en';
+        $lang = ($request->hasHeader('Accept-Language')) ? $request->header('Accept-Language') : 'ar';
+        \Log::info($lang);
         app()->setlocale($lang);
         return $next($request);
     }

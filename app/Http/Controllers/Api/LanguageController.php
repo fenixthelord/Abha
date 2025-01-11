@@ -10,15 +10,9 @@ class LanguageController extends Controller
     use ResponseTrait;
     public function swap($locale)
     {
-        if (!in_array($locale, ['en', 'fr', 'ar', 'de'])) {
-            // return $this->returnError('Language not supported');
-            return response()->json([
-                'status' => false,
-                'code' => 400,
-                'msg' => "Language not supported",
-            ], 400);
+        if (!in_array($locale, SupportedLanguages())) {
+            $locale = 'en';
         }
-
         app()->setLocale($locale);
 
         return $this->returnSuccessMessage('Language changed successfully');

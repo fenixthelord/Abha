@@ -31,12 +31,6 @@ class LanguageChangeTest extends TestCase
         $locale = 'es';
 
         $response = $this->getJson("/api/lang/{$locale}");
-
-        $response->assertStatus(400)
-            ->assertJson([
-                'status' => false,
-                'code' => 400,
-                'msg' => 'Language not supported',
-            ]);
+        $this->assertEquals(app()->getLocale(), 'en');
     }
 }

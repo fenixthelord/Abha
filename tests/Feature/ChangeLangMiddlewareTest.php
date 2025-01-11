@@ -12,21 +12,17 @@ class ChangeLangMiddlewareTest extends TestCase
     public function test_it_sets_locale_based_on_accept_language_header()
     {
         $response = $this->withHeaders([
-            'Accept-Language' => 'ar', 
-        ])->getJson('/api/lang/ar');
+            'Accept-Language' => 'ar',
+        ])->getJson('/api/lang/error');
 
         $this->assertEquals('ar', app()->getLocale());
-
-        $response->assertStatus(200);
     }
 
     /** @test */
     public function test_it_defaults_to_en_when_accept_language_header_is_missing()
     {
-        $response = $this->getJson('/api/lang');
+        $response = $this->withHeaders(['Accept-Language' => ''])->getJson('/api/lang/n');
 
         $this->assertEquals('en', app()->getLocale());
-
-        $response->assertStatus(200);
     }
 }

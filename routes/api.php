@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('lang/{locale}', [LanguageController::class, 'swap']);
+Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
