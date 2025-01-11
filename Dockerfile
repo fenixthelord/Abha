@@ -1,4 +1,4 @@
-FROM php:7.3-apache
+FROM php:8.1-apache
 # 1. Install development packages and clean up apt cache.
 RUN apt-get update -y && apt-get install -y libwebp-dev libjpeg62-turbo-dev libpng-dev libxpm-dev \
   libfreetype6-dev zlib1g-dev  zip  unzip  libzip-dev supervisor
