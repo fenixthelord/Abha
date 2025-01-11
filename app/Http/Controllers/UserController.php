@@ -88,11 +88,16 @@ class UserController extends Controller
     public function login(Request $request)
     {
         try {
+            $messages = ['user.required' => 'Email is required.',
+                'password.required' => 'Password is required.',
+                'password.min' => 'Password must be at least 8 characters.',
+                'password.string' => 'Password must be a string.',
+                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',];
             $validator = Validator::make($request->all(), [
                 'user' => 'required|string',
                 'password' =>
                     'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/',
-            ]);
+            ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator,null,$validator->errors()->first());
             }
@@ -114,18 +119,20 @@ class UserController extends Controller
     public function addImage(Request $request)
     {
         try {
+            $messages = ['image.required' => 'Image is required.',
+                'image.image' => 'Image must be a image.',
+                'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
+                'image.max' => 'Image must be less than 2MB.',
+                'type.required' => 'Type is required.',];
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
-            ]);
+                'type' => 'required|string',
+            ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator,null,$validator->errors()->first());
             }
-        //    $data = auth()->user();
-        //     $image = $this->uploadImagePublic($request, $data, $request->type);
-           // dd($request->file('image'));
-            $image=$request->file('image')->store('app/images');
-
+            $data = auth()->user();
+            $image = $this->uploadImagePublic($request, $data, $request->type);
             return $this->returnData('data',$image,'Image Uploaded');
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
