@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\api\auth\ChangePassword;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +27,6 @@ Route::post('register',[UserController::class,'register']);
 Route::post('login',[UserController::class,'login']);
 Route::post('upload',[UserController::class,'addImage'])->middleware('auth:sanctum');
 Route::post('send',[UserController::class,'sendOTP'])->middleware('auth:sanctum');
+Route::post('/auth/forgot-password', [ChangePassword::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [ChangePassword::class, 'reset_password']);
 
