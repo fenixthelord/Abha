@@ -51,7 +51,7 @@ trait ResponseTrait
             'status' => true,
             'code' => Response::HTTP_OK,
             'msg' => $msg,
-            $key => $value,
+            $key =>  $value,
         ], Response::HTTP_OK);
     }
 
