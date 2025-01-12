@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,14 +16,13 @@ use App\Http\Controllers\Api\NotificationController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Change Lang
+Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 
-
-});
-
+// Send Notifications
 Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
 
+// Authentication Routes
 Route::post('logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
