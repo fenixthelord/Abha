@@ -47,10 +47,12 @@ class UserController extends Controller
             'gender.in' => 'Gender must be a male or female.',
             'alt.string' => 'Alt must be a string.',
             'jop.string' => 'Jop must be a string.',
-            'jop_id.numeric' => 'Jop must be a number.',];
+            'jop_id.string' => 'Jop must be a string.',];
+        // TODO remove Email Validaet shouls br accept \arabic
+
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|regex:/^[a-zA-Z\s]+$/|min:3|max:255',
-            'last_name' => 'required|string|regex:/^[a-zA-Z\s]+$/|min:3|max:255',
+            'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255|regex:/^[^\d]+$/',
+            'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u/|min:3|max:255|regex:/^[^\d]+$/',
             'email' => 'required|email|unique:users,email|max:255',
             'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
@@ -58,14 +60,14 @@ class UserController extends Controller
             'gender' => 'required|in:male,female',
             'alt' => 'nullable|string',
             'jop' => 'nullable|string',
-            'jop_id' => 'nullable|numeric',
+            'jop_id' => 'nullable|string',
         ], $messages);
         if ($validator->fails()) {
             return $this->returnValidationError($validator,null,$validator->errors()->first());
         }
         try {
             $user = User::create([
-                'uuid' => Str::uuid(),
+                'uuid' => Str::orderedUuid(),
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -77,6 +79,7 @@ class UserController extends Controller
                 'jop_id' => $request->jop_id,
                 'OTP' => '00000',
             ]);
+            // TODO Don't Forget OPT cycle
             return $this->returnSuccessMessage("Registered successfully");
 
         } catch (\Exception $ex) {
