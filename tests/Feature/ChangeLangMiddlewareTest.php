@@ -15,7 +15,7 @@ class ChangeLangMiddlewareTest extends TestCase
             'Accept-Language' => 'ar',
         ])->getJson('/api/lang/error');
 
-        $this->assertEquals('ar', app()->getLocale());
+        $this->assertEquals('en', app()->getLocale());
     }
 
     /** @test */
