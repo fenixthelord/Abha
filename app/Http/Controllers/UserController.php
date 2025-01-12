@@ -46,21 +46,19 @@ class UserController extends Controller
             'gender.required' => 'Gender is required.',
             'gender.in' => 'Gender must be a male or female.',
             'alt.string' => 'Alt must be a string.',
-            'jop.string' => 'Jop must be a string.',
-            'jop_id.string' => 'Jop must be a string.',];
-        // TODO remove Email Validaet shouls br accept \arabic
-
+            'job.string' => 'Jop must be a string.',
+            'job_id.' => 'Jop must be a number.',];
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255|regex:/^[^\d]+$/',
-            'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u/|min:3|max:255|regex:/^[^\d]+$/',
+            'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
+            'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
             'email' => 'required|email|unique:users,email|max:255',
             'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
             'phone' => 'required|unique:users,phone|numeric',
             'gender' => 'required|in:male,female',
             'alt' => 'nullable|string',
-            'jop' => 'nullable|string',
-            'jop_id' => 'nullable|string',
+            'job' => 'nullable|string',
+            'job_id' => 'nullable|string',
         ], $messages);
         if ($validator->fails()) {
             return $this->returnValidationError($validator,null,$validator->errors()->first());
@@ -75,11 +73,10 @@ class UserController extends Controller
                 'password' => $request->password ? Hash::make($request->password) : null,
                 'alt' => $request->alt,
                 'gender' => $request->gender,
-                'jop' => $request->jop,
-                'jop_id' => $request->jop_id,
+                'job' => $request->job,
+                'job_id' => $request->job_id,
                 'OTP' => '00000',
             ]);
-            // TODO Don't Forget OPT cycle
             return $this->returnSuccessMessage("Registered successfully");
 
         } catch (\Exception $ex) {
