@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/run-command/{command}', function ($command) {
+    \Illuminate\Support\Facades\Artisan::call($command);
+    echo "Done ".$command;
+});
