@@ -22,10 +22,10 @@ class NotificationController extends Controller {
         ];
 
         if (empty($tokens)) {
-            return $this->returnError('Tokens are required.');
+            return $this->badRequest('Tokens are required.');
         }
         if (empty($content['title']) || empty($content['body'])) {
-            return $this->returnError('Title and body are required.');
+            return $this->badRequest('Title and body are required.');
         }
 
         try {
@@ -40,8 +40,8 @@ class NotificationController extends Controller {
 
     public  function saveDeviceToken(Request $request) {
         $request->validate([
-            'token' => 'required|string|unique:device_tokens, token',
-            'user_id' => 'nullable|exists:users, id',
+            'token' => 'required|string|unique:device_tokens,token',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         try {
@@ -49,7 +49,7 @@ class NotificationController extends Controller {
                'token' => $request->input('token'),
                'user_id' => $request->input('user_id'),
             ]);
-            return $this->returnSuccessMessage('Token saved successfully');
+            return $this->returnSuccessMessage('Device Token saved successfully');
         } catch (\Exception $e) {
             return $this->returnError('Faild to save device token', $e->getMessage());
         }
