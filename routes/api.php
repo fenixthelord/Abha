@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\Auth\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,7 +24,14 @@ Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("ch
 Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
 
 // Authentication Routes
-Route::post('logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
-Route::post('upload', [UserController::class, 'addImage'])->middleware('auth:sanctum');
+// Login Throw Social
+Route::post('social-login', [SocialLoginController::class, 'login']);
+
+Route::prefix('/auth')->middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
+
+    Route::post('upload', [UserController::class, 'addImage'])->middleware('auth:sanctum');
+
+});
