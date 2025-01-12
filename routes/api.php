@@ -25,3 +25,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('register',[UserController::class,'register']);
 Route::post('login',[UserController::class,'login']);
 Route::post('upload',[UserController::class,'addImage'])->middleware('auth:sanctum');
+Route::post('send',[UserController::class,'sendOTP'])->middleware('auth:sanctum');
+

@@ -160,5 +160,15 @@ class UserController extends Controller
             return $this->returnError($ex->getMessage());
         }
     }
+    public function sendOTP()
+    {
+        $user = auth()->user();
+        $otp = $user->OTP = rand(10000, 99999);
+        $user->save();
+        $mail = Mail::to($user->email)->send(new OtpMail($otp));
+        if ($mail) {
+            return $this->returnSuccessMessage('OTP send successfully');
+        }
+    }
 }
 
