@@ -14,15 +14,20 @@ use Laravel\Socialite\Two\User as ProviderUser;
 
 class SocialLoginController extends Controller
 {
+
     use ResponseTrait;
 
     public function login(Request $request)
     {
-        $messages = ['provider.in'=> 'Google Facebook Apple Stripe Firebase only allowed'];
-        $validator = Validator::make($request->all(), [
-            'provider' => 'required|in:google,facebook,apple,stripe,firebase',
-            'access_token' => 'required|string',
-        ],
+        $messages = [
+            'provider.in' => 'Only Google, Facebook, Apple, Stripe, or Firebase are allowed.',
+        ];
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'provider' => 'required|in:google,facebook,apple,stripe,firebase',
+                'access_token' => 'required|string',
+            ],
             $messages
         );
 
@@ -34,61 +39,104 @@ class SocialLoginController extends Controller
             $accessToken = $request->get('access_token');
             $provider = $request->get('provider');
             $providerUser = Socialite::driver($provider)->userFromToken($accessToken);
-
         } catch (Exception $exception) {
             return response()->json([
                 'message' => $exception->getMessage(),
-            ]);
+            ], 401);
         }
 
         if (filled($providerUser)) {
-            $user = $this->findOrCreate($providerUser, $provider);
+            $user = $this->findUserBySocialAccount($providerUser, $provider);
         } else {
-            $user = $providerUser;
+            return $this->error(
+                message: 'Social provider authentication failed.',
+                code: 401
+            );
         }
-        auth()->login($user);
-        if (auth()->check()) {
+
+        if ($user) {
+            auth()->login($user);
             return response()->json([
-                'message' => 'Logged in successfully',
+                'message' => 'Logged in successfully.',
                 'data' => ['token' => auth()->user()->createToken('API Token')->plainTextToken],
             ]);
         } else {
             return $this->error(
-                message: 'Failed to Login try again',
-                code: 401
+                message: 'No account is linked to this social account.',
+                code: 404
             );
         }
     }
 
-
-    protected function findOrCreate(ProviderUser $providerUser, string $provider): User
+    public function linkSocialAccount(Request $request)
     {
-        $linkedSocialAccount = LinkedSocialAccount::query()->where('provider_name', $provider)
+        $messages = [
+            'provider.in' => 'Only Google, Facebook, Apple, Stripe, or Firebase are allowed.',
+        ];
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'provider' => 'required|in:google,facebook,apple,stripe,firebase',
+                'access_token' => 'required|string',
+            ],
+            $messages
+        );
+
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator, $validator->errors(), $validator->errors());
+        }
+
+        if (!auth()->check()) {
+            return $this->error(
+                message: 'You must be logged in to link a social account.',
+                code: 401
+            );
+        }
+
+        try {
+            $accessToken = $request->get('access_token');
+            $provider = $request->get('provider');
+            $providerUser = Socialite::driver($provider)->userFromToken($accessToken);
+        } catch (Exception $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 401);
+        }
+
+        $user = auth()->user();
+
+        // Check if the social account is already linked
+        $existingSocialAccount = LinkedSocialAccount::query()
+            ->where('provider_name', $provider)
             ->where('provider_id', $providerUser->getId())
             ->first();
 
-        if ($linkedSocialAccount) {
-            return $linkedSocialAccount->user;
-        } else {
-            $user = null;
-
-            if ($email = $providerUser->getEmail()) {
-                $user = User::query()->where('email', $email)->first();
-            }
-
-            if (!$user) {
-                $user = User::query()->create([
-                    'name' => $providerUser->getName(),
-                    'email' => $providerUser->getEmail(),
-                ]);
-                $user->markEmailAsVerified();
-            }
-
-            $user->linkedSocialAccounts()->create([
-                'provider_id' => $providerUser->getId(),
-                'provider_name' => $provider,
-            ]);
-            return $user;
+        if ($existingSocialAccount) {
+            return $this->error(
+                message: 'This social account is already linked to another user.',
+                code: 400
+            );
         }
+
+        // Link the social account to the authenticated user
+        $user->linkedSocialAccounts()->create([
+            'provider_id' => $providerUser->getId(),
+            'provider_name' => $provider,
+        ]);
+
+        return response()->json([
+            'message' => 'Social account linked successfully.',
+        ]);
+    }
+
+    protected function findUserBySocialAccount(ProviderUser $providerUser, string $provider): ?User
+    {
+        // Find the social account linked to an existing user
+        $linkedSocialAccount = LinkedSocialAccount::query()
+            ->where('provider_name', $provider)
+            ->where('provider_id', $providerUser->getId())
+            ->first();
+
+        return $linkedSocialAccount ? $linkedSocialAccount->user : null;
     }
 }
