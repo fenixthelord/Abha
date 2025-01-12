@@ -6,21 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
+use App\Models\DeviceToken;
 
 class NotificationController extends Controller {
     use Firebase, ResponseTrait;
     public function sendNotification(Request $request) {
-        // استقبال البيانات من الطلب
+
         $tokens = $request->input('tokens', []);
         $content = [
             'title' => $request->input('title'),
             'body' => $request->input('body'),
-            'type' => $request->input('data.type', null), // (اختياري)
-            'object' => $request->input('data.object', null), // (اختياري)
-            'screen' => $request->input('data.screen', null), // (اختياري)
+            'type' => $request->input('data.type', null),
+            'object' => $request->input('data.object', null),
+            'screen' => $request->input('data.screen', null),
         ];
 
-        // التحقق من التوكينات والعنوان والمحتوى
         if (empty($tokens)) {
             return $this->returnError('Tokens are required.');
         }
@@ -28,7 +28,6 @@ class NotificationController extends Controller {
             return $this->returnError('Title and body are required.');
         }
 
-        // إرسال الإشعارات عبر الـ Trait
         try {
             $status = $this->HandelDataAndSendNotify($tokens, $content);
             return $status
@@ -36,6 +35,23 @@ class NotificationController extends Controller {
                 : $this->returnError('Failed to send notifications.');
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
+        }
+    }
+
+    public  function saveDeviceToken(Request $request) {
+        $request->validate([
+            'token' => 'required|string|unique:device_tokens, token',
+            'user_id' => 'nullable|exists:users, id',
+        ]);
+
+        try {
+            DeviceToken::create ([
+               'token' => $request->input('token'),
+               'user_id' => $request->input('user_id'),
+            ]);
+            return $this->returnSuccessMessage('Token saved successfully');
+        } catch (\Exception $e) {
+            return $this->returnError('Faild to save device token', $e->getMessage());
         }
     }
 }
