@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserLogin;
+use App\Events\UserRegistered;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
+use App\Mail\OtpMail;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Http\Traits\ResponseTrait;
@@ -77,6 +82,10 @@ class UserController extends Controller
                 'job_id' => $request->job_id,
                 'OTP' => '00000',
             ]);
+            if ($user)
+            {
+                event(new UserRegistered($user));
+            }
             return $this->returnSuccessMessage("Registered successfully");
 
         } catch (\Exception $ex) {
@@ -106,6 +115,7 @@ class UserController extends Controller
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->returnValidationError($validator, 400, 'email or phone or password false');
             } else {
+                event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->returnData('data', $data);
