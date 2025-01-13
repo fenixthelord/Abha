@@ -88,7 +88,7 @@ class UserController extends Controller
             if ($request->hasFile('image')) {
                 $user->image = $this->uploadImagePublic($request,$request->type);
             }
-            if ($request->has('password')) {
+            if ($request->has('password') && !empty($request->password)) {
                 if ($user->password == $request->old_password);
                 {
                     $user->password = $request->password ? Hash::make($request->password) : null;
