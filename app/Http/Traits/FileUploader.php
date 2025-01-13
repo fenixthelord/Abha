@@ -15,7 +15,7 @@ trait FileUploader
      * @param mixed|null $inputName
      * @return bool|string
      */
-    public function uploadImagePublic($request, $data, $name, $inputName = 'image',$extra = null)
+    public function uploadImagePublic($request, $name, $inputName = 'image',$extra = null)
     {
 
         if(!is_null($extra)){
@@ -26,14 +26,14 @@ trait FileUploader
         }else{
             $requestFile = $request->file($inputName);
         }
-
         try {
+
             $dir = 'public/images/'.$name;
             $randomNumber = Str::random(5);
-            $fixName = $data->id.'-'.$randomNumber.'.'.$requestFile->extension();
+            $fixName =$randomNumber.'.'.$requestFile->extension();
             if ($requestFile) {
-                $url =  Storage::putFileAs($dir, $requestFile, $fixName);
-
+                 Storage::putFileAs($dir, $requestFile, $fixName);
+                 $url = Storage::url($dir.'/'.$fixName);
                 $request->image = $fixName;
             }
 
