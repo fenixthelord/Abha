@@ -101,6 +101,46 @@ class UserController extends Controller
             return $this->returnError($e->getMessage());
         }
     }
+    public function deleteUser(Request $request)
+    {
+        try {
+
+        $validator = Validator::make($request->all(), [
+            'uuid' => 'required|string|exists:users,uuid',
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator,null,$validator->errors());
+        }
+        $user = User::whereuuid($request->uuid)->firstOrFail();
+        $user->delete();
+        return $this->returnSuccessMessage('User deleted successfully');
+        }
+        catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
+    public function showDeleteUser()
+    {
+        $user = User::onlyTrashed()->paginate(10);
+        return $this->returnData('users',$user);
+    }
+    public function restoreUser(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'uuid' => 'required|string|exists:users,uuid',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator,null,$validator->errors());
+            }
+            $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
+            $user->restore();
+            return $this->returnSuccessMessage('User restore successfully');
+        }
+        catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
     public function addImage(Request $request)
     {
         try {
