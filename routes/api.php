@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\RoleAndPermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,9 +29,7 @@ Route::post('logout', [UserController::class, 'logout'])->middleware('auth:sanct
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('upload', [UserController::class, 'addImage'])->middleware('auth:sanctum');
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
 Route::prefix('roles-and-permissions')->group(function (){
     Route::get('/', [RoleAndPermissionController::class,'index']);
     Route::post('/create',[RoleAndPermissionController::class,'store']);
@@ -37,18 +39,12 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/roles/remove',[RoleAndPermissionController::class,'RemovePermissionsFromRole']);
     Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
     Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
+
     Route::prefix('users')->group(function () {
+
         Route::post('/permissions', [RoleAndPermissionController::class, 'assignPermission']);
         Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
         Route::post('/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
         Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
-
-
-
-
-
-
-
-
-});
+})->middleware('auth:sanctum');
