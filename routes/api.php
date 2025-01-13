@@ -24,13 +24,16 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/permission/create',[RoleAndPermissionController::class,'CreatePermission']);
     Route::put('/{id}',[RoleAndPermissionController::class,'update']);
     Route::delete('/{id}',[RoleAndPermissionController::class,'destroy']);
-    Route::post('/users/{userId}/permissions', [RoleAndPermissionController::class, 'assignPermission']);
-    Route::post('/users/{userId}/roles', [RoleAndPermissionController::class, 'assignRole']);
-    Route::post('/users/{userId}/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
-    Route::post('/users/{userId}/remove', [RoleAndPermissionController::class, ' RemoveDirectPermission']);
-    Route::get('/users/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);
-    Route::post('/roles/remove',[RoleAndPermissionController::class,' RemovePermissionsFromRole']);
-    Route::post('/roles/assign',[RoleAndPermissionController::class,' AssignPermissionsToRole']);
+    Route::post('/roles/remove',[RoleAndPermissionController::class,'RemovePermissionsFromRole']);
+    Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
+    Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
+    Route::prefix('users')->group(function () {
+        Route::post('/permissions', [RoleAndPermissionController::class, 'assignPermission']);
+        Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
+        Route::post('/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
+        Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
+        Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
+
 
 
 

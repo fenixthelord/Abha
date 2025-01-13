@@ -8,9 +8,9 @@ use App\Http\Resources\Roles\Rolesresource;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleAndPermissionController extends Controller
 {
@@ -19,7 +19,7 @@ class RoleAndPermissionController extends Controller
     public function index()
     {
         $roles = Role::all();
-        return $this->returnData('role',Rolesresource::collection($roles));
+        return $this->returnData('role', Rolesresource::collection($roles));
     }
 
     public function store(Request $request)
@@ -28,7 +28,8 @@ class RoleAndPermissionController extends Controller
             'name' => 'required|string|unique:roles,name',
         ]);
         if ($validator->fails()) {
-            return $this->returnError($validator->errors());
+
+            return $this->returnValidationError($validator,400,$validator->errors());
         }
 
 
@@ -38,12 +39,21 @@ class RoleAndPermissionController extends Controller
         return $this->returnSuccessMessage('Role created successfully');
     }
 
-    public function assignRole(Request $request, $id)
+    public function assignRole(Request $request)
 
     {
+        $validator = Validator::make($request->all(), [
+            'role' => 'required|exists:roles,name',
+
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator,400,$validator->errors());
+        }
 
         try {
-            $user = User::FindorFail($id);
+            $user = User::findOrFail($request->user_id);
+
             $user->assignRole($request->role);
             return $this->returnSuccessMessage('the role has been assigned successfully');
         } catch (\Exception $exception) {
@@ -52,23 +62,28 @@ class RoleAndPermissionController extends Controller
 
     }
 
-    public function assignPermission(Request $request, $id)
+    public function assignPermission(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'permissions' => 'required|array|min:1', // Ensure at least one permission is passed
-            'permissions.*' => 'string|exists:permissions,name',   // Validate each permission exists in the 'permissions' table
-        ]);
+            'user_id' => 'required|integer|exists:users,id',
+            'permissions' => 'required'
 
+        ]);
+        if ($validatedData->fails()) {
+            return $this->returnValidationError($validatedData,400,$validatedData->errors());
+        }
         try {
-            $user = User::findOrFail($id);
-            $user->givePermissionTo($request->permissions);
+            $user = User::findOrFail($request->user_id);
+            $permissions = exploder($request->permissions);
+            $user->givePermissionTo($permissions);
+            return $this->returnSuccessMessage('the permission has been assigned successfully');
         } catch (\Exception $exception) {
             return $exception->getMessage();
         }
     }
 
 
-    function removeRoleFromUser($userId, Request $request)
+    function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
         $validator = Validator::make(['roleName' => $request->roleName], [
@@ -76,12 +91,12 @@ class RoleAndPermissionController extends Controller
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnError($validator->errors());
+            return $this->returnValidationError($validator,400,$validator->errors());
         }
         try {
 
 
-            $user = User::findOrFail($userId);
+            $user = User::findOrFail($request->user_id);
 
             // Check if the user has the role before removing it
             if ($user->hasRole($request->roleName)) {
@@ -100,43 +115,79 @@ class RoleAndPermissionController extends Controller
     public function RemovePermissionsFromRole(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'permissions' => 'required|array|min:1',
+            'permissions' => 'required',
             'roleName' => 'required|string'
         ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator,400,$validator->errors());
+        }
 
 
         try {
             $role = Role::findByName($request->roleName);
-            foreach ($request->permissions as $permission) {
-                if ($role->hasPermissionTo($permission)) {
-                    $role->revokePermissionTo($permission);
 
-                    return $this->returnSuccessMessage('the role has been removed successfully');
+
+            if (is_array($request->permissions)) {
+                foreach ($request->permissions as $permission) {
+                    if ($role->hasPermissionTo($permission)) {
+                        $role->revokePermissionTo($permission);
+                        return $this->returnData('role', RolesResource::make($role));
+                    } else return $this->returnError("The role doesn't have this permission");
+                }
+            } else {
+                if ($role->hasPermissionTo($request->permissions)) {
+                    $role->revokePermissionTo($request->permissions);
+                    return $this->returnData('role', RolesResource::make($role));
                 } else return $this->returnError("The role doesn't have this permission");
             }
+
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
     }
 
-    public function RemoveDirectPermission(Request $request, $user_id)
+    public function RemoveDirectPermission(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'permission' => 'required|array|min:1',
-            'permission.*' => 'string|exists:permissions,name',
+            'permission' => 'required',
+            'user_id' => 'required|integer|exists:users,id'
+
 
         ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator,400,$validator->errors());
+        }
         try {
-            $user = User::FindOrFail($user_id);
-            foreach ($request->permissions as $permission) {
-                // Check if the user has the permission directly (not inherited from roles)
-                if ($user->hasDirectPermission($permission)) {
-                    // Remove the permission from the user
-                    $user->revokePermissionTo($permission);
-                    return $this->returnSuccessMessage('the ' . $permission . " permission has been removed successfully");
 
-                } else return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
-            }
+
+            $user = User::FindOrFail($request->user_id);
+
+//            if (is_array($request->permission)) {
+
+
+                foreach ($request->permission as $permission) {
+                    // Check if the user has the permission directly (not inherited from roles)
+
+
+                    if ($user->hasDirectPermission($permission)) {
+                        // Remove the permission from the user
+                        $user->revokePermissionTo($permission);
+                    } else return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
+                }
+             return   $this->returnSuccessMessage('the permission removed successfully');
+
+//            }
+//        else {
+//                if ($user->hasDirectPermission($request->permission)) {
+//                    // Remove the permission from the user
+//                    $user->revokePermissionTo($request->permission);
+//                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
+//
+//                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
+//            }
+
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -145,13 +196,13 @@ class RoleAndPermissionController extends Controller
     public function CreatePermission(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'name' => 'required|string|unique:permissions,name',
+            'name' => 'required|string|unique:permissions,name|regex:/^[A-Za-z-]+$/',
             'displaying' => 'required|string|unique:permissions,displaying',
 
             'group' => 'required|string'
         ]);
         if ($validatedData->fails()) {
-            return $this->returnError($validatedData->errors());
+            return $this->returnValidationError($validatedData,400,$validatedData->errors());
         }
 
 
@@ -164,65 +215,72 @@ class RoleAndPermissionController extends Controller
             'group' => $request->group,
             'is_admin' => $request->is_admin,
         ]);
- return $this->returnData('permission',Permissionsresource::make($permission));
+        return $this->returnData('permission', Permissionsresource::make($permission));
     }
 
 
-    public function GetUserPermissions($id)
+    public function GetUserPermissions($userId)
 
     {
         try {
-            $user = User::FindorFail($id);
+            $user = User::FindorFail($userId);
+
             $permission['directed'] = $user->getDirectPermissions();
             $permission['roll'] = $user->getPermissionsViaRoles();
+            return $this->returnData('permission', [
+                'directed' => PermissionsResource::collection($permission['directed']),
+                'roll' => PermissionsResource::collection($permission['roll'])
+                ]);
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
 
     }
 
-    public function assignPermissionToRole(Request $request)
+    public function AssignPermissionsToRole(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
-            'permission' => 'required|array|min:1',
-            'permission.*' => 'string|exists:permissions,name',
+            'permission' => 'required',
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnError($validator->errors());
+            return $this->returnValidationError($validator,400,$validator->errors());
         }
         try {
 
 
             $role = Role::findByName($request->roleName);
 
+
             // Assign multiple permissions
-            $role->givePermissionTo($request->permissions);
-            return $this->returnSuccessMessage('the role has been assigned successfully');
+            $permission = exploder($request->permission);
+
+            $role->givePermissionTo($permission);
+            return $this->returnData('role', RolesResource::make($role));
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
     }
 
-    function SyncPermission (Request $request)
+    function SyncPermission(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array|min:1',
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnError($validator->errors());
+            return $this->returnValidationError($validator,400,$validator->errors());
         }
-        $role=Role::where('name',$request->roleName)->first();
-        if(!$role) {
-         return $this->returnError("The role doesn't exist");
-        }
+
+
+        $role = Role::FindByName($request->roleName);
         $role = $role->syncPermissions($request->permission);
-        return $this->returnData('permission',RolesResource::make($role));
+        return $this->returnData('permission', RolesResource::make($role));
     }
 
-    public
-    function destroy()
+    public function destroy()
+
     {
 
     }
