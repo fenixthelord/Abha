@@ -32,6 +32,7 @@ class User extends Authenticatable
         'jop',
         'jpp_id',
         'role',
+        'is_admin'
     ];
 
     /**
