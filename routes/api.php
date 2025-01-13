@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\api\auth\ChangePassword;
 
 /*
@@ -35,17 +34,15 @@ Route::prefix('/auth')->group(function () {
     // Authentication Routes
     Route::post('register', [UserController::class, 'register']);
     Route::post('login', [UserController::class, 'login']);
+    Route::post('/forgot-password', [ChangePassword::class, 'forgotPassword']);
+    Route::post('/reset-password', [ChangePassword::class, 'reset_password']);
     Route::middleware('auth:sanctum')->group(function () {
-
         // Link Social Account Route (Requires Authentication)
         Route::post('/auth/link-social', [SocialLoginController::class, 'linkSocialAccount'])
-            ->middleware('auth:sanctum')
             ->name('auth.link-social');
         Route::post('upload', [UserController::class, 'addImage']);
         Route::post('logout', [UserController::class, 'logout']);
+        Route::post('send', [UserController::class, 'sendOTP']);
     });
 });
-Route::post('send',[UserController::class,'sendOTP'])->middleware('auth:sanctum');
-Route::post('/auth/forgot-password', [ChangePassword::class, 'forgotPassword']);
-Route::post('/auth/reset-password', [ChangePassword::class, 'reset_password']);
 
