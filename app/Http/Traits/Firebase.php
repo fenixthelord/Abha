@@ -18,7 +18,7 @@ trait Firebase
     public function HandelDataAndSendNotify($tokens=null, $content=null, $link = 'FLUTTER_NOTIFICATION_CLICK')
     {
         $client = new Client();
-        dd($this->getAccessToken());
+//        dd($this->getAccessToken());
         try {
             if (empty($tokens)) {
                 return false;

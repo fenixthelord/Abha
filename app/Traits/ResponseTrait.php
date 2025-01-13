@@ -69,10 +69,10 @@ trait ResponseTrait
 
         return response()->json([
             'status' => false,
-            'code' => $this->returnCodeAccordingToInput($validator),
+            'code' =>$code?? $this->returnCodeAccordingToInput($validator),
             'msg' => __('Please check the following errors'),
             'errors'=>$errors,
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        ], $code);
     }
 
     public function returnCodeAccordingToInput($validator)
