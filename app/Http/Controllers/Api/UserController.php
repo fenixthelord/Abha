@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Events\UserLogin;
+use App\Events\UserRegistered;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
-use App\Http\Traits\ResponseTrait;
+use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Models\User;
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 
 class UserController extends Controller
@@ -78,6 +82,10 @@ class UserController extends Controller
                 'job_id' => $request->job_id,
                 'OTP' => '00000',
             ]);
+            if ($user)
+            {
+                event(new UserRegistered($user));
+            }
             return $this->returnSuccessMessage("Registered successfully");
 
         } catch (\Exception $ex) {
@@ -107,6 +115,7 @@ class UserController extends Controller
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->returnValidationError($validator, 400, 'email or phone or password false');
             } else {
+                event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->returnData('data', $data);
@@ -149,6 +158,16 @@ class UserController extends Controller
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
+        }
+    }
+    public function sendOTP()
+    {
+        $user = auth()->user();
+        $otp = $user->OTP = rand(10000, 99999);
+        $user->save();
+        $mail = Mail::to($user->email)->send(new OtpMail($otp));
+        if ($mail) {
+            return $this->returnSuccessMessage('OTP send successfully');
         }
     }
 }
