@@ -21,8 +21,9 @@ use App\Http\Controllers\Api\RoleAndPermissionController;
 // Change Lang
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 
-// Send Notifications
+
 Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
+Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
 
 // Authentication Routes
 Route::post('logout', [UserController::class, 'logout'])->middleware('auth:sanctum');
