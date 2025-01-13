@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Http\Traits;
 
 use Illuminate\Http\Response;
 
@@ -69,10 +69,10 @@ trait ResponseTrait
 
         return response()->json([
             'status' => false,
-            'code' =>$code?? $this->returnCodeAccordingToInput($validator),
+            'code' => $this->returnCodeAccordingToInput($validator),
             'msg' => __('Please check the following errors'),
             'errors'=>$errors,
-        ], $code);
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     public function returnCodeAccordingToInput($validator)
