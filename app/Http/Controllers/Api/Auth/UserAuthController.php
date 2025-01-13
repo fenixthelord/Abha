@@ -70,6 +70,10 @@ class UserAuthController extends Controller
             if ($request->hasFile('image')) {
                 $image = $this->uploadImagePublic($request,$request->type);
             }
+            else
+            {
+                $image = null;
+            }
                 $user = User::create([
                     'uuid' => Str::orderedUuid(),
                     'first_name' => $request->first_name,
