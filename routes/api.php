@@ -46,6 +46,7 @@ Route::prefix('/auth')->group(function () {
 });
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
         Route::post('send', [UserController::class, 'sendOTP']);
         Route::post('update-profile', [UserController::class, 'update']);
         Route::post('upload', [UserController::class, 'addImage']);
