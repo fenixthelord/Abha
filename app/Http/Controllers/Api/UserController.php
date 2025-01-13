@@ -66,7 +66,7 @@ class UserController extends Controller
             'job_id' => 'nullable|string',
         ], $messages);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator,null,$validator->errors()->first());
+            return $this->returnValidationError($validator, null, $validator->errors()->first());
         }
         try {
             $user = User::create([
@@ -82,8 +82,7 @@ class UserController extends Controller
                 'job_id' => $request->job_id,
                 'OTP' => '00000',
             ]);
-            if ($user)
-            {
+            if ($user) {
                 event(new UserRegistered($user));
             }
             return $this->returnSuccessMessage("Registered successfully");
@@ -108,7 +107,7 @@ class UserController extends Controller
                     'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator,null,$validator->errors()->first());
+                return $this->returnValidationError($validator, null, $validator->errors()->first());
             }
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
             $user = User::where($username, $request->user)->first();
@@ -139,11 +138,11 @@ class UserController extends Controller
                 'type' => 'required|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator,null,$validator->errors()->first());
+                return $this->returnValidationError($validator, null, $validator->errors()->first());
             }
             $data = auth()->user();
             $image = $this->uploadImagePublic($request, $data, $request->type);
-            return $this->returnData('data',$image,'Image Uploaded');
+            return $this->returnData('data', $image, 'Image Uploaded');
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
         }
@@ -160,6 +159,7 @@ class UserController extends Controller
             return $this->returnError($ex->getMessage());
         }
     }
+
     public function sendOTP()
     {
         $user = auth()->user();
