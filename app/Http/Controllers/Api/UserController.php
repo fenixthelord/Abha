@@ -70,7 +70,7 @@ class UserController extends Controller
                 'type' => 'nullable|required_with:image|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                'old_password' => 'nullable|required_with:password|string|min:8',
+                'old_password' => 'nullable|required_with:password|string',
             ],$messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator,null,$validator->errors());
