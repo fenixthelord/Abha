@@ -104,7 +104,7 @@ class UserAuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'user' => 'required|string',
                 'password' =>
-                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/',
+                    'required|string',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());
