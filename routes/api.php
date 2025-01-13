@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\auth\ChangePassword;
+use App\Http\Controllers\Api\Auth\UserAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,17 +33,23 @@ Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
 
 Route::prefix('/auth')->group(function () {
     // Authentication Routes
-    Route::post('register', [UserController::class, 'register']);
-    Route::post('login', [UserController::class, 'login']);
+    Route::post('register', [UserAuthController::class, 'register']);
+    Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePassword::class, 'forgotPassword']);
     Route::post('/reset-password', [ChangePassword::class, 'reset_password']);
     Route::middleware('auth:sanctum')->group(function () {
         // Link Social Account Route (Requires Authentication)
         Route::post('/auth/link-social', [SocialLoginController::class, 'linkSocialAccount'])
             ->name('auth.link-social');
-        Route::post('upload', [UserController::class, 'addImage']);
-        Route::post('logout', [UserController::class, 'logout']);
-        Route::post('send', [UserController::class, 'sendOTP']);
+        Route::post('logout', [UserAuthController::class, 'logout']);
     });
 });
+Route::prefix('/user')->group(function () {
+    route::middleware('auth:sanctum')->group(function () {
+        Route::post('send', [UserController::class, 'sendOTP']);
+        Route::post('update-profile', [UserController::class, 'update']);
+        Route::post('upload', [UserController::class, 'addImage']);
+    });
+});
+
 
