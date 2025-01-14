@@ -53,6 +53,7 @@ Route::prefix('/user')->group(function () {
         Route::get('/all', [UserController::class, 'index']);
         Route::post('send', [UserController::class, 'sendOTP']);
         Route::post('update-profile', [UserController::class, 'update']);
+        Route::post('update', [UserController::class, 'updateAdmin']);
         Route::post('upload', [UserController::class, 'addImage']);
         Route::post('delete-user', [UserController::class, 'deleteUser']);
         Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
