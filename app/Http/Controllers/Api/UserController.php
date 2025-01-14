@@ -24,7 +24,7 @@ class UserController extends Controller
     {
         $pageNumber = request()->input('page', 1);
         $perPage = request()->input('perPage', 10);
-        if($request->search){
+        if ($request->search) {
             return $this->oldSearch(request());
         }
         $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
@@ -33,7 +33,7 @@ class UserController extends Controller
             return $this->badRequest('Invalid page number');
         }
         $data = [
-            'researchers' => UserResource::collection($users),
+            'users' => UserResource::collection($users),
             'current_page' => $users->currentPage(),
             'next_page' => $users->nextPageUrl(),
             'previous_page' => $users->previousPageUrl(),
@@ -118,6 +118,7 @@ class UserController extends Controller
             return $this->returnError($e->getMessage());
         }
     }
+
     public function UpdateAdmin(Request $request)
     {
         try {
@@ -212,6 +213,7 @@ class UserController extends Controller
             return $this->returnError($e->getMessage());
         }
     }
+
     public function oldSearch(Request $request)
     {
         $pageNumber = request()->input('page', 1);
@@ -231,7 +233,7 @@ class UserController extends Controller
             return $this->badRequest('Invalid page number');
         }
         $data = [
-            'researchers' => UserResource::collection($users),
+            'users' => UserResource::collection($users),
             'current_page' => $users->currentPage(),
             'next_page' => $users->nextPageUrl(),
             'previous_page' => $users->previousPageUrl(),
@@ -244,13 +246,25 @@ class UserController extends Controller
     public function searchUser(Request $request)
     {
         try {
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
             $query = User::query();
             $fillable = (new User)->getFillable();
             foreach ($request->all() as $key => $value) {
                 if (in_array($key, $fillable) && !empty($value)) {
                     $query->where($key, 'LIKE', '%' . $value . '%');
-                    $user = $query->paginate(10);
-                    return $this->returnData('user', UserResource::collection($user));
+                    $users = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+                    if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                        return $this->badRequest('Invalid page number');
+                    }
+                    $data = [
+                        'users' => UserResource::collection($users),
+                        'current_page' => $users->currentPage(),
+                        'next_page' => $users->nextPageUrl(),
+                        'previous_page' => $users->previousPageUrl(),
+                        'total_pages' => $users->lastPage(),
+                    ];
+                    return $this->returnData('data', $data, 'success');
                 } else {
                     return $this->returnData('user', 'No results found');
                 }
@@ -261,10 +275,25 @@ class UserController extends Controller
         }
     }
 
+
     public function showDeleteUser()
     {
-        $user = User::onlyTrashed()->paginate(10);
-        return $this->returnData('users', UserResource::collection($user));
+        $pageNumber = request()->input('page', 1);
+        $perPage = request()->input('perPage', 10);
+        $users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber);
+        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+            return $this->badRequest('Invalid page number');
+            $data = [
+                'users' => UserResource::collection($users),
+                'current_page' => $users->currentPage(),
+                'next_page' => $users->nextPageUrl(),
+                'previous_page' => $users->previousPageUrl(),
+                'total_pages' => $users->lastPage(),
+            ];
+            return $this->returnData('data', $data, 'success');
+        } else {
+            return $this->returnData('user', 'No results found');
+        }
     }
 
     public function restoreUser(Request $request)
@@ -323,7 +352,7 @@ class UserController extends Controller
     public function user_profile()
     {
         $user = auth()->user();
-        return $this->returnData('user','user');
+        return $this->returnData('user', 'user');
     }
 }
 
