@@ -123,17 +123,24 @@ class UserController extends Controller
 
     public function searchUser(Request $request)
     {
-        $search = $request->search;
-        $user = User::where(function ($query) use ($search) {
-            $query->where('id', 'like', "%$search%")
-                ->orWhere('uuid', 'like', "%$search%")
-                ->orWhere('first_name', 'like', "%$search%")
-                ->orWhere('last_name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%")
-                ->orWhere('phone', 'like', "%$search%")
-                ->orWhere('job', 'like', "%$search%")
-                ->orWhere('job_id', 'like', "%$search%");
-        })->get();
+        try {
+            $query = User::query();
+            $fillable = (new User)->getFillable();
+            foreach ($request->all() as $key => $value) {
+                if (in_array($key, $fillable) && !empty($value)) {
+                    $query->where($key, 'LIKE', '%' . $value . '%');
+                    $user = $query->paginate(10);
+                    return $this->returnData('user', $user);
+                }
+
+                else {
+                    return $this->returnData('user', 'No results found');
+                }
+            }
+        } catch
+        (Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
     }
 
     public function showDeleteUser()
