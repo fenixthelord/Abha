@@ -12,16 +12,22 @@ class PermissionsResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-//    dd($this);
         return [
-            'group' => $this->group,
             'id' => $this->id,
             'name' => $this->name,
-            'displaying' => $this->displaying,
-            'is_admin' => $this->is_admin
+            'permissions' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
+                return [
+                    'group' => $group,
+                    'permissions' => $permissions->map(function ($permission) {
+                        return [
+                            'id' => $permission->id,
+                            'name' => $permission->name,
+                        ];
+                    }),
+                ];
+            })->values(),
         ];
-
     }
 }

@@ -50,7 +50,8 @@ Route::prefix('/auth')->group(function () {
 });
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
+        Route::get('/all', [UserController::class, 'index']);
+        Route::post('/me', [UserController::class, 'user_profile']);
         Route::post('send', [UserController::class, 'sendOTP']);
         Route::post('update-profile', [UserController::class, 'update']);
         Route::post('upload', [UserController::class, 'addImage']);
@@ -72,6 +73,7 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/roles/remove',[RoleAndPermissionController::class,'RemovePermissionsFromRole']);
     Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
     Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
+    Route::get('/permissions/get',[RoleAndPermissionController::class,'GetAllPermissions']);
 
     Route::prefix('users')->group(function () {
 
@@ -79,5 +81,5 @@ Route::prefix('roles-and-permissions')->group(function (){
         Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
         Route::post('/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
-        Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
+        Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
 })->middleware('auth:sanctum');

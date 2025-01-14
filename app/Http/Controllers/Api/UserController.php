@@ -197,5 +197,11 @@ class UserController extends Controller
             return $this->returnSuccessMessage('OTP send successfully');
         }
     }
+
+    public function user_profile()
+    {
+        $user = auth()->user();
+        return $this->returnData('user','user');
+    }
 }
 
