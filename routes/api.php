@@ -54,6 +54,10 @@ Route::prefix('/user')->group(function () {
         Route::post('send', [UserController::class, 'sendOTP']);
         Route::post('update-profile', [UserController::class, 'update']);
         Route::post('upload', [UserController::class, 'addImage']);
+        Route::post('delete-user', [UserController::class, 'deleteUser']);
+        Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+        Route::post('restore_user', [UserController::class, 'restoreUser']);
+        Route::post('search', [UserController::class, 'searchUser']);
     });
 });
 

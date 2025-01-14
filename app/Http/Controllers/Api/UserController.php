@@ -19,11 +19,13 @@ class UserController extends Controller
 
     use FileUploader;
     use ResponseTrait;
+
     public function index()
     {
         $users = User::paginate(10);
         return $this->returnData('users', UserResource::collection($users), 'success');
     }
+
     public function Update(Request $request)
     {
         try {
@@ -71,9 +73,9 @@ class UserController extends Controller
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
-            ],$messages);
+            ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator,null,$validator->errors());
+                return $this->returnValidationError($validator, null, $validator->errors());
             }
             $user = auth()->user();
 
@@ -84,23 +86,84 @@ class UserController extends Controller
             $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
-            $user->job_id = $request->job_id ?$request->job_id : $user->job_id;
+            $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             if ($request->hasFile('image')) {
-                $user->image = $this->uploadImagePublic($request,$request->type);
+                $user->image = $this->uploadImagePublic($request, $request->type);
             }
             if ($request->has('password') && !empty($request->password)) {
-                if ($user->password == $request->old_password);
+                if ($user->password == $request->old_password) ;
                 {
                     $user->password = $request->password ? Hash::make($request->password) : null;
                 }
             }
             $user->save();
             return $this->returnSuccessMessage('User updated successfully');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
     }
+
+    public function deleteUser(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'uuid' => 'required|string|exists:users,uuid',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator, null, $validator->errors());
+            }
+            $user = User::whereuuid($request->uuid)->firstOrFail();
+            $user->delete();
+            return $this->returnSuccessMessage('User deleted successfully');
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
+
+    public function searchUser(Request $request)
+    {
+        try {
+            $query = User::query();
+            $fillable = (new User)->getFillable();
+            foreach ($request->all() as $key => $value) {
+                if (in_array($key, $fillable) && !empty($value)) {
+                    $query->where($key, 'LIKE', '%' . $value . '%');
+                    $user = $query->paginate(10);
+                    return $this->returnData('user', $user);
+                } else {
+                    return $this->returnData('user', 'No results found');
+                }
+            }
+        } catch
+        (Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
+
+    public function showDeleteUser()
+    {
+        $user = User::onlyTrashed()->paginate(10);
+        return $this->returnData('users', $user);
+    }
+
+    public function restoreUser(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'uuid' => 'required|string|exists:users,uuid',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator, null, $validator->errors());
+            }
+            $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
+            $user->restore();
+            return $this->returnSuccessMessage('User restore successfully');
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
+
     public function addImage(Request $request)
     {
         try {
@@ -123,6 +186,7 @@ class UserController extends Controller
             return $this->returnError($ex->getMessage());
         }
     }
+
     public function sendOTP()
     {
         $user = auth()->user();
