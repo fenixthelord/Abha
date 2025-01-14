@@ -18,7 +18,7 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-         $this->middleware('super-admin')->only(['store']);
+       //  $this->middleware('super-admin')->only(['store']);
         }
 
     public function index()
@@ -30,7 +30,10 @@ class RoleAndPermissionController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:roles,name',
+            'roleName' => 'required|string|unique:roles,name',
+            'permission' => 'nullable|array',
+
+
         ]);
         if ($validator->fails()) {
 
@@ -38,9 +41,14 @@ class RoleAndPermissionController extends Controller
         }
 
 
-        Role::create([
-            'name' => $request->name,
+       $role= Role::create([
+            'name' => $request->roleName,
         ]);
+
+        if ($request->has('permission')) {
+            $this->AssignPermissionsToRole($request);
+        }
+
         return $this->returnSuccessMessage('Role created successfully');
     }
 
@@ -71,7 +79,7 @@ class RoleAndPermissionController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id',
-            'permissions' => 'required'
+            'permissions' => 'nullable'
 
         ]);
         if ($validatedData->fails()) {
