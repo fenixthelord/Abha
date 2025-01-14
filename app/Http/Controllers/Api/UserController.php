@@ -233,7 +233,7 @@ class UserController extends Controller
             return $this->badRequest('Invalid page number');
         }
         $data = [
-            'researchers' => UserResource::collection($users),
+            'users' => UserResource::collection($users),
             'current_page' => $users->currentPage(),
             'next_page' => $users->nextPageUrl(),
             'previous_page' => $users->previousPageUrl(),
@@ -258,7 +258,7 @@ class UserController extends Controller
                         return $this->badRequest('Invalid page number');
                     }
                     $data = [
-                        'researchers' => UserResource::collection($users),
+                        'users' => UserResource::collection($users),
                         'current_page' => $users->currentPage(),
                         'next_page' => $users->nextPageUrl(),
                         'previous_page' => $users->previousPageUrl(),
@@ -284,7 +284,7 @@ class UserController extends Controller
         if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
             return $this->badRequest('Invalid page number');
             $data = [
-                'researchers' => UserResource::collection($users),
+                'users' => UserResource::collection($users),
                 'current_page' => $users->currentPage(),
                 'next_page' => $users->nextPageUrl(),
                 'previous_page' => $users->previousPageUrl(),
