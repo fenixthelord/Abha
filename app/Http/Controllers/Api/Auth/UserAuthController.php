@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
+        DB::beginTransaction();
         try {
             $messages = ['first_name.required' => 'First Name is required.',
                 'first_name.min' => 'First Name must be at least 3 characters.',
@@ -92,9 +94,11 @@ class UserAuthController extends Controller
             if ($user) {
                 event(new UserRegistered($user));
             }
+            DB::commit();
             return $this->returnSuccessMessage("Registered successfully");
         } catch
         (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
