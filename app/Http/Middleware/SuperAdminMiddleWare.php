@@ -18,7 +18,7 @@ class SuperAdminMiddleWare
     {
         if (auth()->check()) {
 
-            if (auth()->user()->is_admin()) {
+            if (auth()->user()->role()=="super_admin") {
                 return $next($request);
             } else return $this->Forbidden('Access denied');
 
