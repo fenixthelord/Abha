@@ -26,7 +26,7 @@ class RoleAndPermissionController extends Controller
     public function index()
     {
         $roles = Role::all();
-        return $this->returnData('role', Rolesresource::collection($roles));
+        return $this->returnData('role', RolesResource::collection($roles));
     }
 
     public function store(Request $request)
