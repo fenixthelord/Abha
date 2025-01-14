@@ -20,10 +20,26 @@ class UserController extends Controller
     use FileUploader;
     use ResponseTrait;
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
-        return $this->returnData('users', UserResource::collection($users), 'success');
+        $pageNumber = request()->input('page', 1);
+        $perPage = request()->input('perPage', 10);
+        if($request->search){
+            return $this->oldSearch(request());
+        }
+        $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
+
+        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+            return $this->badRequest('Invalid page number');
+        }
+        $data = [
+            'researchers' => UserResource::collection($users),
+            'current_page' => $users->currentPage(),
+            'next_page' => $users->nextPageUrl(),
+            'previous_page' => $users->previousPageUrl(),
+            'total_pages' => $users->lastPage(),
+        ];
+        return $this->returnData('data', $data, 'success');
     }
 
     public function Update(Request $request)
@@ -120,6 +136,34 @@ class UserController extends Controller
             return $this->returnError($e->getMessage());
         }
     }
+    public function oldSearch(Request $request)
+    {
+        $pageNumber = request()->input('page', 1);
+        $perPage = request()->input('perPage', 10);
+        $search = $request->search;
+        $users = User::where(function ($query) use ($search) {
+            $query->where('id', 'like', "%$search%")
+                ->orWhere('uuid', 'like', "%$search%")
+                ->orWhere('first_name', 'like', "%$search%")
+                ->orWhere('last_name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%")
+                ->orWhere('phone', 'like', "%$search%")
+                ->orWhere('job', 'like', "%$search%")
+                ->orWhere('job_id', 'like', "%$search%");
+        })->paginate($perPage, ['*'], 'page', $pageNumber);
+        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+            return $this->badRequest('Invalid page number');
+        }
+        $data = [
+            'researchers' => UserResource::collection($users),
+            'current_page' => $users->currentPage(),
+            'next_page' => $users->nextPageUrl(),
+            'previous_page' => $users->previousPageUrl(),
+            'total_pages' => $users->lastPage(),
+        ];
+        return $this->returnData('data', $data, 'success');
+    }
+
 
     public function searchUser(Request $request)
     {
@@ -130,7 +174,7 @@ class UserController extends Controller
                 if (in_array($key, $fillable) && !empty($value)) {
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $user = $query->paginate(10);
-                    return $this->returnData('user', UserResource::collection($users));
+                    return $this->returnData('user', UserResource::collection($user));
                 } else {
                     return $this->returnData('user', 'No results found');
                 }
@@ -144,7 +188,7 @@ class UserController extends Controller
     public function showDeleteUser()
     {
         $user = User::onlyTrashed()->paginate(10);
-        return $this->returnData('users', UserResource::collection($users));
+        return $this->returnData('users', UserResource::collection($user));
     }
 
     public function restoreUser(Request $request)
@@ -181,6 +225,8 @@ class UserController extends Controller
             }
             $data = auth()->user();
             $image = $this->uploadImagePublic($request, $request->type);
+            $data->image = $image;
+            $data->save();
             return $this->returnData('data', $image, 'Image Uploaded');
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
