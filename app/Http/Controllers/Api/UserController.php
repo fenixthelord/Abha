@@ -131,9 +131,7 @@ class UserController extends Controller
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $user = $query->paginate(10);
                     return $this->returnData('user', $user);
-                }
-
-                else {
+                } else {
                     return $this->returnData('user', 'No results found');
                 }
             }
