@@ -130,7 +130,7 @@ class UserController extends Controller
                 if (in_array($key, $fillable) && !empty($value)) {
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $user = $query->paginate(10);
-                    return $this->returnData('user', $user);
+                    return $this->returnData('user', UserResource::collection($users));
                 } else {
                     return $this->returnData('user', 'No results found');
                 }
@@ -144,7 +144,7 @@ class UserController extends Controller
     public function showDeleteUser()
     {
         $user = User::onlyTrashed()->paginate(10);
-        return $this->returnData('users', $user);
+        return $this->returnData('users', UserResource::collection($users));
     }
 
     public function restoreUser(Request $request)
