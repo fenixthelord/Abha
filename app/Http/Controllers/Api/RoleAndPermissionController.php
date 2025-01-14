@@ -15,6 +15,11 @@ use Spatie\Permission\Models\Role;
 class RoleAndPermissionController extends Controller
 {
     use ResponseTrait;
+    public function __construct()
+    {
+        // Apply middleware to all actions in this controller
+         $this->middleware('super-admin');
+        }
 
     public function index()
     {
@@ -196,7 +201,7 @@ class RoleAndPermissionController extends Controller
     public function CreatePermission(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'name' => 'required|string|unique:permissions,name|regex:/^[A-Za-z-]+$/',
+            'name' => 'required|string|unique:permissions,name|regex:/^[^\s]+$/',
             'displaying' => 'required|string|unique:permissions,displaying',
 
             'group' => 'required|string'
@@ -219,11 +224,11 @@ class RoleAndPermissionController extends Controller
     }
 
 
-    public function GetUserPermissions($userId)
+    public function GetUserPermissions(Request $request)
 
     {
         try {
-            $user = User::FindorFail($userId);
+            $user = User::FindorFail($request->user_id);
 
             $permission['directed'] = $user->getDirectPermissions();
             $permission['roll'] = $user->getPermissionsViaRoles();
@@ -279,10 +284,14 @@ class RoleAndPermissionController extends Controller
         return $this->returnData('permission', RolesResource::make($role));
     }
 
-    public function destroy()
+    public function GetAllPermissions(){
 
-    {
-
+        $permission = Permission::all();
+        return $this->returnData('permission', PermissionsResource::collection($permission));
     }
+
+
+
+
 }
 
