@@ -53,6 +53,7 @@ Route::prefix('/user')->group(function () {
         Route::post('delete-user', [UserController::class, 'deleteUser']);
         Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
         Route::post('restore_user', [UserController::class, 'restoreUser']);
+        Route::post('search', [UserController::class, 'searchUser']);
     });
 });
 
