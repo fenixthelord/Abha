@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
+        DB::beginTransaction();
         try {
             $messages = ['first_name.required' => 'First Name is required.',
                 'first_name.min' => 'First Name must be at least 3 characters.',
@@ -68,38 +70,39 @@ class UserAuthController extends Controller
                 return $this->returnValidationError($validator, null, $validator->errors());
             }
             if ($request->hasFile('image')) {
-                $image = $this->uploadImagePublic($request,$request->type);
-            }
-            else
-            {
+                $image = $this->uploadImagePublic($request, $request->type);
+            } else {
                 $image = null;
             }
-                $user = User::create([
-                    'uuid' => Str::orderedUuid(),
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                    'password' => $request->password ? Hash::make($request->password) : null,
-                    'alt' => $request->alt,
-                    'gender' => $request->gender,
-                    'job' => $request->job,
-                    'job_id' => $request->job_id,
-                    'OTP' => '00000',
-                    'image' => $image,
-                    'type' => $request->type,
+            $user = User::create([
+                'uuid' => Str::orderedUuid(),
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => $request->password ? Hash::make($request->password) : null,
+                'alt' => $request->alt,
+                'gender' => $request->gender,
+                'job' => $request->job,
+                'job_id' => $request->job_id,
+                'OTP' => '00000',
+                'image' => $image,
+                'type' => $request->type,
 
 
-                ]);
-                if ($user) {
-                    event(new UserRegistered($user));
-                }
-                return $this->returnSuccessMessage("Registered successfully");
+            ]);
+            if ($user) {
+                event(new UserRegistered($user));
+            }
+            DB::commit();
+            return $this->returnSuccessMessage("Registered successfully");
         } catch
         (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
+
     public function login(Request $request)
     {
         try {
@@ -131,6 +134,7 @@ class UserAuthController extends Controller
             return $this->returnError($ex->getMessage());
         }
     }
+
     public function logout(Request $request)
     {
         try {
