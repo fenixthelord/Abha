@@ -18,7 +18,7 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-         $this->middleware('super-admin');
+         //$this->middleware('super-admin');
         }
 
     public function index()
