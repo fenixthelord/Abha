@@ -181,4 +181,34 @@ trait ResponseTrait
             return 422;
         }
     }
+    public function badRequest($msg = '')
+    {
+        return response()->json([
+            'status' => false,
+            'code' => Response::HTTP_BAD_REQUEST,
+            'msg' => $msg,
+        ], Response::HTTP_BAD_REQUEST);
+    }
+    /*
+    * 403
+    */
+    public function Forbidden($msg = '')
+    {
+        return response()->json([
+            'status' => false,
+            'code' => Response::HTTP_FORBIDDEN,
+            'msg' => $msg,
+        ], Response::HTTP_FORBIDDEN);
+    }
+
+    public function Unauthorized($msg = '')
+    {
+        return response()->json([
+            'status' => false,
+            'code' => Response::HTTP_UNAUTHORIZED,
+            'msg' => $msg,
+        ], Response::HTTP_UNAUTHORIZED);
+    }
+
+
 }

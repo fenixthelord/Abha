@@ -13,12 +13,22 @@ class RolesResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'permissions' => PermissionsResource::collection($this->permissions),
+            'permissions' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
+                return [
+                    'group' => $group,
+                    'permissions' => $permissions->map(function ($permission) {
+                        return [
+                            'id' => $permission->id,
+                            'name' => $permission->name,
+                        ];
+                    }),
+                ];
+            })->values(), // Reset numeric keys for a clean array
         ];
     }
 }
