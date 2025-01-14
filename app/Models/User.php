@@ -33,6 +33,7 @@ class User extends Authenticatable
         'jop',
         'jpp_id',
         'role',
+        'verify_code',
     ];
     protected $dates = ['deleted_at'];
 
