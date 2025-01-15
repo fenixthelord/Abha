@@ -29,12 +29,13 @@ class User extends Authenticatable
         'alt',
         'gender',
         'uuid',
-        'OTP',
-        'jop',
-        'jpp_id',
+        'otp_code',
+        'job',
+        'job_id',
         'role',
         'verify_code',
-        'is_admin'
+        'is_admin',
+        'otp_expire',
     ];
     protected $dates = ['deleted_at'];
 
