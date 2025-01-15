@@ -24,8 +24,7 @@ class SendLoginOtpEmail
     public function handle(UserLogin $event): void
     {
         $user = $event->user;
-        $otp = $user->OTP = rand(10000, 99999);
-        $user->save();
-        $mail = Mail::to($user->email)->send(new OtpMail($otp));
+
+        $mail = Mail::to($user->email)->send(new OtpMail($user->otp));
     }
 }
