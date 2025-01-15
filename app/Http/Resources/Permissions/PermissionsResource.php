@@ -15,19 +15,19 @@ class PermissionsResource extends JsonResource
     public function toArray($request): array
     {
         return [
-
             'name' => $this->name,
-            'permissions' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
+            'groups' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
                 return [
                     'group' => $group,
                     'permissions' => $permissions->map(function ($permission) {
                         return [
-
                             'name' => $permission->name,
+                            'displaying' => $permission->displaying, // Assuming you need this too
                         ];
                     }),
                 ];
-            })->values(),
+            })->values(), // Reset numeric keys for a clean array
         ];
     }
 }
+

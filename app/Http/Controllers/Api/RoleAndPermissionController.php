@@ -323,7 +323,9 @@ class RoleAndPermissionController extends Controller
     {
         try {
             $permission = Permission::all();
-            return $this->returnData('permission',NewPermissionsResource::collection($permission));
+            $resource = new NewPermissionsResource($permission);
+
+            return $this->returnData('permission',$resource);
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }

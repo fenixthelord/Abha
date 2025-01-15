@@ -12,33 +12,23 @@ class NewPermissionsResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-        // Group permissions by 'group' field
-        $groupedPermissions = $this->resource->groupBy('group');
+        // Group permissions by 'group' and transform into an array
+        $groupedPermissions = collect($this->resource)
+            ->groupBy('group')
+            ->map(function ($permissions, $group) {
+                return [
+                    'group' => $group,
+                    'permissions' => $permissions->map(function ($permission) {
+                        return [
+                            'name' => $permission->name,
+                            'displaying' => $permission->displaying, // Adjust based on your database fields
+                        ];
+                    })->values()->toArray(), // Convert to array
+                ];
+            })->values()->toArray(); // Ensure the final structure is an array
 
-        // Prepare the response structure
-        $response = [
-            'status' => true,
-            'code' => 200,
-            'msg' => '',
-            'permission' => []
-        ];
-
-        // Iterate over the grouped permissions
-        foreach ($groupedPermissions as $group => $permissions) {
-            // Get the name and description of each permission in the group
-            $response['permission'][] = [
-                'group' => $group, // the group name
-                'permissions' => $permissions->map(function ($permission) {
-                    return [
-                        'name' => $permission->name,           // permission name
-                        'displaying' => $permission->displaying, // permission description
-                    ];
-                })
-            ];
-        }
-
-        return $response;
+        return $groupedPermissions;
     }
 }
