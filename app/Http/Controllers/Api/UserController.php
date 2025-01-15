@@ -14,6 +14,7 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 
 class UserController extends Controller
@@ -47,6 +48,7 @@ class UserController extends Controller
     public function Update(Request $request)
     {
         try {
+            $user=auth()->user();
             $messages = [
                 'first_name.min' => 'First Name must be at least 3 characters.',
                 'first_name.max' => 'First Name must be less than 255 characters.',
@@ -80,14 +82,13 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
-                'email' => 'nullable|email|unique:users,email|max:255',
-                'phone' => 'nullable|unique:users,phone|numeric',
+                'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
+                'phone' => ['nullable',Rule::unique('user','phone')->ignore($user->id),'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-                'type' => 'nullable|required_with:image|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
@@ -105,9 +106,7 @@ class UserController extends Controller
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-            if ($request->hasFile('image')) {
-                $user->image = $this->uploadImagePublic($request, $request->type);
-            }
+            $user->image = $request->image ? $request->image : $user->image;
             if ($request->has('password') && !empty($request->password)) {
                 if ($user->password == $request->old_password) ;
                 {
@@ -124,6 +123,13 @@ class UserController extends Controller
     public function UpdateAdmin(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'uuid' => 'required|string|exists:users,uuid',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator, null, $validator->errors());
+            }
+            $user = User::whereuuid($request->uuid)->firstorfail();
             $messages = [
                 'first_name.min' => 'First Name must be at least 3 characters.',
                 'first_name.max' => 'First Name must be less than 255 characters.',
@@ -155,17 +161,15 @@ class UserController extends Controller
                 'job.string' => 'Jop must be a string.',
                 'job_id.' => 'Jop must be a number.',];
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
-                'email' => 'nullable|email|unique:users,email|max:255',
-                'phone' => 'nullable|unique:users,phone|numeric',
+                'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
+                'phone' => ['nullable',Rule::unique('users','phone')->ignore($user->id),'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-                'type' => 'nullable|required_with:image|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
@@ -173,7 +177,6 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());
             }
-            $user = User::whereuuid($request->uuid)->firstorfail();
             $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
             $user->email = $request->email ? $request->email : $user->email;
@@ -182,9 +185,7 @@ class UserController extends Controller
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-            if ($request->hasFile('image')) {
-                $user->image = $this->uploadImagePublic($request, $request->type);
-            }
+            $user->image = $request->image ? $request->image : $user->image;
             if ($request->has('password') && !empty($request->password)) {
                 if ($user->password == $request->old_password) ;
                 {
@@ -398,7 +399,7 @@ class UserController extends Controller
     public function user_profile()
     {
         $user = auth()->user();
-        return $this->returnData('user', 'user');
+        return $this->returnData('user', UserResource::make($user));
     }
 }
 
