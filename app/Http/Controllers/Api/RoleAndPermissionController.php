@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\Permissions\PermissionsResource;
 use App\Http\Resources\Roles\RolesResource;
 use App\Models\User;
@@ -20,7 +21,7 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-        //  $this->middleware('super-admin')->only(['store']);
+         $this->middleware('super-admin')->only(['store']);
     }
 
     public function index()
@@ -322,10 +323,13 @@ class RoleAndPermissionController extends Controller
     {
         try {
             $permission = Permission::all();
-            return $this->returnData('permission', PermissionsResource::collection($permission));
+            $resource = new NewPermissionsResource($permission);
+
+            return $this->returnData('permission',$resource);
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
+
     }
 
     public function DeleteRole(Request $request)

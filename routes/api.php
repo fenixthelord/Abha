@@ -80,7 +80,7 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
     Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
     Route::post('roles/delete',[RoleAndPermissionController::class,'DeleteRole']);
-    Route::get('permissions/get',[RoleAndPermissionController::class,' GetAllPermissions']);
+    Route::get('permissions/get',[RoleAndPermissionController::class,'GetAllPermissions']);
 
 
     Route::prefix('users')->group(function () {

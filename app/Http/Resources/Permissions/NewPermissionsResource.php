@@ -5,7 +5,7 @@ namespace App\Http\Resources\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PermissionsResource extends JsonResource
+class NewPermissionsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,20 +14,21 @@ class PermissionsResource extends JsonResource
      */
     public function toArray($request): array
     {
-        return [
-            'name' => $this->name,
-            'groups' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
+        // Group permissions by 'group' and transform into an array
+        $groupedPermissions = collect($this->resource)
+            ->groupBy('group')
+            ->map(function ($permissions, $group) {
                 return [
                     'group' => $group,
                     'permissions' => $permissions->map(function ($permission) {
                         return [
                             'name' => $permission->name,
-                            'displaying' => $permission->displaying, // Assuming you need this too
+                            'displaying' => $permission->displaying, // Adjust based on your database fields
                         ];
-                    }),
+                    })->values()->toArray(), // Convert to array
                 ];
-            })->values(), // Reset numeric keys for a clean array
-        ];
+            })->values()->toArray(); // Ensure the final structure is an array
+
+        return $groupedPermissions;
     }
 }
-
