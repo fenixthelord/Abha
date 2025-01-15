@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use OwenIt\Auditing\Models\Audit;
+use Carbon\Carbon;
+
 
 class AuditLogController extends Controller
 {
@@ -15,12 +17,10 @@ class AuditLogController extends Controller
 
         // Dynamic filters
         $filters = [
-            'model_type' => 'auditable_type', // Maps `model_type` to `auditable_type` in the database
+            'model_type' => 'auditable_type',
             'user_type' => 'user_type',
             'user_id' => 'user_id',
             'event' => 'event',
-            'created' => 'created_at',
-
         ];
 
         foreach ($filters as $filterKey => $dbColumn) {
@@ -37,9 +37,20 @@ class AuditLogController extends Controller
             ]);
         }
 
+        // Order by newest to oldest
+        $query->orderBy('created_at', 'desc');
+
         // Paginate results
-        $auditLogs = $query->paginate(10);
+        $auditLogs = $query->paginate(25);
+
+        // Format dates
+        $auditLogs->getCollection()->transform(function ($log) {
+            $log->created_at_readable = Carbon::parse($log->created_at)->format('Y-m-d H:i:s');
+            $log->updated_at_readable = Carbon::parse($log->updated_at)->format('Y-m-d H:i:s');
+            return $log;
+        });
 
         return response()->json($auditLogs);
     }
+
 }
