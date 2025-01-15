@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Events\SendOtpPhone;
 use App\Events\UserLogin;
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -64,15 +66,9 @@ class UserAuthController extends Controller
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-                'type' => 'required_with:image|string',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());
-            }
-            if ($request->hasFile('image')) {
-                $image = $this->uploadImagePublic($request, $request->type);
-            } else {
-                $image = null;
             }
             $user = User::create([
                 'uuid' => Str::orderedUuid(),
@@ -85,17 +81,17 @@ class UserAuthController extends Controller
                 'gender' => $request->gender,
                 'job' => $request->job,
                 'job_id' => $request->job_id,
-                'OTP' => '00000',
-                'image' => $image,
-                'type' => $request->type,
-
-
+                'image' => $request->image,
+                'otp_code' => rand(100000, 999999),
+                'otp_expires_at' => Carbon::now()->addMinutes(5),
             ]);
             if ($user) {
                 event(new UserRegistered($user));
             }
             DB::commit();
-            return $this->returnSuccessMessage("Registered successfully");
+            //     event(new sendOtpPhone($user->otp, $user->phone));
+            $data['token'] = $user->createToken('MyApp')->plainTextToken;
+            return $this->returnData('data', $data);
         } catch
         (\Exception $ex) {
             DB::rollBack();
@@ -112,7 +108,7 @@ class UserAuthController extends Controller
                 'password.string' => 'Password must be a string.',
                 'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',];
             $validator = Validator::make($request->all(), [
-                'user' => ['required','string',
+                'user' => ['required', 'string',
                     function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
                         if (!\DB::table('users')->where($field, $value)->exists()) {
@@ -135,7 +131,7 @@ class UserAuthController extends Controller
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->returnValidationError($validator, 400, 'email or phone or password false');
             } else {
- //               event(new UserLogin($user));
+                //               event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->returnData('data', $data);
