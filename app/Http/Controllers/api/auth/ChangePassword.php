@@ -29,16 +29,16 @@ class ChangePassword extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->returnValidationError($validator,null,$validator->errors());
+            return $this->returnValidationError($validator);
         }
-            $user = User::where('email', $request->email)->first();
-            // Generate a random verification code (you can customize the length as needed)
-            $verificationCode = rand(10000, 99999);
-            // Save the verification code in the user's record
-            $user->verify_code = $verificationCode;
-            $user->save();
-            $mail = Mail::to($user->email)->send(new OtpMail($verificationCode));
-            return $this->returnSuccessMessage('Verification code sent! to Email');
+        $user = User::where('email', $request->email)->first();
+        // Generate a random verification code (you can customize the length as needed)
+        $verificationCode = rand(10000, 99999);
+        // Save the verification code in the user's record
+        $user->verify_code = $verificationCode;
+        $user->save();
+        $mail = Mail::to($user->email)->send(new OtpMail($verificationCode));
+        return $this->returnSuccessMessage('Verification code sent! to Email');
     }
     public function reset_password(Request $request)
     {
@@ -47,26 +47,25 @@ class ChangePassword extends Controller
         $validator = Validator::make($input, [
             'email'     => 'required|email|exists:users,email',
             'password' =>
-                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+            'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
             'code'      => 'required|integer|min_digits:5|max_digits:5',
         ]);
 
         if ($validator->fails()) {
-            return $this->returnValidationError($validator,null,$validator->errors());
+            return $this->returnValidationError($validator);
         }
         try {
 
-        $user = User::where('email', $request->email)
-            ->first();
-        if ($user->verify_code == $request['code']) {
+            $user = User::where('email', $request->email)
+                ->first();
+            if ($user->verify_code == $request['code']) {
 
-        $user->password = $request->password ? Hash::make($request->password) : null;
-        $user->save();
-        return $this->returnSuccessMessage('Password changed!');
-        }
-        }
-        catch (\Exception $e) {
+                $user->password = $request->password ? Hash::make($request->password) : null;
+                $user->save();
+                return $this->returnSuccessMessage('Password changed!');
+            }
+        } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
-        }
+    }
 }

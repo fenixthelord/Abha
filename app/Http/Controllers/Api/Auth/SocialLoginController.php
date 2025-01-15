@@ -32,7 +32,7 @@ class SocialLoginController extends Controller
         );
 
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, $validator->errors(), $validator->errors());
+            return $this->returnValidationError($validator);
         }
 
         try {
@@ -83,7 +83,7 @@ class SocialLoginController extends Controller
         );
 
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, $validator->errors(), $validator->errors());
+            return $this->returnValidationError($validator);
         }
 
         if (!auth()->check()) {

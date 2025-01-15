@@ -91,7 +91,7 @@ class UserController extends Controller
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = auth()->user();
 
@@ -169,7 +169,7 @@ class UserController extends Controller
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstorfail();
             $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
@@ -204,7 +204,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstOrFail();
             $user->delete();
@@ -303,7 +303,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
             $user->restore();
@@ -326,7 +326,7 @@ class UserController extends Controller
                 'type' => 'required|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors()->first());
+                return $this->returnValidationError($validator);
             }
             $data = auth()->user();
             $image = $this->uploadImagePublic($request, $request->type);
