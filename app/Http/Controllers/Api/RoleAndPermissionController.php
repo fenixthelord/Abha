@@ -35,6 +35,7 @@ class RoleAndPermissionController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'roleName' => 'required|string|unique:roles,name',
+                "description" => "required|string",
                 'permission' => 'nullable',
             ]);
             if ($validator->fails()) {
@@ -44,15 +45,43 @@ class RoleAndPermissionController extends Controller
 
             $role = Role::create([
                 'name' => $request->roleName,
+                'description' => $request->description,
             ]);
             $request->roleName = $role->name;
-            $request->permission = $request->permission;
+
             $this->AssignPermissionsToRole($request);
             DB::commit();
             return $this->returnSuccessMessage('Role created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return abort(400);
+        }
+
+    }
+
+    public function AssignPermissionsToRole(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'permission' => 'required',
+            'roleName' => 'required|string'
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator, 400, $validator->errors());
+        }
+        try {
+
+
+            $role = Role::findByName($request->roleName);
+
+
+            // Assign multiple permissions
+            $permission = exploder($request->permission);
+
+            $role->givePermissionTo($permission);
+            return $this->returnData('role', RolesResource::make($role));
+        } catch (\Exception $exception) {
+            return $this->returnError($exception->getMessage());
         }
     }
 
@@ -177,7 +206,7 @@ class RoleAndPermissionController extends Controller
 
             $user = User::FindOrFail($request->user_id);
 
-            //            if (is_array($request->permission)) {
+//            if (is_array($request->permission)) {
 
 
             foreach ($request->permission as $permission) {
@@ -191,15 +220,15 @@ class RoleAndPermissionController extends Controller
             }
             return $this->returnSuccessMessage('the permission removed successfully');
 
-            //            }
-            //        else {
-            //                if ($user->hasDirectPermission($request->permission)) {
-            //                    // Remove the permission from the user
-            //                    $user->revokePermissionTo($request->permission);
-            //                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
-            //
-            //                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
-            //            }
+//            }
+//        else {
+//                if ($user->hasDirectPermission($request->permission)) {
+//                    // Remove the permission from the user
+//                    $user->revokePermissionTo($request->permission);
+//                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
+//
+//                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
+//            }
 
 
         } catch (\Exception $exception) {
@@ -248,54 +277,64 @@ class RoleAndPermissionController extends Controller
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
+
     }
 
-    public function AssignPermissionsToRole(Request $request)
+    function SyncPermission(Request $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'permission' => 'required',
-            'roleName' => 'required|string'
-        ]);
-        if ($validator->fails()) {
-            return $this->returnValidationError($validator);
-        }
         try {
+            DB::beginTransaction();
+
+            $validator = Validator::make($request->all(), [
+                'permission' => 'required|array|min:1',
+                'roleName' => 'required|string|exists:roles,name',
+                'newName' => 'required|string|unique:roles,name',
+                'description' => 'required|string'
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator, 400, $validator->errors());
+            }
 
 
-            $role = Role::findByName($request->roleName);
+            $role = Role::FindByName($request->roleName);
 
 
-            // Assign multiple permissions
-            $permission = exploder($request->permission);
+            $role->update(['name' => $request->newName, 'description' => $request->decription]);
 
-            $role->givePermissionTo($permission);
-            return $this->returnData('role', RolesResource::make($role));
+
+            $role = $role->syncPermissions($request->permission);
+            Db::commit();
+            return $this->returnData('permission', RolesResource::make($role));
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            return $this->returnError($exception->getMessage());
+        }
+    }
+
+    public function GetAllPermissions()
+    {
+        try {
+            $permission = Permission::all();
+            return $this->returnData('permission', PermissionsResource::collection($permission));
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
     }
 
-    function SyncPermission(Request $request)
+    public function DeleteRole(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'permission' => 'required|array|min:1',
-            'roleName' => 'required|string'
+            'roleName' => 'required|string|exists:roles,name',
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator);
+            return $this->returnValidationError($validator, 400, $validator->errors());
         }
-
-
-        $role = Role::FindByName($request->roleName);
-        $role = $role->syncPermissions($request->permission);
-        return $this->returnData('permission', RolesResource::make($role));
-    }
-
-    public function GetAllPermissions()
-    {
-
-        $permission = Permission::all();
-        return $this->returnData('permission', PermissionsResource::collection($permission));
+        try {
+            $role = Role::findByName($request->roleName);
+            $role->delete();
+            return $this->returnSuccessMessage('the role deleted successfully');
+        } catch (\Exception $exception) {
+            return $this->returnError($exception->getMessage());
+        }
     }
 }

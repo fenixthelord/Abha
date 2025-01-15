@@ -113,7 +113,7 @@ class UserController extends Controller
                 }
             }
             $user->save();
-            return $this->returnSuccessMessage('User updated successfully');
+            return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
@@ -190,7 +190,7 @@ class UserController extends Controller
                 }
             }
             $user->save();
-            return $this->returnSuccessMessage('User updated successfully');
+            return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
@@ -341,7 +341,7 @@ class UserController extends Controller
     public function sendOTP()
     {
         $user = auth()->user();
-        $otp = $user->OTP = rand(10000, 99999);
+        $otp = $user->OTP = rand(100000, 999999);
         $user->save();
         $mail = Mail::to($user->email)->send(new OtpMail($otp));
         if ($mail) {

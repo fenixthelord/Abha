@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.8",
+        "owen-it/laravel-auditing": "^13.6",
         "spatie/laravel-permission": "^6.10",
         "spatie/laravel-translatable": "^6.9"
     },

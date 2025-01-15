@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\api\auth\ChangePassword;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
+use App\Http\Controllers\Api\AuditLogController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +54,7 @@ Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
         Route::get('/all', [UserController::class, 'index']);
         Route::post('/me', [UserController::class, 'user_profile']);
+        Route::get('/me', [UserController::class, 'user_profile']);
         Route::post('send', [UserController::class, 'sendOTP']);
         Route::post('update-profile', [UserController::class, 'update']);
         Route::post('update', [UserController::class, 'updateAdmin']);
@@ -63,6 +66,8 @@ Route::prefix('/user')->group(function () {
     });
 });
 
+// Role And Permission
+//require_once __DIR__ . '/Api/roles-and-permissions/roles-and-permissions.php';
 
 
 Route::prefix('roles-and-permissions')->group(function (){
@@ -74,6 +79,9 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/roles/remove',[RoleAndPermissionController::class,'RemovePermissionsFromRole']);
     Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
     Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
+    Route::post('roles/delete',[RoleAndPermissionController::class,'DeleteRole']);
+    Route::get('permissions/get',[RoleAndPermissionController::class,' GetAllPermissions']);
+
 
     Route::prefix('users')->group(function () {
 
@@ -83,3 +91,5 @@ Route::prefix('roles-and-permissions')->group(function (){
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
         Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
 })->middleware('auth:sanctum');
+
+Route::get('/audit-logs', [AuditLogController::class, 'index']);

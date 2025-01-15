@@ -115,7 +115,13 @@ class UserAuthController extends Controller
                 'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
             ];
             $validator = Validator::make($request->all(), [
-                'user' => 'required|string',
+                'user' => ['required','string',
+                    function ($attribute, $value, $fail) {
+                        $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+                        if (!\DB::table('users')->where($field, $value)->exists()) {
+                            $fail("The :attribute does not exist in our records.");
+                        }
+                    }],
                 'password' =>
                 'required|string',
             ], $messages);
@@ -123,11 +129,16 @@ class UserAuthController extends Controller
                 return $this->returnValidationError($validator);
             }
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-            $user = User::where($username, $request->user)->first();
+            if (User::where($username, $request->user)->firstorfail()) {
+                $user = User::where($username, $request->user)->firstorfail();
+            } else {
+                return $this->returnValidationError($validator, 400, 'email or phone or password false');
+            }
+
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->Unauthorized('email or phone or password false');
             } else {
-                event(new UserLogin($user));
+ //               event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->returnData('data', $data);
