@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\SendOtpPhone;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Mail\OtpMail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Http\Traits\ResponseTrait;
@@ -328,24 +330,68 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors()->first());
             }
-            $data = auth()->user();
             $image = $this->uploadImagePublic($request, $request->type);
-            $data->image = $image;
-            $data->save();
             return $this->returnData('data', $image, 'Image Uploaded');
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
         }
     }
 
-    public function sendOTP()
+    /*    public function sendOTP()
+        {
+            $user = auth()->user();
+            $otp = $user->OTP = rand(100000, 999999);
+            $user->otp_expires_at = Carbon::now()->addMinutes(5);
+            $user->save();
+            $mail = Mail::to($user->email)->send(new OtpMail($otp));
+            if ($mail) {
+                return $this->returnSuccessMessage('OTP send successfully');
+            }
+        }*/
+    public function sendOtp()
     {
-        $user = auth()->user();
-        $otp = $user->OTP = rand(100000, 999999);
-        $user->save();
-        $mail = Mail::to($user->email)->send(new OtpMail($otp));
-        if ($mail) {
-            return $this->returnSuccessMessage('OTP send successfully');
+        try {
+
+            $user = auth()->user();
+            if (Carbon::now()->lessThan($user->otp_expires_at) || $user->otp_verified == true) {
+                return $this->returnData('error', 'OTP Not expired');
+            }
+            $otp = $user->otp_code = rand(100000, 999999);
+            $user->otp_expires_at = Carbon::now()->addMinutes(5);
+            $user->save();
+            //$phone = event(new SendOtpPhone($otp, $user->phone));
+            $phone = Mail::to($user->email)->send(new OtpMail($user->otp_code));
+            if ($phone) {
+                return $this->returnSuccessMessage('OTP send successfully');
+            }
+        } catch (\Exception $ex) {
+            return $this->returnError($ex->getMessage());
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'otp' => 'required|string',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator, null, $validator->errors()->first());
+            }
+            $user = User::where('id', auth()->user()->id)
+                ->where('otp_code', $request->otp)
+                ->where('otp_expires_at', '>', now())
+                ->firstorfail();
+            if (!$user) {
+                return $this->returnError('Invalid OTP Or Expired');
+            }
+            $user->otp_code = null;
+            $user->otp_expires_at = null;
+            $user->otp_verified = true;
+            $user->save();
+            $this->returnSuccessMessage('OTP verified successfully');
+        } catch (\Exception $ex) {
+            return $this->returnError($ex->getMessage());
         }
     }
 
