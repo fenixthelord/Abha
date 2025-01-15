@@ -74,6 +74,7 @@ Route::prefix('roles-and-permissions')->group(function (){
     Route::post('/roles/remove',[RoleAndPermissionController::class,'RemovePermissionsFromRole']);
     Route::post('/roles/assign',[RoleAndPermissionController::class,'AssignPermissionsToRole']);
     Route::post('/role/sync',[RoleAndPermissionController::class,'SyncPermission']);
+    Route::get('permissions/get',[RoleAndPermissionController::class,' GetAllPermissions']);
 
     Route::prefix('users')->group(function () {
 

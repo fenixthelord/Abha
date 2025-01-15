@@ -23,8 +23,9 @@ class RolesResource extends JsonResource
                     'group' => $group,
                     'permissions' => $permissions->map(function ($permission) {
                         return [
-                            'id' => $permission->id,
+
                             'name' => $permission->name,
+                            'displaying'=>$permission->displaying,
                         ];
                     }),
                 ];
