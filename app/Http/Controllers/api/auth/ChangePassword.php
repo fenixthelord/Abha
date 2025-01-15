@@ -57,12 +57,16 @@ class ChangePassword extends Controller
         try {
 
         $user = User::where('email', $request->email)
-            ->first();
+            ->firstorfail();
         if ($user->verify_code == $request['code']) {
 
         $user->password = $request->password ? Hash::make($request->password) : null;
         $user->save();
         return $this->returnSuccessMessage('Password changed!');
+        }
+        else
+        {
+            return $this->returnError('code verification false!');
         }
         }
         catch (\Exception $e) {
