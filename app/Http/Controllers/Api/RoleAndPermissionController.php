@@ -11,8 +11,8 @@ use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Models\Role\Permission;
+use App\Models\Role\Role;
 
 class RoleAndPermissionController extends Controller
 {
@@ -21,7 +21,7 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-         $this->middleware('super-admin')->only(['store']);
+        $this->middleware('super-admin')->only(['store']);
     }
 
     public function index()
@@ -38,6 +38,7 @@ class RoleAndPermissionController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -79,8 +80,7 @@ class RoleAndPermissionController extends Controller
         try {
 
 
-            $role = Role::findByName($request->roleName);
-
+            $role = \App\Models\Role\Role::findByName($request->roleName);
 
             // Assign multiple permissions
             $permission = exploder($request->permission);
