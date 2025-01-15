@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\api\auth\ChangePassword;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
+use App\Http\Controllers\Api\AuditLogController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +65,8 @@ Route::prefix('/user')->group(function () {
     });
 });
 
+// Role And Permission
+//require_once __DIR__ . '/Api/roles-and-permissions/roles-and-permissions.php';
 
 
 Route::prefix('roles-and-permissions')->group(function (){
@@ -84,3 +88,5 @@ Route::prefix('roles-and-permissions')->group(function (){
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
         Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
 })->middleware('auth:sanctum');
+
+Route::get('/audit-logs', [AuditLogController::class, 'index']);
