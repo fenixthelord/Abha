@@ -61,18 +61,18 @@ trait ResponseTrait
      * @param Validator $validator
      * @return Response
      */
-    public function returnValidationError($validator, $code = null, $errors = null)
+    public function returnValidationError($validator, $code = 400,)
     {
-        if ($code == null) {
-            $code = $this->returnCodeAccordingToInput($validator);
-        }
+        // if ($code == null) {
+        //     $code = $this->returnCodeAccordingToInput($validator);
+        // }
 
         return response()->json([
             'status' => false,
-            'code' => $this->returnCodeAccordingToInput($validator),
+            'code' => $code,
             'msg' => __('Please check the following errors'),
-            'errors'=>$errors,
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            'errors' => $validator->errors()->first(),
+        ], $code);
     }
 
     public function returnCodeAccordingToInput($validator)
@@ -181,9 +181,9 @@ trait ResponseTrait
             return 422;
         }
     }
-/*
-* 400
-*/
+    /*
+    * 400
+    */
     public function badRequest($msg = '')
     {
         return response()->json([
@@ -192,9 +192,9 @@ trait ResponseTrait
             'msg' => $msg,
         ], Response::HTTP_BAD_REQUEST);
     }
-/*
-* 403
-*/
+    /*
+    * 403
+    */
     public function Forbidden($msg = '')
     {
         return response()->json([
@@ -202,5 +202,16 @@ trait ResponseTrait
             'code' => Response::HTTP_FORBIDDEN,
             'msg' => $msg,
         ], Response::HTTP_FORBIDDEN);
+    }
+    /**
+     * 401
+     */
+    public function Unauthorized($msg = '')
+    {
+        return response()->json([
+            'status' => false,
+            'code' => Response::HTTP_UNAUTHORIZED,
+            'msg' => $msg,
+        ], Response::HTTP_UNAUTHORIZED);
     }
 }

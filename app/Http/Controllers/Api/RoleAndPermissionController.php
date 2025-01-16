@@ -7,12 +7,12 @@ use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\Permissions\PermissionsResource;
 use App\Http\Resources\Roles\RolesResource;
 use App\Models\User;
-use App\Traits\ResponseTrait;
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Models\Role\Permission;
+use App\Models\Role\Role;
 
 class RoleAndPermissionController extends Controller
 {
@@ -21,23 +21,18 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-         $this->middleware('super-admin')->only(['store']);
+        $this->middleware('super-admin')->only(['store']);
     }
 
     public function index()
     {
-        try {
-
-
-            $roles = Role::all();
-            return $this->returnData('role', RolesResource::collection($roles));
-        } catch (\Exception $exception) {
-            return $this->returnError($exception->getMessage());
-        }
+        $roles = Role::all();
+        return $this->returnData('role', RolesResource::collection($roles));
     }
 
     public function store(Request $request)
     {
+        \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -46,7 +41,7 @@ class RoleAndPermissionController extends Controller
                 'permission' => 'nullable',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, 400, $validator->errors());
+                return $this->returnValidationError($validator);
             }
 
 
@@ -79,8 +74,7 @@ class RoleAndPermissionController extends Controller
         try {
 
 
-            $role = Role::findByName($request->roleName);
-
+            $role = \App\Models\Role\Role::findByName($request->roleName);
 
             // Assign multiple permissions
             $permission = exploder($request->permission);
@@ -101,7 +95,7 @@ class RoleAndPermissionController extends Controller
             'user_id' => 'required|integer|exists:users,id',
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
 
         try {
@@ -112,7 +106,6 @@ class RoleAndPermissionController extends Controller
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
-
     }
 
     public function assignPermission(Request $request)
@@ -123,7 +116,7 @@ class RoleAndPermissionController extends Controller
 
         ]);
         if ($validatedData->fails()) {
-            return $this->returnValidationError($validatedData, 400, $validatedData->errors());
+            return $this->returnValidationError($validatedData);
         }
         try {
             $user = User::findOrFail($request->user_id);
@@ -135,6 +128,7 @@ class RoleAndPermissionController extends Controller
         }
     }
 
+
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
@@ -143,7 +137,7 @@ class RoleAndPermissionController extends Controller
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
         try {
 
@@ -171,7 +165,7 @@ class RoleAndPermissionController extends Controller
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
 
 
@@ -192,8 +186,6 @@ class RoleAndPermissionController extends Controller
                     return $this->returnData('role', RolesResource::make($role));
                 } else return $this->returnError("The role doesn't have this permission");
             }
-
-
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -208,7 +200,7 @@ class RoleAndPermissionController extends Controller
 
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
         try {
 
@@ -254,7 +246,7 @@ class RoleAndPermissionController extends Controller
             'group' => 'required|string'
         ]);
         if ($validatedData->fails()) {
-            return $this->returnValidationError($validatedData, 400, $validatedData->errors());
+            return $this->returnValidationError($validatedData);
         }
 
 
@@ -269,6 +261,7 @@ class RoleAndPermissionController extends Controller
         ]);
         return $this->returnData('permission', Permissionsresource::make($permission));
     }
+
 
     public function GetUserPermissions(Request $request)
 
@@ -348,7 +341,4 @@ class RoleAndPermissionController extends Controller
             return $this->returnError($exception->getMessage());
         }
     }
-
-
 }
-

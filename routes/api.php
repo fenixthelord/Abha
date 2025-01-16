@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserController;
-
 use App\Http\Controllers\api\auth\ChangePassword;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
@@ -52,25 +51,31 @@ Route::prefix('/auth')->group(function () {
 });
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-        Route::get('/all', [UserController::class, 'index']);
-        Route::post('/me', [UserController::class, 'user_profile']);
-        Route::get('/me', [UserController::class, 'user_profile']);
-        Route::post('send', [UserController::class, 'sendOTP']);
-        Route::post('update-profile', [UserController::class, 'update']);
-        Route::post('update', [UserController::class, 'updateAdmin']);
-        Route::post('upload', [UserController::class, 'addImage']);
-        Route::post('delete-user', [UserController::class, 'deleteUser']);
-        Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
-        Route::post('restore_user', [UserController::class, 'restoreUser']);
-        Route::post('search', [UserController::class, 'searchUser']);
+    //    Route::middleware('verify')->group(function () {
+            Route::get('/all', [UserController::class, 'index']);
+            Route::post('/me', [UserController::class, 'user_profile']);
+            Route::get('/me', [UserController::class, 'user_profile']);
+            Route::post('send', [UserController::class, 'sendOTP']);
+            Route::post('update-profile', [UserController::class, 'update']);
+            Route::post('update', [UserController::class, 'updateAdmin']);
+            Route::post('upload', [UserController::class, 'addImage']);
+            Route::post('delete-user', [UserController::class, 'deleteUser']);
+            Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+            Route::post('restore_user', [UserController::class, 'restoreUser']);
+            Route::post('search', [UserController::class, 'searchUser']);
+   //     });
     });
+});
+Route::middleware('auth:sanctum')->group(function () {
+   Route::get('get-verify', [UserController::class, 'sendOtp']);
+   Route::post('cheek-verify', [UserController::class, 'verifyOtp']);
 });
 
 // Role And Permission
 //require_once __DIR__ . '/Api/roles-and-permissions/roles-and-permissions.php';
 
 
-Route::prefix('roles-and-permissions')->group(function (){
+Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(function (){
     Route::get('/', [RoleAndPermissionController::class,'index']);
     Route::post('/create',[RoleAndPermissionController::class,'store']);
     Route::post('/permission/create',[RoleAndPermissionController::class,'CreatePermission']);
@@ -89,7 +94,7 @@ Route::prefix('roles-and-permissions')->group(function (){
         Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
         Route::post('/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
-        Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
-})->middleware('auth:sanctum');
+        Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
+});
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
