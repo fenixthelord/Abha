@@ -94,7 +94,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
         Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
         Route::post('/remove', [RoleAndPermissionController::class, 'removeRoleFromUser']);
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
-        Route::get('/{userId}/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
+        Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
 });
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);

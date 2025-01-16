@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\Permissions\PermissionsResource;
-use App\Http\Resources\Roles\Rolesresource;
+use App\Http\Resources\Roles\RolesResource;
 use App\Models\User;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
