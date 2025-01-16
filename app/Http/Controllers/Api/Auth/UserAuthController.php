@@ -70,7 +70,7 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::create([
                 'uuid' => Str::orderedUuid(),
