@@ -51,7 +51,7 @@ Route::prefix('/auth')->group(function () {
 });
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-        Route::middleware('verify')->group(function () {
+    //    Route::middleware('verify')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
             Route::post('/me', [UserController::class, 'user_profile']);
             Route::get('/me', [UserController::class, 'user_profile']);
@@ -63,7 +63,7 @@ Route::prefix('/user')->group(function () {
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
-        });
+   //     });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
