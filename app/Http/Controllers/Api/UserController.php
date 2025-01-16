@@ -352,7 +352,11 @@ class UserController extends Controller
     public function user_profile()
     {
         $user = auth()->user();
-        return $this->returnData('user', 'user');
+        $data = [
+            'user' => UserResource::make($user),
+            'roles' => $user->role,
+        ];
+        return $this->returnData('user', $data);
     }
 }
 
