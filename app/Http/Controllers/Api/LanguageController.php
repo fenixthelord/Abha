@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Traits\ResponseTrait;
+use App\Http\Traits\ResponseTrait;
 
 class LanguageController extends Controller
 {
