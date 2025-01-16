@@ -48,6 +48,8 @@ class UserController extends Controller
     public function Update(Request $request)
     {
         try {
+            $user = auth()->user();
+
             $messages = [
                 'first_name.min' => 'First Name must be at least 3 characters.',
                 'first_name.max' => 'First Name must be less than 255 characters.',
@@ -95,7 +97,6 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $user = auth()->user();
 
             $user->first_name = $request->firt_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
