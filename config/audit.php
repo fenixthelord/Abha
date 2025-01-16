@@ -28,8 +28,10 @@ return [
         'morph_prefix' => 'user',
         'guards'       => [
             'web',
-            'api'
+            'api',
+            'sanctum'
         ],
+        'model' => App\Models\User::class,
         'resolver'     => OwenIt\Auditing\Resolvers\UserResolver::class
     ],
 
