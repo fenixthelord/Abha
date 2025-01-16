@@ -83,7 +83,7 @@ class UserController extends Controller
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
-                'phone' => ['nullable',Rule::unique('user','phone')->ignore($user->id),'numeric'],
+                'phone' => ['nullable',Rule::unique('users','phone')->ignore($user->id),'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
