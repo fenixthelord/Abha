@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Role\Permission;
 use App\Models\Role\Role;
+use function PHPUnit\Framework\lessThanOrEqual;
 
 class RoleAndPermissionController extends Controller
 {
@@ -21,12 +22,18 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-        $this->middleware('super-admin')->only(['store']);
+       $this->middleware('super-admin')->only(['store']);
     }
 
     public function index()
     {
-        $roles = Role::all();
+
+        if(auth()->user()->hasRole('Master')){
+            $roles = Role::all();
+        }
+        else {
+            $roles = Role::where('name', '!=', 'Master')->get();
+        }
         return $this->returnData('role', RolesResource::collection($roles));
     }
 
@@ -48,8 +55,10 @@ class RoleAndPermissionController extends Controller
             $role = Role::create([
                 'name' => $request->roleName,
                 'description' => $request->description,
+
             ]);
             $request->roleName = $role->name;
+
 
             $this->AssignPermissionsToRole($request);
             DB::commit();
@@ -77,9 +86,22 @@ class RoleAndPermissionController extends Controller
             $role = \App\Models\Role\Role::findByName($request->roleName);
 
             // Assign multiple permissions
-            $permission = exploder($request->permission);
 
+            $permissions = exploder($request->permission);
+foreach ($permissions as $permission) {
+    if($permission->is_admin==true){
+        if($role->name =='Master'){
             $role->givePermissionTo($permission);
+        }
+        else{
+            return $this->returnError('this is master role permission you can not assign it to this role');
+        }}
+        else{
+            $role->givePermissionTo($permission);
+        }
+    }
+
+
             return $this->returnData('role', RolesResource::make($role));
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
@@ -120,8 +142,23 @@ class RoleAndPermissionController extends Controller
         }
         try {
             $user = User::findOrFail($request->user_id);
+
             $permissions = exploder($request->permissions);
-            $user->givePermissionTo($permissions);
+            foreach ($permissions as $permission) {
+                if($permission->is_admin==true){
+                    if($user->hasRole('Master')){
+                        $user->givePermissionTo($permission);
+                    }
+                    else{
+                        return $this->returnError('this is master permission you can not assign it to this user');
+                    }
+
+                }
+                else{
+                    $user->givePermissionTo($permission);
+                }
+            }
+            $user->givePermissionTo($permission);
             return $this->returnSuccessMessage('the permission has been assigned successfully');
         } catch (\Exception $exception) {
             return $exception->getMessage();
@@ -295,17 +332,27 @@ class RoleAndPermissionController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 400, $validator->errors());
             }
-
-
+               if($request->roleName == "Master"||$request->newName == "Master"){
+                   return $this->returnError('you cannot update  Master');
+               }
             $role = Role::FindByName($request->roleName);
 
 
             $role->update(['name' => $request->newName, 'description' => $request->decription]);
 
+            $permissions = exploder($request->permission);
+            foreach ($permissions as $permission) {
+                if($permission->is_admin==true){
 
+                    return $this->returnError('this is master role permission you can not assign it to this role');
+                    }
+
+                else{
+                    $role->givePermissionTo($permission);
+                }
             $role = $role->syncPermissions($request->permission);
             Db::commit();
-            return $this->returnData('permission', RolesResource::make($role));
+            return $this->returnData('permission', RolesResource::make($role));}
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -315,7 +362,13 @@ class RoleAndPermissionController extends Controller
     public function GetAllPermissions()
     {
         try {
-            $permission = Permission::all();
+            if(auth()->user()->hasrole('Master')){
+                $permission = Permission::all();
+            }
+            else{
+                $permission = Permission::where('is_admin',true)->get();
+            }
+
             $resource = new NewPermissionsResource($permission);
 
             return $this->returnData('permission',$resource);
@@ -334,9 +387,15 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator, 400, $validator->errors());
         }
         try {
-            $role = Role::findByName($request->roleName);
-            $role->delete();
-            return $this->returnSuccessMessage('the role deleted successfully');
+            if($request->roleName == "Master"){
+                return $this->returnError('you cannot delete  Master');
+            }
+            else{
+                $role = Role::findByName($request->roleName);
+                $role->delete();
+                return $this->returnSuccessMessage('the role deleted successfully');
+            }
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
