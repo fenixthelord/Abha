@@ -83,18 +83,18 @@ class UserController extends Controller
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
-                'phone' => ['nullable',Rule::unique('user','phone')->ignore($user->id),'numeric'],
+                'phone' => ['nullable',Rule::unique('users','phone')->ignore($user->id),'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = auth()->user();
 
@@ -122,6 +122,7 @@ class UserController extends Controller
 
     public function UpdateAdmin(Request $request)
     {
+        
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
@@ -169,13 +170,13 @@ class UserController extends Controller
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
@@ -207,7 +208,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstOrFail();
             $user->delete();
@@ -306,7 +307,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
             $user->restore();
@@ -329,7 +330,7 @@ class UserController extends Controller
                 'type' => 'required|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors()->first());
+                return $this->returnValidationError($validator);
             }
             $image = $this->uploadImagePublic($request, $request->type);
             return $this->returnData('data', $image, 'Image Uploaded');

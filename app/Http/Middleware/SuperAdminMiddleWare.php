@@ -2,13 +2,14 @@
 
 namespace App\Http\Middleware;
 
-use App\Traits\ResponseTrait;
+use App\Http\Traits\ResponseTrait;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SuperAdminMiddleWare
-{ use ResponseTrait;
+{
+    use ResponseTrait;
     /**
      * Handle an incoming request.
      *
@@ -18,13 +19,11 @@ class SuperAdminMiddleWare
     {
         if (auth()->check()) {
 
-            if (auth()->user()->role()=="super_admin") {
+            if (auth()->user()->role() == "super_admin") {
                 return $next($request);
             } else return $this->Forbidden('Access denied');
-
         } else {
-        return $this->Unauthorized('unauthorized');}
-
+            return $this->Unauthorized('unauthorized');
+        }
     }
-
 }

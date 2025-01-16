@@ -27,7 +27,8 @@ class UserAuthController extends Controller
     {
         DB::beginTransaction();
         try {
-            $messages = ['first_name.required' => 'First Name is required.',
+            $messages = [
+                'first_name.required' => 'First Name is required.',
                 'first_name.min' => 'First Name must be at least 3 characters.',
                 'first_name.max' => 'First Name must be less than 255 characters.',
                 'first_name.string' => 'First Name must be a string.',
@@ -53,19 +54,20 @@ class UserAuthController extends Controller
                 'gender.in' => 'Gender must be a male or female.',
                 'alt.string' => 'Alt must be a string.',
                 'job.string' => 'Jop must be a string.',
-                'job_id.' => 'Jop must be a number.',];
+                'job_id.' => 'Jop must be a number.',
+            ];
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
-                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'phone' => 'required|unique:users,phone|numeric',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());
@@ -102,24 +104,26 @@ class UserAuthController extends Controller
     public function login(Request $request)
     {
         try {
-            $messages = ['user.required' => 'Email is required.',
+            $messages = [
+                'user.required' => 'Email is required.',
                 'password.required' => 'Password is required.',
                 'password.min' => 'Password must be at least 8 characters.',
                 'password.string' => 'Password must be a string.',
-                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',];
+                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
+            ];
             $validator = Validator::make($request->all(), [
                 'user' => ['required', 'string',
                     function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-                        if (!\DB::table('users')->where($field, $value)->exists()) {
+                        if (!User::where($field, $value)->exists()) {
                             $fail("The :attribute does not exist in our records.");
                         }
                     }],
                 'password' =>
-                    'required|string',
+                'required|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator, 401);
             }
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
             if (User::where($username, $request->user)->firstorfail()) {
@@ -129,15 +133,14 @@ class UserAuthController extends Controller
             }
 
             if (!$user || !Hash::check($request->password, $user->password)) {
-                return $this->returnValidationError($validator, 400, 'email or phone or password false');
+                return $this->Unauthorized('email or phone or password false');
             } else {
                 //               event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
                 return $this->returnData('data', $data);
             }
-        } catch
-        (\Exception $ex) {
+        } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
         }
     }
