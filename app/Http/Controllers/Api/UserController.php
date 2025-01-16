@@ -122,6 +122,7 @@ class UserController extends Controller
 
     public function UpdateAdmin(Request $request)
     {
+        
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',

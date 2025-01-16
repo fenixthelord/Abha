@@ -115,7 +115,7 @@ class UserAuthController extends Controller
                 'user' => ['required', 'string',
                     function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-                        if (!\DB::table('users')->where($field, $value)->exists()) {
+                        if (!User::where($field, $value)->exists()) {
                             $fail("The :attribute does not exist in our records.");
                         }
                     }],
@@ -123,7 +123,7 @@ class UserAuthController extends Controller
                 'required|string',
             ], $messages);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator);
+                return $this->returnValidationError($validator, 401);
             }
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
             if (User::where($username, $request->user)->firstorfail()) {
