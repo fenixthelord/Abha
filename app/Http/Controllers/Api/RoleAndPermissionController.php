@@ -30,9 +30,10 @@ class RoleAndPermissionController extends Controller
 
         if(auth()->user()->hasRole('Master')){
             $roles = Role::all();
+         dd(auth()->user()->getRoleNames());
         }
         else {
-            $roles = Role::where('name', '!=', 'Master')->get();
+            $roles = Role::where('name','!=','Master')->get();
         }
         return $this->returnData('role', RolesResource::collection($roles));
     }
@@ -123,7 +124,7 @@ foreach ($permissions as $permission) {
         try {
             $user = User::findOrFail($request->user_id);
 
-            $user->assignRole($request->role);
+            $user->syncRoles($request->role);
             return $this->returnSuccessMessage('the role has been assigned successfully');
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
