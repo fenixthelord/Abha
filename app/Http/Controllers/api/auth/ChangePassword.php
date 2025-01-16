@@ -47,7 +47,7 @@ class ChangePassword extends Controller
         $validator = Validator::make($input, [
             'email'     => 'required|email|exists:users,email',
             'password' =>
-            'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
             'code'      => 'required|integer|min_digits:5|max_digits:5',
         ]);
 
