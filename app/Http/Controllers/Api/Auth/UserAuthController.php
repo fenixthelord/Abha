@@ -67,7 +67,7 @@ class UserAuthController extends Controller
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());

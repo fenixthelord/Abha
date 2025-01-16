@@ -88,7 +88,7 @@ class UserController extends Controller
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
@@ -169,7 +169,7 @@ class UserController extends Controller
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                'image' => 'nullable|string',
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
