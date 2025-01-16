@@ -48,7 +48,6 @@ class UserController extends Controller
     public function Update(Request $request)
     {
         try {
-            $user=auth()->user();
             $messages = [
                 'first_name.min' => 'First Name must be at least 3 characters.',
                 'first_name.max' => 'First Name must be less than 255 characters.',
@@ -122,7 +121,7 @@ class UserController extends Controller
 
     public function UpdateAdmin(Request $request)
     {
-        
+
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
@@ -307,7 +306,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator);
+                return $this->returnValidationError($validator, null, $validator->errors());
             }
             $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
             $user->restore();
@@ -400,7 +399,11 @@ class UserController extends Controller
     public function user_profile()
     {
         $user = auth()->user();
-        return $this->returnData('user', UserResource::make($user));
+        $data = [
+            'user' => UserResource::make($user),
+            'roles' => $user->role,
+        ];
+        return $this->returnData('user', $data);
     }
 }
 
