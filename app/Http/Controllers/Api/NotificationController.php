@@ -33,11 +33,11 @@ class NotificationController extends Controller {
 
         try {
             $status = $this->HandelDataAndSendNotify($tokens, $content);
+            DB::commit();
             return $status
                 ? $this->returnSuccessMessage('Notifications sent successfully!')
                 : $this->returnError('Failed to send notifications.');
             
-            DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());
@@ -56,8 +56,8 @@ class NotificationController extends Controller {
                'token' => $request->input('token'),
                'user_id' => $request->input('user_id'),
             ]);
-            return $this->returnSuccessMessage('Device Token saved successfully');
             DB::commit();
+            return $this->returnSuccessMessage('Device Token saved successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError('Faild to save device token', $e->getMessage());
