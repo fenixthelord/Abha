@@ -62,7 +62,7 @@ class RoleAndPermissionController extends Controller
 
     public function AssignPermissionsToRole(Request $request)
     {
-        DB::beginTransaction();
+
         $validator = Validator::make($request->all(), [
             'permission' => 'required',
             'roleName' => 'required|string'
@@ -79,17 +79,15 @@ class RoleAndPermissionController extends Controller
             $permission = exploder($request->permission);
 
             $role->givePermissionTo($permission);
-            DB::commit();
             return $this->returnData('role', RolesResource::make($role));
         } catch (\Exception $exception) {
-            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
 
     public function assignRole(Request $request)
+
     {
-        DB::beginTransaction();
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
@@ -103,17 +101,14 @@ class RoleAndPermissionController extends Controller
             $user = User::findOrFail($request->user_id);
 
             $user->assignRole($request->role);
-            DB::commit();
             return $this->returnSuccessMessage('the role has been assigned successfully');
         } catch (\Exception $exception) {
-            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
 
     public function assignPermission(Request $request)
     {
-        DB::beginTransaction();
         $validatedData = Validator::make($request->all(), [
             'user_id' => 'required|integer|exists:users,id',
             'permissions' => 'nullable'
@@ -126,10 +121,8 @@ class RoleAndPermissionController extends Controller
             $user = User::findOrFail($request->user_id);
             $permissions = exploder($request->permissions);
             $user->givePermissionTo($permissions);
-            DB::commit();
             return $this->returnSuccessMessage('the permission has been assigned successfully');
         } catch (\Exception $exception) {
-            DB::rollBack();
             return $exception->getMessage();
         }
     }
@@ -137,7 +130,6 @@ class RoleAndPermissionController extends Controller
 
     function removeRoleFromUser(Request $request)
     {
-        DB::beginTransaction();
         // Find the user by ID
         $validator = Validator::make(['roleName' => $request->roleName], [
 
@@ -147,20 +139,20 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+
+
             $user = User::findOrFail($request->user_id);
 
             // Check if the user has the role before removing it
             if ($user->hasRole($request->roleName)) {
                 // Remove the role from the user
                 $user->removeRole($request->roleName);
-                DB::commit();
+
                 return $this->returnSuccessMessage('the role has been removed successfully');
             } else {
-                DB::commit();
                 return $this->returnError("The user doesn't have this role");
             }
         } catch (\Exception $exception) {
-            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
@@ -177,7 +169,6 @@ class RoleAndPermissionController extends Controller
 
 
         try {
-            DB::beginTransaction();
             $role = Role::findByName($request->roleName);
 
 
@@ -195,6 +186,7 @@ class RoleAndPermissionController extends Controller
                 } else return $this->returnError("The role doesn't have this permission");
             }
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
@@ -211,7 +203,7 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
-
+            DB::beginTransaction();
 
             $user = User::FindOrFail($request->user_id);
 
@@ -225,8 +217,12 @@ class RoleAndPermissionController extends Controller
                 if ($user->hasDirectPermission($permission)) {
                     // Remove the permission from the user
                     $user->revokePermissionTo($permission);
-                } else return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
+                } else {
+                    DB::rollBack();
+                    return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
+                }
             }
+            DB::commit();
             return $this->returnSuccessMessage('the permission removed successfully');
 
             //            }
@@ -241,6 +237,7 @@ class RoleAndPermissionController extends Controller
 
 
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
@@ -257,22 +254,28 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validatedData);
         }
 
+        try {
 
-        // Create a single permission
-        $permission = Permission::create([
-            'name' => $request->name,
-            'guard_name' => 'web',
-            'displaying' => $request->displaying,
+            DB::beginTransaction();
+            // Create a single permission
+            $permission = Permission::create([
+                'name' => $request->name,
+                'guard_name' => 'web',
+                'displaying' => $request->displaying,
 
-            'group' => $request->group,
-            'is_admin' => $request->is_admin,
-        ]);
-        return $this->returnData('permission', Permissionsresource::make($permission));
+                'group' => $request->group,
+                'is_admin' => $request->is_admin,
+            ]);
+            DB::commit();
+            return $this->returnData('permission', Permissionsresource::make($permission));
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            abort(400, $exception->getMessage());
+        }
     }
 
 
     public function GetUserPermissions(Request $request)
-
     {
         try {
             $user = User::FindorFail($request->user_id);
@@ -291,7 +294,6 @@ class RoleAndPermissionController extends Controller
     function SyncPermission(Request $request)
     {
         try {
-            DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
                 'permission' => 'required|array|min:1',
@@ -302,6 +304,7 @@ class RoleAndPermissionController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 400, $validator->errors());
             }
+            DB::beginTransaction();
 
 
             $role = Role::FindByName($request->roleName);
@@ -340,10 +343,13 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator, 400, $validator->errors());
         }
         try {
+            DB::beginTransaction();
             $role = Role::findByName($request->roleName);
             $role->delete();
+            DB::commit();
             return $this->returnSuccessMessage('the role deleted successfully');
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
