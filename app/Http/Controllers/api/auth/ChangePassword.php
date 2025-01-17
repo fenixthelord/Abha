@@ -63,9 +63,11 @@ class ChangePassword extends Controller
 
                 $user->password = $request->password ? Hash::make($request->password) : null;
                 $user->save();
+                DB::commit();
                 return $this->returnSuccessMessage('Password changed!');
             }
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
