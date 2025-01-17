@@ -151,7 +151,7 @@ class UserAuthController extends Controller
 
     public function logout(Request $request)
     {
-        DB::beginTransaction()
+        DB::beginTransaction();
         try {
             Auth::user()->tokens()->delete();
             DB::commit();
