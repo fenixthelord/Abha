@@ -454,7 +454,7 @@ class UserController extends Controller
                 'otp' => 'required|string',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors()->first());
+                return $this->returnValidationError($validator);
             }
             $user = User::where('id', auth()->user()->id)
                 ->where('otp_code', $request->otp)
