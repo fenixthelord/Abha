@@ -182,7 +182,8 @@ class UserAuthController extends Controller
     {
         DB::beginTransaction();
         try {
-            Auth::user()->tokens()->delete();
+
+            $request->user()->currentAccessToken()->delete();
             DB::commit();
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {

@@ -95,7 +95,7 @@ class UserController extends Controller
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id), 'max:255'],
-                'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric'],
+                'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric', 'regex:/^05\d{8}$/'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
@@ -108,19 +108,28 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-
-            $user->first_name = $request->firt_name ? $request->first_name : $user->first_name;
+            $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
-            $user->email = $request->email ? $request->email : $user->email;
-            $user->phone = $request->phone ? $request->phone : $user->phone;
+            if ($request->has('email') && !empty($request->email)) {
+                $user->email = $request->email;
+                $user->otp_verified = false;
+            }
+            if ($request->has('phone') && !empty($request->phone)) {
+                $user->phone = $request->phone;
+                $user->otp_verified = false;
+            }
             $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             $user->image = $request->image ? $request->image : $user->image;
-            if ($request->has('password') && !empty($request->password)) {
-                if ($user->password == $request->old_password); {
+            if ($request->has('password') && !empty($request->password) && $request->has('old_password')) {
+                if ($user->password == Hash::make($request->old_password))
+                {
                     $user->password = $request->password ? Hash::make($request->password) : null;
+                    $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+                }else{
+                    return $this->returnError('Old password is wrong');
                 }
             }
             $user->save();
@@ -140,7 +149,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstorfail();
             $messages = [
@@ -225,11 +234,15 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $user = User::whereuuid($request->uuid)->firstOrFail();
-            $user->delete();
-            DB::commit();
-            return $this->returnSuccessMessage('User deleted successfully');
+            if ($user = User::whereuuid($request->uuid)->firstOrFail()) {
+                $user->delete();
+                DB::commit();
+                return $this->returnSuccessMessage('User deleted successfully');
+            } else {
+                return $this->returnError('User Deleted.');
+            }
         } catch (\Exception $e) {
+
             DB::rollBack();
             return $this->returnError($e->getMessage());
         }
@@ -333,10 +346,14 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $user = User::whereUuid($request->uuid)->onlyTrashed()->firstOrFail();
-            $user->restore();
-            DB::commit();
-            return $this->returnSuccessMessage('User restore successfully');
+            if ($user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail()) {
+
+                $user->restore();
+                DB::commit();
+                return $this->returnSuccessMessage('User restore successfully');
+            } else {
+                return $this->returnError('User Not Deleted.');
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());
