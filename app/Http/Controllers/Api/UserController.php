@@ -136,7 +136,7 @@ class UserController extends Controller
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstorfail();
             $messages = [
