@@ -361,7 +361,7 @@ else{
 
     {
         try {
-            $user = User::Find($request->user_uuid);
+            $user = User::where("uuid",$request->user_uuid);
               if(!$user){
                   return $this->NotFound('User not found');
               }
