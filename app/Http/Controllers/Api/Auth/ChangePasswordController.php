@@ -30,8 +30,8 @@ class ChangePasswordController extends Controller
                 return $this->returnValidationError($validator);
             }
             $user = User::where('email', $request->email)->firstOrFail();
-            if (Carbon::now()->lessThan($user->otp_expires_at)) {
-                return $this->returnData('error', 'OTP Not expired');
+            if ($user->otp_expires_at == null ? false : Carbon::now()->lessThan($user->otp_expires_at)) {
+                return $this->badRequest('OTP Not expired');
             } elseif (Carbon::now()->isAfter($user->otp_expires_at) || $user->otp_expires_at == null) {
                 $verificationCode = rand(100000, 999999);
                 $user->verify_code = $verificationCode;
@@ -59,21 +59,24 @@ class ChangePasswordController extends Controller
                 'email'     => 'required|email|exists:users,email',
                 'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                'code'      => 'required|integer|min_digits:5|max_digits:5',
+                'code'      => 'required|integer|min_digits:6|max_digits:6',
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             if ($user = User::where('email', $request->email)
-                ->where('verify_code', $request['code'])
+                ->where('verify_code', $request->code)
                 ->where('otp_expires_at', '>', now())
-                ->firstOrFail()
+                ->first()
             ) {
-                $user->password = $request->password ? Hash::make($request->password) : null;
-                $user->verify_code = null;
-                $user->otp_expires_at = null;
+                $user->update([
+                    'password' => Hash::make($request->password),
+                    'verify_code' => null,
+                    'otp_expires_at' => null
+                ]);
                 $user->tokens()->delete();
-                $user->save();
+                // dd($user);
+                DB::commit();
                 return $this->returnSuccessMessage("Password changed and You've been logged out of all your sessions");
             } else {
                 return $this->returnError('The verification code is invalid!');

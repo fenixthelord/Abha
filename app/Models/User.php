@@ -37,7 +37,7 @@ class User extends Authenticatable  implements Auditable
         'role',
         'verify_code',
         'is_admin',
-        'otp_expire',
+        'otp_expires_at',
         'refresh_token',
         'refresh_token_expires_at',
     ];
