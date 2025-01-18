@@ -149,7 +149,7 @@ class UserAuthController extends Controller
     {
         try {
 
-            Auth::user()->tokens()->delete();
+            $request->user()->currentAccessToken()->delete();
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
             return $this->returnError($ex->getMessage());
