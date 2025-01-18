@@ -169,6 +169,8 @@ class UserAuthController extends Controller
 
                 // Include refresh token in the response
                 $data['refresh_token'] = $refreshToken;
+                $data['roles']=$user->getRoleNames();
+                $data['permissions']=$user->getPermissionNames();
 
                 return $this->returnData('data', $data);
             }
