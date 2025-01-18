@@ -99,7 +99,7 @@ class UserAuthController extends Controller
             $refreshToken = Str::random(60);
             $user->update([
                 'refresh_token' => Hash::make($refreshToken),
-                'refresh_token_expires_at' => Carbon::now()->addDays(30), // Customize expiry as needed
+                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
             ]);
             // Include refresh token in the response
             $data['refresh_token'] = $refreshToken;
@@ -157,7 +157,7 @@ class UserAuthController extends Controller
                 $refreshToken = Str::random(60);
                 $user->update([
                     'refresh_token' => Hash::make($refreshToken),
-                    'refresh_token_expires_at' => Carbon::now()->addDays(30), // Customize expiry as needed
+                    'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
                 ]);
 
                 // Include refresh token in the response
@@ -222,7 +222,7 @@ class UserAuthController extends Controller
             $refreshToken = Str::random(60);
             $user->update([
                 'refresh_token' => Hash::make($refreshToken),
-                'refresh_token_expires_at' => Carbon::now()->addDays(30), // Customize expiry as needed
+                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
             ]);
 
             DB::commit();
