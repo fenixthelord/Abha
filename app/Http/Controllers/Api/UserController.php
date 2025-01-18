@@ -100,8 +100,14 @@ class UserController extends Controller
 
             $user->first_name = $request->firt_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
-            $user->email = $request->email ? $request->email : $user->email;
-            $user->phone = $request->phone ? $request->phone : $user->phone;
+            if ($request->has('email') && !empty($request->email)) {
+                $user->email = $request->email;
+                $user->otp_verified = false;
+            }
+            if ($request->has('phone') && !empty($request->phone)) {
+                $user->phone = $request->phone;
+                $user->otp_verified = false;
+            }
             $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
