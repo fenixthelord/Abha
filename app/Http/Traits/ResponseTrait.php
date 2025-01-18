@@ -222,4 +222,5 @@ trait ResponseTrait
             'msg' => $msg,
         ], Response::HTTP_NOT_FOUND);
     }
+
 }
