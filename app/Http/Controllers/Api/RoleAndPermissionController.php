@@ -159,6 +159,7 @@ class RoleAndPermissionController extends Controller
 
     public function RemovePermissionsFromRole(Request $request)
     {
+        DB::beginTransaction();
         $validator = Validator::make($request->all(), [
             'permissions' => 'required',
             'roleName' => 'required|string'
@@ -176,12 +177,14 @@ class RoleAndPermissionController extends Controller
                 foreach ($request->permissions as $permission) {
                     if ($role->hasPermissionTo($permission)) {
                         $role->revokePermissionTo($permission);
+                        DB::commit();
                         return $this->returnData('role', RolesResource::make($role));
                     } else return $this->returnError("The role doesn't have this permission");
                 }
             } else {
                 if ($role->hasPermissionTo($request->permissions)) {
                     $role->revokePermissionTo($request->permissions);
+                    DB::commit();
                     return $this->returnData('role', RolesResource::make($role));
                 } else return $this->returnError("The role doesn't have this permission");
             }
