@@ -258,7 +258,7 @@ class UserController extends Controller
                 DB::commit();
                 return $this->returnSuccessMessage('User deleted successfully');
             } else {
-                return $this->returnError('User Deleted already.');
+                return $this->badRequest('User Deleted already.');
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -376,7 +376,7 @@ class UserController extends Controller
                 DB::commit();
                 return $this->returnSuccessMessage('User restore successfully');
             } else {
-                return $this->returnError('User Not Deleted.');
+                return $this->badRequest('User Not Deleted.');
             }
         } catch (\Exception $e) {
             DB::rollBack();
