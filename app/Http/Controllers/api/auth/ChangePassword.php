@@ -46,7 +46,7 @@ class ChangePassword extends Controller
     }
     public function reset_password(Request $request)
     {
-
+        try {
         $input = $request->only('email', 'code', 'password', 'password_confirmation');
         $validator = Validator::make($input, [
             'email'     => 'required|email|exists:users,email',
@@ -54,19 +54,21 @@ class ChangePassword extends Controller
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
             'code'      => 'required|integer|min_digits:5|max_digits:5',
         ]);
-
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
-        try {
-
-            $user = User::where('email', $request->email)
-                ->first();
-            if ($user->verify_code == $request['code']) {
-
+            if ($user = User::where('email', $request->email)
+                ->where('verify_code', $request['code'])
+                ->where('otp_expires_at', '>', now())
+                ->firstOrFail()) {
                 $user->password = $request->password ? Hash::make($request->password) : null;
+                $user->verify_code = null;
+                $user->otp_expires_at = null;
+                $user->tokens()->delete();
                 $user->save();
-                return $this->returnSuccessMessage('Password changed!');
+                return $this->returnSuccessMessage("Password changed and You've been logged out of all your sessions");
+            } else {
+                return $this->returnError('The verification code is invalid!');
             }
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
