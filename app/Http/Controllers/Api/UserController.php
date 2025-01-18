@@ -273,7 +273,7 @@ class UserController extends Controller
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             $search = $request->search;
-            $users = User::where(function ($query) use ($search) {
+            if ($users = User::where(function ($query) use ($search) {
                 $query->where('id', 'like', "%$search%")
                     ->orWhere('uuid', 'like', "%$search%")
                     ->orWhere('first_name', 'like', "%$search%")
@@ -282,7 +282,7 @@ class UserController extends Controller
                     ->orWhere('phone', 'like', "%$search%")
                     ->orWhere('job', 'like', "%$search%")
                     ->orWhere('job_id', 'like', "%$search%");
-            })->paginate($perPage, ['*'], 'page', $pageNumber);
+            })->paginate($perPage, ['*'], 'page', $pageNumber)){
             if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 return $this->badRequest('Invalid page number');
             }
@@ -295,6 +295,9 @@ class UserController extends Controller
             ];
             DB::commit();
             return $this->returnData('data', $data, 'success');
+            }else{
+                return $this->badRequest('Invalid search');
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             abort(400, $e->getMessage());
