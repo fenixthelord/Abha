@@ -135,8 +135,10 @@ foreach ($permissions as $permission) {
                 return $this->NotFound('User not found');
             }
             else{
-
-            $user->syncRoles($request->role);
+if($request->role == 'Master'){
+    return $this->Forbidden('this is master role you can not assign it to this user');
+}
+        else  {  $user->syncRoles($request->role);}
             return $this->returnSuccessMessage('the role has been assigned successfully');}
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
