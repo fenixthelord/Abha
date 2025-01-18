@@ -68,7 +68,6 @@ class RoleAndPermissionController extends Controller
             DB::rollBack();
             return abort(400);
         }
-
     }
 
     public function AssignPermissionsToRole(Request $request)
@@ -234,6 +233,7 @@ else{
 
     public function RemovePermissionsFromRole(Request $request)
     {
+        DB::beginTransaction();
         $validator = Validator::make($request->all(), [
             'permissions' => 'required',
             'roleName' => 'required|string'
@@ -256,11 +256,15 @@ else{
                     if ($role->hasPermissionTo($permission)) {
                         $role->revokePermissionTo($permission);
 
+                        DB::commit();
+                        return $this->returnData('role', RolesResource::make($role));
                     } else return $this->returnError("The role doesn't have this permission");
                 }
                 return $this->returnData('role', RolesResource::make($role));
+                DB::commit();
             }
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
@@ -277,7 +281,7 @@ else{
             return $this->returnValidationError($validator);
         }
         try {
-
+            DB::beginTransaction();
 
             $user = User::Find($request->user_id);
             if(!$user){
@@ -285,7 +289,7 @@ else{
             }
             else{
 
-//            if (is_array($request->permission)) {
+            //            if (is_array($request->permission)) {
 
 
             foreach ($request->permission as $permission) {
@@ -295,22 +299,27 @@ else{
                 if ($user->hasDirectPermission($permission)) {
                     // Remove the permission from the user
                     $user->revokePermissionTo($permission);
-                } else return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
+                } else {
+                    DB::rollBack();
+                    return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
+                }
             }
+            DB::commit();
             return $this->returnSuccessMessage('the permission removed successfully');
 
-//            }
-//        else {
-//                if ($user->hasDirectPermission($request->permission)) {
-//                    // Remove the permission from the user
-//                    $user->revokePermissionTo($request->permission);
-//                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
-//
-//                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
-//            }
+            //            }
+            //        else {
+            //                if ($user->hasDirectPermission($request->permission)) {
+            //                    // Remove the permission from the user
+            //                    $user->revokePermissionTo($request->permission);
+            //                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
+            //
+            //                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
+            //            }
 
 
         }} catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }
@@ -327,17 +336,24 @@ else{
             return $this->returnValidationError($validatedData);
         }
 
+        try {
 
         // Create a single permission
+        DB::beginTransaction();
         $permission = Permission::create([
             'name' => $request->name,
 
             'displaying' => $request->displaying,
 
-            'group' => $request->group,
-            'is_admin' => $request->is_admin,
-        ]);
-        return $this->returnData('permission', Permissionsresource::make($permission));
+                'group' => $request->group,
+                'is_admin' => $request->is_admin,
+            ]);
+            DB::commit();
+            return $this->returnData('permission', Permissionsresource::make($permission));
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            abort(400, $exception->getMessage());
+        }
     }
 
 
@@ -359,13 +375,11 @@ else{
         }} catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
-
     }
 
     function SyncPermission(Request $request)
     {
         try {
-            DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
                 'permission' => 'required|array|min:1',
@@ -376,9 +390,13 @@ else{
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 400, $validator->errors());
             }
+            DB::beginTransaction();
                if($request->roleName == "Master"||$request->newName == "Master"){
                    return $this->returnError('you cannot update  Master');
                }
+
+
+
             $role = Role::FindByName($request->roleName);
                if(!$role){
                    return $this->NotFound('Role not found');
@@ -443,16 +461,19 @@ else{
                 return $this->returnError('you cannot delete  Master');
             }
             else{
+                DB::beginTransaction();
                 $role = Role::findByName($request->roleName);
                 if(!$role){
                     return $this->NotFound('Role not found');
                 }
                 else{
                 $role->delete();
+                    DB::commit();
                 return $this->returnSuccessMessage('the role deleted successfully');
             }}
 
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
     }

@@ -116,5 +116,6 @@ return [
     */
 
     'password_timeout' => 10800,
+    'refresh_token_expires_at' => 30,
 
 ];

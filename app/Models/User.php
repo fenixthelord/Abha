@@ -38,8 +38,11 @@ class User extends Authenticatable  implements Auditable
         'verify_code',
         'is_admin',
         'otp_expire',
+        'refresh_token',
+        'refresh_token_expires_at',
     ];
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at','refresh_token_expires_at'];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -59,6 +62,7 @@ class User extends Authenticatable  implements Auditable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'refresh_token_expires_at' => 'datetime',
     ];
 
     public function linkedSocialAccounts()

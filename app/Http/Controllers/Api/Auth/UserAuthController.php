@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Traits\ResponseTrait;
-use  App\Http\Traits\FileUploader;
+use App\Http\Traits\FileUploader;
+
 
 class UserAuthController extends Controller
 {
@@ -100,6 +101,16 @@ class UserAuthController extends Controller
             DB::commit();
             //     event(new sendOtpPhone($user->otp, $user->phone));
             $data['token'] = $user->createToken('MyApp')->plainTextToken;
+
+            // Generate a refresh token
+            $refreshToken = Str::random(60);
+            $user->update([
+                'refresh_token' => Hash::make($refreshToken),
+                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+            ]);
+            // Include refresh token in the response
+            $data['refresh_token'] = $refreshToken;
+
             return $this->returnData('data', $data);
         } catch
         (\Exception $ex) {
@@ -110,6 +121,8 @@ class UserAuthController extends Controller
 
     public function login(Request $request)
     {
+        DB::beginTransaction();
+
         try {
             $messages = [
                 'user.required' => 'Email is required.',
@@ -139,26 +152,94 @@ class UserAuthController extends Controller
                 return $this->returnValidationError($validator, 400, 'email or phone or password false');
             }
 
+            DB::commit();
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->Unauthorized('email or phone or password false');
             } else {
                 //               event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
+
+                // Generate a refresh token
+                $refreshToken = Str::random(60);
+                $user->update([
+                    'refresh_token' => Hash::make($refreshToken),
+                    'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+                ]);
+
+                // Include refresh token in the response
+                $data['refresh_token'] = $refreshToken;
+
                 return $this->returnData('data', $data);
             }
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
 
     public function logout(Request $request)
     {
+        DB::beginTransaction();
         try {
-
             Auth::user()->tokens()->delete();
+            DB::commit();
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
+            DB::rollBack();
+            return $this->returnError($ex->getMessage());
+        }
+    }
+
+    public function refreshToken(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'refresh_token' => 'required|string',
+            ]);
+
+            // Fetch all users with a non-null refresh token
+            $users = User::whereNotNull('refresh_token')->get();
+
+            $user = null;
+            foreach ($users as $u) {
+                if (Hash::check($request->refresh_token, $u->refresh_token)) {
+                    $user = $u;
+                    break;
+                }
+            }
+
+            if (!$user) {
+                return $this->Unauthorized('Invalid refresh token.');
+            }
+
+            // Check if the refresh token has expired
+            if ($user->refresh_token_expires_at->isPast()) {
+                return $this->Unauthorized('Refresh token has expired.');
+            }
+
+            // Revoke existing tokens
+            $user->tokens()->delete();
+
+            // Generate a new access token
+            $accessToken = $user->createToken('MyApp')->plainTextToken;
+
+            // Generate a new refresh token
+            $refreshToken = Str::random(60);
+            $user->update([
+                'refresh_token' => Hash::make($refreshToken),
+                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+            ]);
+
+            DB::commit();
+
+            return $this->returnData('data', [
+                'token' => $accessToken,
+                'refresh_token' => $refreshToken,
+            ]);
+        } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
