@@ -123,14 +123,14 @@ foreach ($permissions as $permission) {
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
-            'user_id' => 'required|integer|exists:users,id',
+            'user_uuid' => 'required|integer|exists:users,uuid',
         ]);
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
 
         try {
-            $user = User::find($request->user_id);
+            $user = User::where("uuid",$request->user_id)->first();
             if(!$user){
                 return $this->NotFound('User not found');
             }
@@ -146,7 +146,7 @@ foreach ($permissions as $permission) {
     public function assignPermission(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'user_id' => 'required|integer|exists:users,id',
+            'user_uuid' => 'required|integer|exists:users,uuid',
             'permissions' => 'nullable'
 
         ]);
@@ -154,7 +154,7 @@ foreach ($permissions as $permission) {
             return $this->returnValidationError($validatedData);
         }
         try {
-            $user = User::find($request->user_id);
+            $user = User::where($request->user_uuid)->first();
 if(!$user){
     return $this->NotFound('User not found');
 }
@@ -205,7 +205,7 @@ else{
         try {
 
 
-            $user = User::find($request->user_id);
+            $user = User::where("uuid",$request->user_uuid)->first();
             if(!$user){
                 return $this->NotFound('User not found');
             }
@@ -273,7 +273,7 @@ else{
     {
         $validator = Validator::make($request->all(), [
             'permission' => 'required',
-            'user_id' => 'required|integer|exists:users,id'
+            'user_uuid' => 'required|integer|exists:users,uuid'
 
 
         ]);
@@ -283,7 +283,7 @@ else{
         try {
             DB::beginTransaction();
 
-            $user = User::Find($request->user_id);
+            $user = User::where("uuid",$request->user_uuid)->first();
             if(!$user){
                 return $this->NotFound('User not found');
             }
@@ -361,7 +361,7 @@ else{
 
     {
         try {
-            $user = User::Find($request->user_id);
+            $user = User::Find($request->user_uuid);
               if(!$user){
                   return $this->NotFound('User not found');
               }
