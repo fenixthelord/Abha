@@ -97,8 +97,7 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-
-            $user->first_name = $request->firt_name ? $request->first_name : $user->first_name;
+            $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
             if ($request->has('email') && !empty($request->email)) {
                 $user->email = $request->email;
