@@ -42,12 +42,16 @@ Route::prefix('/auth')->group(function () {
     Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePassword::class, 'forgotPassword']);
     Route::post('/reset-password', [ChangePassword::class, 'reset_password']);
+    Route::post('refresh-token', [UserAuthController::class, 'refreshToken']);
     Route::middleware('auth:sanctum')->group(function () {
         // Link Social Account Route (Requires Authentication)
         Route::post('/auth/link-social', [SocialLoginController::class, 'linkSocialAccount'])
             ->name('auth.link-social');
         Route::post('logout', [UserAuthController::class, 'logout']);
+
     });
+
+
 });
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
