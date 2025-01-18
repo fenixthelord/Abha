@@ -320,9 +320,13 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, null, $validator->errors());
             }
-            $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
-            $user->restore();
-            return $this->returnSuccessMessage('User restore successfully');
+            if ($user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail()) {
+
+                $user->restore();
+                return $this->returnSuccessMessage('User restore successfully');
+            } else {
+                return $this->returnError('User Not Deleted.');
+            }
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
