@@ -372,8 +372,7 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail()) {
-
+            if ($user = User::whereuuid($request->uuid)->onlyTrashed()->first()) {
                 $user->restore();
                 DB::commit();
                 return $this->returnSuccessMessage('User restore successfully');
