@@ -113,10 +113,13 @@ class UserController extends Controller
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             $user->image = $request->image ? $request->image : $user->image;
-            if ($request->has('password') && !empty($request->password)) {
-                if ($user->password == $request->old_password) ;
+            if ($request->has('password') && !empty($request->password) && $request->has('old_password')) {
+                if ($user->password == Hash::make($request->old_password))
                 {
                     $user->password = $request->password ? Hash::make($request->password) : null;
+                    $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+                }else{
+                    return $this->returnError('Old password is wrong');
                 }
             }
             $user->save();
