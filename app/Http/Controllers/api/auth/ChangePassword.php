@@ -16,25 +16,33 @@ use function Laravel\Prompts\text;
 class ChangePassword extends Controller
 {
     use ResponseTrait;
+
     public function forgotPassword(Request $request)
     {
-
-        $input = $request->only('email');
-        $validator = Validator::make($input, [
-            'email' => "required|email|exists:users,email"
-        ]);
-
-        if ($validator->fails()) {
-            return $this->returnValidationError($validator);
+        try {
+            $input = $request->only('email');
+            $validator = Validator::make($input, [
+                'email' => "required|email|exists:users,email"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $user = User::where('email', $request->email)->firstOrFail();
+            if (Carbon::now()->lessThan($user->otp_expires_at)) {
+                return $this->returnData('error', 'OTP Not expired');
+            } elseif (Carbon::now()->isAfter($user->otp_expires_at) || $user->otp_expires_at == null) {
+                $verificationCode = rand(100000, 999999);
+                $user->verify_code = $verificationCode;
+                $user->otp_expires_at = Carbon::now()->addMinutes(5);
+                $user->save();
+                Mail::to($user->email)->send(new OtpMail($verificationCode));
+                return $this->returnSuccessMessage('Verification code sent!');
+            } else {
+                return $this->returnError('You have to try again');
+            }
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
         }
-        $user = User::where('email', $request->email)->first();
-        // Generate a random verification code (you can customize the length as needed)
-        $verificationCode = rand(10000, 99999);
-        // Save the verification code in the user's record
-        $user->verify_code = $verificationCode;
-        $user->save();
-        $mail = Mail::to($user->email)->send(new OtpMail($verificationCode));
-        return $this->returnSuccessMessage('Verification code sent! to Email');
     }
     public function reset_password(Request $request)
     {
