@@ -44,6 +44,7 @@ class ChangePassword extends Controller
             return $this->returnError($e->getMessage());
         }
     }
+
     public function reset_password(Request $request)
     {
         try {
