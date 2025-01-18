@@ -344,7 +344,6 @@ class UserController extends Controller
         $perPage = request()->input('perPage', 10);
         if($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)){
         if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-            return $this->badRequest('Invalid page number');
             $data = [
                 'users' => UserResource::collection($users),
                 'current_page' => $users->currentPage(),
