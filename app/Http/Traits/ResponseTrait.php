@@ -214,4 +214,12 @@ trait ResponseTrait
             'msg' => $msg,
         ], Response::HTTP_UNAUTHORIZED);
     }
+    public function NotFound($msg = '')
+    {
+        return response()->json([
+            'status' => false,
+            'code' => Response::HTTP_NOT_FOUND,
+            'msg' => $msg,
+        ], Response::HTTP_NOT_FOUND);
+    }
 }

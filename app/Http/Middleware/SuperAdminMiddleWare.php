@@ -19,7 +19,7 @@ class SuperAdminMiddleWare
     {
         if (auth()->check()) {
 
-            if (auth()->user()->role() == "super_admin") {
+            if (auth('sanctum')->user()->hasRole('Master') == "super_admin") {
                 return $next($request);
             } else return $this->Forbidden('Access denied');
         } else {

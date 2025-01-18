@@ -69,6 +69,7 @@ class UserAuthController extends Controller
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
+                "role"=>'nullable|string|exists:roles,name',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -87,7 +88,13 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
+
             ]);
+            if (!$request->role) {
+                $user->assignRole('employee'); // Default role
+            } else {
+                $user->assignRole($request->role);
+            }
             if ($user) {
                 event(new UserRegistered($user));
             }
