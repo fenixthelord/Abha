@@ -8,6 +8,7 @@ use App\Models\LinkedSocialAccount;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Two\User as ProviderUser;
@@ -19,6 +20,7 @@ class SocialLoginController extends Controller
 
     public function login(Request $request)
     {
+        DB::beginTransaction();
         $messages = [
             'provider.in' => 'Only Google, Facebook, Apple, Stripe, or Firebase are allowed.',
         ];
@@ -56,11 +58,13 @@ class SocialLoginController extends Controller
 
         if ($user) {
             auth()->login($user);
+            DB::commit();
             return response()->json([
                 'message' => 'Logged in successfully.',
                 'data' => ['token' => auth()->user()->createToken('API Token')->plainTextToken],
             ]);
         } else {
+            DB::rollBack();
             return $this->error(
                 message: 'No account is linked to this social account.',
                 code: 404
@@ -70,6 +74,7 @@ class SocialLoginController extends Controller
 
     public function linkSocialAccount(Request $request)
     {
+        DB::beginTransaction();
         $messages = [
             'provider.in' => 'Only Google, Facebook, Apple, Stripe, or Firebase are allowed.',
         ];
@@ -123,7 +128,7 @@ class SocialLoginController extends Controller
             'provider_id' => $providerUser->getId(),
             'provider_name' => $provider,
         ]);
-
+        DB::commit();
         return response()->json([
             'message' => 'Social account linked successfully.',
         ]);

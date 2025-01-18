@@ -11,7 +11,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Http\Traits\ResponseTrait;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -25,28 +27,36 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $pageNumber = request()->input('page', 1);
-        $perPage = request()->input('perPage', 10);
-        if ($request->search) {
-            return $this->oldSearch(request());
-        }
-        $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
+        DB::beginTransaction();
+        try {
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
+            if ($request->search) {
+                return $this->oldSearch(request());
+            }
+            $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
 
-        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-            return $this->badRequest('Invalid page number');
+            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                return $this->badRequest('Invalid page number');
+            }
+            $data = [
+                'users' => UserResource::collection($users),
+                'current_page' => $users->currentPage(),
+                'next_page' => $users->nextPageUrl(),
+                'previous_page' => $users->previousPageUrl(),
+                'total_pages' => $users->lastPage(),
+            ];
+            DB::commit();
+            return $this->returnData('data', $data, 'success');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            abort(400, $e->getMessage());
         }
-        $data = [
-            'users' => UserResource::collection($users),
-            'current_page' => $users->currentPage(),
-            'next_page' => $users->nextPageUrl(),
-            'previous_page' => $users->previousPageUrl(),
-            'total_pages' => $users->lastPage(),
-        ];
-        return $this->returnData('data', $data, 'success');
     }
 
     public function Update(Request $request)
     {
+        DB::beginTransaction();
         try {
             $user = auth()->user();
 
@@ -79,19 +89,20 @@ class UserController extends Controller
                 'gender.in' => 'Gender must be a male or female.',
                 'alt.string' => 'Alt must be a string.',
                 'job.string' => 'Jop must be a string.',
-                'job_id.' => 'Jop must be a number.',];
+                'job_id.' => 'Jop must be a number.',
+            ];
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
-                'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
-                'phone' => ['nullable',Rule::unique('users','phone')->ignore($user->id),'numeric'],
+                'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id), 'max:255'],
+                'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
@@ -108,21 +119,22 @@ class UserController extends Controller
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             $user->image = $request->image ? $request->image : $user->image;
             if ($request->has('password') && !empty($request->password)) {
-                if ($user->password == $request->old_password) ;
-                {
+                if ($user->password == $request->old_password); {
                     $user->password = $request->password ? Hash::make($request->password) : null;
                 }
             }
             $user->save();
+            DB::commit();
             return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
 
     public function UpdateAdmin(Request $request)
     {
-
+        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
@@ -160,19 +172,20 @@ class UserController extends Controller
                 'gender.in' => 'Gender must be a male or female.',
                 'alt.string' => 'Alt must be a string.',
                 'job.string' => 'Jop must be a string.',
-                'job_id.' => 'Jop must be a number.',];
+                'job_id.' => 'Jop must be a number.',
+            ];
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
-                'email' => ['nullable','email',Rule::unique('users','email')->ignore($user->id),'max:255'],
-                'phone' => ['nullable',Rule::unique('users','phone')->ignore($user->id),'numeric'],
+                'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id), 'max:255'],
+                'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
@@ -188,62 +201,73 @@ class UserController extends Controller
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             $user->image = $request->image ? $request->image : $user->image;
             if ($request->has('password') && !empty($request->password)) {
-                if ($user->password == $request->old_password) ;
-                {
+                if ($user->password == $request->old_password); {
                     $user->password = $request->password ? Hash::make($request->password) : null;
                 }
             }
             $user->save();
+            DB::commit();
             return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
 
     public function deleteUser(Request $request)
     {
+        DB::beginTransaction();
         try {
 
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
+                'uuid' => 'required|string|exists:users',
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             $user = User::whereuuid($request->uuid)->firstOrFail();
             $user->delete();
+            DB::commit();
             return $this->returnSuccessMessage('User deleted successfully');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
 
     public function oldSearch(Request $request)
     {
-        $pageNumber = request()->input('page', 1);
-        $perPage = request()->input('perPage', 10);
-        $search = $request->search;
-        $users = User::where(function ($query) use ($search) {
-            $query->where('id', 'like', "%$search%")
-                ->orWhere('uuid', 'like', "%$search%")
-                ->orWhere('first_name', 'like', "%$search%")
-                ->orWhere('last_name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%")
-                ->orWhere('phone', 'like', "%$search%")
-                ->orWhere('job', 'like', "%$search%")
-                ->orWhere('job_id', 'like', "%$search%");
-        })->paginate($perPage, ['*'], 'page', $pageNumber);
-        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-            return $this->badRequest('Invalid page number');
+        DB::beginTransaction();
+        try {
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
+            $search = $request->search;
+            $users = User::where(function ($query) use ($search) {
+                $query->where('id', 'like', "%$search%")
+                    ->orWhere('uuid', 'like', "%$search%")
+                    ->orWhere('first_name', 'like', "%$search%")
+                    ->orWhere('last_name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhere('job', 'like', "%$search%")
+                    ->orWhere('job_id', 'like', "%$search%");
+            })->paginate($perPage, ['*'], 'page', $pageNumber);
+            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                return $this->badRequest('Invalid page number');
+            }
+            $data = [
+                'users' => UserResource::collection($users),
+                'current_page' => $users->currentPage(),
+                'next_page' => $users->nextPageUrl(),
+                'previous_page' => $users->previousPageUrl(),
+                'total_pages' => $users->lastPage(),
+            ];
+            DB::commit();
+            return $this->returnData('data', $data, 'success');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            abort(400, $e->getMessage());
         }
-        $data = [
-            'users' => UserResource::collection($users),
-            'current_page' => $users->currentPage(),
-            'next_page' => $users->nextPageUrl(),
-            'previous_page' => $users->previousPageUrl(),
-            'total_pages' => $users->lastPage(),
-        ];
-        return $this->returnData('data', $data, 'success');
     }
 
 
@@ -273,8 +297,7 @@ class UserController extends Controller
                     return $this->returnData('user', 'No results found');
                 }
             }
-        } catch
-        (Exception $e) {
+        } catch (Exception $e) {
             return $this->returnError($e->getMessage());
         }
     }
@@ -302,29 +325,35 @@ class UserController extends Controller
 
     public function restoreUser(Request $request)
     {
+        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, null, $validator->errors());
+                return $this->returnValidationError($validator);
             }
-            $user = User::whereuuid($request->uuid)->onlyTrashed()->firstOrFail();
+            $user = User::whereUuid($request->uuid)->onlyTrashed()->firstOrFail();
             $user->restore();
+            DB::commit();
             return $this->returnSuccessMessage('User restore successfully');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
 
     public function addImage(Request $request)
     {
+        DB::beginTransaction();
         try {
-            $messages = ['image.required' => 'Image is required.',
+            $messages = [
+                'image.required' => 'Image is required.',
                 'image.image' => 'Image must be a image.',
                 'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
                 'image.max' => 'Image must be less than 2MB.',
-                'type.required' => 'Type is required.',];
+                'type.required' => 'Type is required.',
+            ];
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'type' => 'required|string',
@@ -333,8 +362,10 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             $image = $this->uploadImagePublic($request, $request->type);
+            DB::commit();
             return $this->returnData('data', $image, 'Image Uploaded');
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
@@ -352,8 +383,8 @@ class UserController extends Controller
         }*/
     public function sendOtp()
     {
+        DB::beginTransaction();
         try {
-
             $user = auth()->user();
             if (Carbon::now()->lessThan($user->otp_expires_at) || $user->otp_verified == true) {
                 return $this->returnData('error', 'OTP Not expired');
@@ -362,17 +393,20 @@ class UserController extends Controller
             $user->otp_expires_at = Carbon::now()->addMinutes(5);
             $user->save();
             //$phone = event(new SendOtpPhone($otp, $user->phone));
+            DB::commit();
             $phone = Mail::to($user->email)->send(new OtpMail($user->otp_code));
             if ($phone) {
                 return $this->returnSuccessMessage('OTP send successfully');
             }
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
 
     public function verifyOtp(Request $request)
     {
+        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|string',
@@ -391,8 +425,10 @@ class UserController extends Controller
             $user->otp_expires_at = null;
             $user->otp_verified = true;
             $user->save();
+            DB::commit();
             $this->returnSuccessMessage('OTP verified successfully');
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
@@ -407,4 +443,3 @@ class UserController extends Controller
         return $this->returnData('user', $data);
     }
 }
-

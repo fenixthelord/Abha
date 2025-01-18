@@ -103,6 +103,8 @@ class UserAuthController extends Controller
 
     public function login(Request $request)
     {
+        DB::beginTransaction();
+
         try {
             $messages = [
                 'user.required' => 'Email is required.',
@@ -132,6 +134,7 @@ class UserAuthController extends Controller
                 return $this->returnValidationError($validator, 400, 'email or phone or password false');
             }
 
+            DB::commit();
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return $this->Unauthorized('email or phone or password false');
             } else {
@@ -141,17 +144,20 @@ class UserAuthController extends Controller
                 return $this->returnData('data', $data);
             }
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
 
     public function logout(Request $request)
     {
+        DB::beginTransaction();
         try {
-
             Auth::user()->tokens()->delete();
+            DB::commit();
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
+            DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
     }
