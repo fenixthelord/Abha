@@ -61,7 +61,7 @@ class RoleAndPermissionController extends Controller
             $request->roleName = $role->name;
 
 
-            $this->AssignPermissionsToRole($request);
+            $role->syncPermissions($request->permission);
             DB::commit();
             return $this->returnSuccessMessage('Role created successfully');
         } catch (\Exception $e) {
