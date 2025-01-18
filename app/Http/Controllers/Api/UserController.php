@@ -339,9 +339,10 @@ class UserController extends Controller
 
     public function showDeleteUser()
     {
+        try {
         $pageNumber = request()->input('page', 1);
         $perPage = request()->input('perPage', 10);
-        $users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber);
+        if($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)){
         if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
             return $this->badRequest('Invalid page number');
             $data = [
@@ -353,7 +354,11 @@ class UserController extends Controller
             ];
             return $this->returnData('data', $data, 'success');
         } else {
-            return $this->returnData('user', 'No results found');
+            return $this->returnData('user', 'Invalid page number');
+        }
+        }else return $this->badRequest('No results found');
+        }catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
         }
     }
 
