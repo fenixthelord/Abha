@@ -63,7 +63,7 @@ class UserAuthController extends Controller
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                'phone' => 'required|unique:users,phone|numeric',
+                'phone' => 'required|unique:users,phone|numeric,regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
