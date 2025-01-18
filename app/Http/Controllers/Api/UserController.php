@@ -118,6 +118,7 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
             }
+            // dd( $request->job ? $request->job : $user->job);
             $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
