@@ -253,15 +253,14 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->firstOrFail()) {
+            if ($user = User::whereuuid($request->uuid)->first()) {
                 $user->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('User deleted successfully');
             } else {
-                return $this->returnError('User Deleted.');
+                return $this->returnError('User Deleted already.');
             }
         } catch (\Exception $e) {
-
             DB::rollBack();
             return $this->returnError($e->getMessage());
         }
