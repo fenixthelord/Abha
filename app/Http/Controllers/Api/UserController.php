@@ -102,7 +102,7 @@ class UserController extends Controller
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], $messages);
             if ($validator->fails()) {
@@ -123,13 +123,16 @@ class UserController extends Controller
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
             $user->image = $request->image ? $request->image : $user->image;
-            if ($request->has('password') && !empty($request->password) && $request->has('old_password')) {
-                if ($user->password == Hash::make($request->old_password))
-                {
-                    $user->password = $request->password ? Hash::make($request->password) : null;
-                    $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+            if ($request->has('password') && !empty($request->password)) {
+                if ($request->has('old_password')) {
+                    if ($user->password == Hash::make($request->old_password)) {
+                        $user->password = $request->password ? Hash::make($request->password) : null;
+                        $user->tokens()->delete();
+                    } else {
+                        return $this->returnError('Old password is wrong');
+                    }
                 }else{
-                    return $this->returnError('Old password is wrong');
+                    return $this->returnError('Old password is required');
                 }
             }
             $user->save();
