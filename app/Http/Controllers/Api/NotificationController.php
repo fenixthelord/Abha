@@ -54,7 +54,7 @@ class NotificationController extends Controller {
         try {
             DeviceToken::create ([
                'token' => $request->input('token'),
-               'user_id' => $request->input('user_id'),
+               'user_id' => $request->input('user_uuid'),
             ]);
             DB::commit();
             return $this->returnSuccessMessage('Device Token saved successfully');
