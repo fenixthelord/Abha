@@ -39,7 +39,7 @@ class RoleAndPermissionController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {     // TODO Validate Role name without Space
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {

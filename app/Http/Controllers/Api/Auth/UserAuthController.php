@@ -63,13 +63,14 @@ class UserAuthController extends Controller
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                'phone' => 'required|unique:users,phone|numeric,regex:/^05\d{8}$/',
+                'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
-                "role" => 'nullable|string|exists:roles,name',
+                'role' => 'nullable|array',
+                'role.*' => 'string|exists:roles,name',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -93,7 +94,7 @@ class UserAuthController extends Controller
             if (!$request->role) {
                 $user->assignRole('employee'); // Default role
             } else {
-                $user->assignRole($request->role);
+                $user->syncRoles($request->role);
             }
             if ($user) {
                 event(new UserRegistered($user));
