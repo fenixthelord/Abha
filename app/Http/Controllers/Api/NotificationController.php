@@ -37,7 +37,7 @@ class NotificationController extends Controller {
             return $status
                 ? $this->returnSuccessMessage('Notifications sent successfully!')
                 : $this->returnError('Failed to send notifications.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());
@@ -48,7 +48,7 @@ class NotificationController extends Controller {
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string|unique:device_tokens,token',
-            'user_id' => 'nullable|exists:users,id',
+            'user_uuid' => 'nullable|exists:users,uuid',
         ]);
 
         try {
