@@ -11,8 +11,11 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Role\Role;
+
 use function Laravel\Prompts\text;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ChangePasswordController extends Controller
 {
@@ -24,12 +27,13 @@ class ChangePasswordController extends Controller
         try {
             $input = $request->only('email');
             $validator = Validator::make($input, [
-                'email' => "required|email|exists:users,email"
+                'email' => "required|email|" . Rule::exists('users', 'email')->whereNull('deleted_at')
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $user = User::where('email', $request->email)->firstOrFail();
+            $user = User::where('email', $request->email)->first();
+            // dd($user->otp_expires_at  );
             if ($user->otp_expires_at == null ? false : Carbon::now()->lessThan($user->otp_expires_at)) {
                 return $this->badRequest('OTP Not expired');
             } elseif (Carbon::now()->isAfter($user->otp_expires_at) || $user->otp_expires_at == null) {
