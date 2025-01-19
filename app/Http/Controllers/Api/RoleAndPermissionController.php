@@ -44,29 +44,31 @@ class RoleAndPermissionController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'roleName' => 'required|string|unique:roles,name',
+                'roleName'=>'required|string|unique:roles,name',
                 "description" => "required|string",
-                'permission' => 'nullable',
+                'permission' => 'nullable|array',
+                'permission.*' => 'exists:permissions,name'
+
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-
 
             $role = Role::create([
                 'name' => $request->roleName,
                 'description' => $request->description,
 
             ]);
-            $request->roleName = $role->name;
 
 
-            $role->syncPermissions($request->permission);
+            if ($request->has('permission') && !empty($request->permission)){
+            $role->syncPermissions($request->permission);}
+
             DB::commit();
             return $this->returnSuccessMessage('Role created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return abort(400);
+            return $this->returnError($e->getMessage());
         }
     }
 
