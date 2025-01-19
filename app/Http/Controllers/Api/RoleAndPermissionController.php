@@ -45,6 +45,7 @@ class RoleAndPermissionController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'roleName'=>'required|string|unique:roles,name',
+                "displayName"=>"required|string|unique:roles,displaying",
                 "description" => "required|string",
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
@@ -53,9 +54,10 @@ class RoleAndPermissionController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-
+          if($request->displayName !="Master"||$request->name !="Master" ){}
             $role = Role::create([
                 'name' => $request->roleName,
+                "displaying" => $request->displayName,
                 'description' => $request->description,
 
             ]);
@@ -76,7 +78,8 @@ class RoleAndPermissionController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'permission' => 'required',
+            'permission' => 'nullable|array',
+            'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
@@ -91,8 +94,8 @@ class RoleAndPermissionController extends Controller
             }
 
             // Assign multiple permissions
-       else{
-            $permissions = exploder($request->permission);
+
+        /*    $permissions = exploder($request->permission);
 foreach ($permissions as $permission) {
     $permission=Permission::FindByName($permission);
         if(!$permission){
@@ -105,15 +108,13 @@ foreach ($permissions as $permission) {
         }
         else{
             return $this->returnError('this is master role permission you can not assign it to this role');
-        }}
-        else{
-            $role->givePermissionTo($permission);
-        }
-    }
+        }}*/
+        else {
+            $role->givePermissionTo($request->permission);
 
 
             return $this->returnData('role', RolesResource::make($role));
-        }}
+        }
         }catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -261,7 +262,7 @@ else{
                         $role->revokePermissionTo($permission);
 
                         DB::commit();
-                        return $this->returnData('role', RolesResource::make($role));
+
                     } else return $this->returnError("The role doesn't have this permission");
                 }
                 return $this->returnData('role', RolesResource::make($role));
@@ -386,35 +387,37 @@ else{
         try {
 
             $validator = Validator::make($request->all(), [
-                'permission' => 'required|array|min:1',
+                'permission' => 'required|array',
+                'permission.*' => 'exists:permissions,name',
                 'roleName' => 'required|string|exists:roles,name',
-                'newName' => 'required|string|unique:roles,name',
+                "displayName" => "required|string",
                 'description' => 'required|string'
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             DB::beginTransaction();
-               if($request->roleName == "Master"||$request->newName == "Master"){
+               if($request->displayName == "Master"||$request->roleName == "Master"){
                    return $this->returnError('you cannot update  Master');
                }
 
 
-
+             else{
             $role = Role::FindByName($request->roleName);
                if(!$role){
                    return $this->NotFound('Role not found');
                }
 else{
 
-            $role->update(['name' => $request->newName, 'description' => $request->decription]);
+            $role->update(['displaying' => $request->displayName, 'description' => $request->decription]);
 
-            $permissions = exploder($request->permission);
+      /*      $permissions = exploder($request->permission);
             foreach ($permissions as $permission) {
                 $singlepermission = Permission::where('name', $permission)->first();
                 if(!$singlepermission){
                     return $this->NotFound('Permission not found');
                 }
+                else{
                 if($permission->is_admin==true){
 
                     return $this->returnError('this is master role permission you can not assign it to this role');
@@ -422,7 +425,7 @@ else{
 
                 else{
                     $role->givePermissionTo($permission);
-                }
+                }*/
             $role = $role->syncPermissions($request->permission);
             Db::commit();
             return $this->returnData('permission', RolesResource::make($role));}}
