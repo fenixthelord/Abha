@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\DeviceToken;
 use Illuminate\Support\Facades\DB;
@@ -52,9 +53,10 @@ class NotificationController extends Controller {
         ]);
 
         try {
+            $user = User::where('uuid', $request->input('user_uuid'))->first();
             DeviceToken::create ([
                'token' => $request->input('token'),
-               'user_id' => $request->input('user_uuid'),
+               'user_id' => $user->id,
             ]);
             DB::commit();
             return $this->returnSuccessMessage('Device Token saved successfully');
