@@ -83,7 +83,7 @@ class ChangePasswordController extends Controller
                 DB::commit();
                 return $this->returnSuccessMessage("Password changed and You've been logged out of all your sessions");
             } else {
-                return $this->returnError('The verification code is invalid!');
+                return $this->badRequest('The verification code is invalid!');
                 DB::commit();
                 return $this->returnSuccessMessage('Password changed!');
             }
