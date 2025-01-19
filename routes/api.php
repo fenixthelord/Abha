@@ -6,11 +6,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\api\auth\ChangePassword;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
 use App\Http\Controllers\Api\AuditLogController;
-
+use App\Http\Controllers\Api\Auth\ChangePasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +39,8 @@ Route::prefix('/auth')->group(function () {
     // Authentication Routes
     Route::post('register', [UserAuthController::class, 'register']);
     Route::post('login', [UserAuthController::class, 'login']);
-    Route::post('/forgot-password', [ChangePassword::class, 'forgotPassword']);
-    Route::post('/reset-password', [ChangePassword::class, 'reset_password']);
+    Route::post('/forgot-password', [ChangePasswordController::class, 'forgotPassword']);
+    Route::post('/reset-password', [ChangePasswordController::class, 'reset_password']);
     Route::post('refresh-token', [UserAuthController::class, 'refreshToken']);
     Route::middleware('auth:sanctum')->group(function () {
         // Link Social Account Route (Requires Authentication)

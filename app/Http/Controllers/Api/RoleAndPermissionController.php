@@ -77,7 +77,7 @@ class RoleAndPermissionController extends Controller
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
         try {
 
@@ -389,7 +389,7 @@ else{
                 'description' => 'required|string'
             ]);
             if ($validator->fails()) {
-                return $this->returnValidationError($validator, 400, $validator->errors());
+                return $this->returnValidationError($validator);
             }
             DB::beginTransaction();
                if($request->roleName == "Master"||$request->newName == "Master"){
@@ -455,7 +455,7 @@ else{
             'roleName' => 'required|string|exists:roles,name',
         ]);
         if ($validator->fails()) {
-            return $this->returnValidationError($validator, 400, $validator->errors());
+            return $this->returnValidationError($validator);
         }
         try {
             if($request->roleName == "Master"){

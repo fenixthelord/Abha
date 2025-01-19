@@ -63,13 +63,13 @@ class UserAuthController extends Controller
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
                 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                'phone' => 'required|unique:users,phone|numeric',
+                'phone' => 'required|unique:users,phone|numeric,regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
                 'job' => 'nullable|string',
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
-                "role"=>'nullable|string|exists:roles,name',
+                "role" => 'nullable|string|exists:roles,name',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -112,8 +112,7 @@ class UserAuthController extends Controller
             $data['refresh_token'] = $refreshToken;
 
             return $this->returnData('data', $data);
-        } catch
-        (\Exception $ex) {
+        } catch (\Exception $ex) {
             DB::rollBack();
             return $this->returnError($ex->getMessage());
         }
@@ -132,13 +131,16 @@ class UserAuthController extends Controller
                 'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
             ];
             $validator = Validator::make($request->all(), [
-                'user' => ['required', 'string',
+                'user' => [
+                    'required',
+                    'string',
                     function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
                         if (!User::where($field, $value)->exists()) {
                             $fail("The :attribute does not exist in our records.");
                         }
-                    }],
+                    }
+                ],
                 'password' =>
                 'required|string',
             ], $messages);
@@ -149,7 +151,7 @@ class UserAuthController extends Controller
             if (User::where($username, $request->user)->firstorfail()) {
                 $user = User::where($username, $request->user)->firstorfail();
             } else {
-                return $this->returnValidationError($validator, 400, 'email or phone or password false');
+                return $this->Unauthorized('email or phone or password false');
             }
 
             DB::commit();
@@ -169,8 +171,8 @@ class UserAuthController extends Controller
 
                 // Include refresh token in the response
                 $data['refresh_token'] = $refreshToken;
-                $data['roles']=$user->getRoleNames();
-                $data['permissions']=$user->getPermissionNames();
+                $data['roles'] = $user->getRoleNames();
+                $data['permissions'] = $user->getPermissionNames();
 
                 return $this->returnData('data', $data);
             }
@@ -184,7 +186,8 @@ class UserAuthController extends Controller
     {
         DB::beginTransaction();
         try {
-            Auth::user()->tokens()->delete();
+
+            $request->user()->currentAccessToken()->delete();
             DB::commit();
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
