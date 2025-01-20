@@ -35,8 +35,7 @@ class UserController extends Controller
                 return $this->oldSearch(request());
             }
             $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
-
-            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+            if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
                 return $this->badRequest('Invalid page number');
             }
             $data = [
@@ -318,20 +317,20 @@ class UserController extends Controller
                     ->orWhere('phone', 'like', "%$search%")
                     ->orWhere('job', 'like', "%$search%")
                     ->orWhere('job_id', 'like', "%$search%");
-            })->paginate($perPage, ['*'], 'page', $pageNumber)){
-            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
-            }
-            $data = [
-                'users' => UserResource::collection($users),
-                'current_page' => $users->currentPage(),
-                'next_page' => $users->nextPageUrl(),
-                'previous_page' => $users->previousPageUrl(),
-                'total_pages' => $users->lastPage(),
-            ];
-            DB::commit();
-            return $this->returnData('data', $data, 'success');
-            }else{
+            })->paginate($perPage, ['*'], 'page', $pageNumber)) {
+                if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
+                    return $this->badRequest('Invalid page number');
+                }
+                $data = [
+                    'users' => UserResource::collection($users),
+                    'current_page' => $users->currentPage(),
+                    'next_page' => $users->nextPageUrl(),
+                    'previous_page' => $users->previousPageUrl(),
+                    'total_pages' => $users->lastPage(),
+                ];
+                DB::commit();
+                return $this->returnData('data', $data, 'success');
+            } else {
                 return $this->badRequest('Invalid search');
             }
         } catch (\Exception $e) {
@@ -352,7 +351,7 @@ class UserController extends Controller
                 if (in_array($key, $fillable) && !empty($value)) {
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $users = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-                    if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                    if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
                         return $this->badRequest('Invalid page number');
                     }
                     $data = [
@@ -376,23 +375,23 @@ class UserController extends Controller
     public function showDeleteUser()
     {
         try {
-        $pageNumber = request()->input('page', 1);
-        $perPage = request()->input('perPage', 10);
-        if($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)){
-        if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-            $data = [
-                'users' => UserResource::collection($users),
-                'current_page' => $users->currentPage(),
-                'next_page' => $users->nextPageUrl(),
-                'previous_page' => $users->previousPageUrl(),
-                'total_pages' => $users->lastPage(),
-            ];
-            return $this->returnData('data', $data, 'success');
-        } else {
-            return $this->returnData('user', 'Invalid page number');
-        }
-        }else return $this->badRequest('No results found');
-        }catch (\Exception $e) {
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
+            if ($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)) {
+                if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
+                    $data = [
+                        'users' => UserResource::collection($users),
+                        'current_page' => $users->currentPage(),
+                        'next_page' => $users->nextPageUrl(),
+                        'previous_page' => $users->previousPageUrl(),
+                        'total_pages' => $users->lastPage(),
+                    ];
+                    return $this->returnData('data', $data, 'success');
+                } else {
+                    return $this->returnData('user', 'Invalid page number');
+                }
+            } else return $this->badRequest('No results found');
+        } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
     }
