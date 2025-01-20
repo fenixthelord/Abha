@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+
 class UserResource extends JsonResource
 {
     /**
@@ -27,6 +28,9 @@ class UserResource extends JsonResource
             'job' => $this->job,
             'job_id' => $this->job_id,
             'role' => $this->role,
+            'user-role'=>$this->getRoleNames(),
+            'user-Permission'=> $this->getAllPermissions()->pluck("name")
+
 
         ];
     }

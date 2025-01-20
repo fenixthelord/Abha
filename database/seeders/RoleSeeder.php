@@ -21,11 +21,10 @@ class RoleSeeder extends Seeder
         DB::beginTransaction();
         try {
             // Create Master Role
-            $masterRole = Role::firstOrCreate(['name' => 'Master', "displaying"=>"Master","description" => "Master in the system"]);
+            $masterRole = Role::firstOrCreate(['name' => 'Master', "description" => "Master"]);
 
             // Define permissions
-            $permissions = ['master.create', 'master.assign', 'mas
-            ter.remove'];
+            $permissions = ['master.create', 'master.assign', 'master.remove'];
 
             foreach ($permissions as $permissionName) {
                 // Create each permission
