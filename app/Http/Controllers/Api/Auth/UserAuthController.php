@@ -139,7 +139,6 @@ class UserAuthController extends Controller
             return $this->returnError($ex->getMessage());
         }
     }
-
     public function logout(Request $request)
     {
         DB::beginTransaction();
