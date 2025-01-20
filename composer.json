@@ -32,7 +32,8 @@
         },
         "files": [
             "app/helpers/helpers.php",
-            "app/Http/Helper/GeneralHelper.php"
+            "app/Http/Helper/GeneralHelper.php",
+            "app/helpers/ValidationHelper.php"
         ]
     },
     "autoload-dev": {
