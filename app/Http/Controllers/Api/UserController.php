@@ -94,7 +94,7 @@ class UserController extends Controller
                 if ($request->has('old_password')) {
                     if (Hash::check($request->old_password, $user->password)) {
                         $user->password = $request->password ? Hash::make($request->password) : null;
-                        $user->tokens()->delete();
+                        $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
                     } else {
                         return $this->returnError('Old password is wrong');
                     }
@@ -194,14 +194,17 @@ class UserController extends Controller
             }
             if (User::whereuuid($request->uuid)->onlyTrashed()->first()) {
                 return $this->badRequest('This user is deleted');
-            }  else {
-                $user = User::whereuuid($request->uuid)->first();
-                $user->active = $request->active;
-                $user->save();
-                if ($request->active == 1) {
-                    return $this->returnSuccessMessage('User activated');
-                } elseif ($request->active == 0) {
-                    return $this->returnSuccessMessage('User not activated');
+            } else {
+                if ($user = User::whereuuid($request->uuid)->first()) {
+                    $user->active = $request->active;
+                    $user->save();
+                    if ($user->active == 1) {
+                        return $this->returnSuccessMessage('User activated');
+                    } elseif ($user->active == 0) {
+                        return $this->returnSuccessMessage('User not activated');
+                    }
+                } else {
+                    return $this->badRequest('User not found');
                 }
             }
         } catch (\Exception $e) {
