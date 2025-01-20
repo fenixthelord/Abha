@@ -52,7 +52,7 @@ class RoleAndPermissionController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($request->displayName != "Master" || $request->name != "Master") {
+            if ($request->displayName == "Master" || $request->name == "Master") {
                 return $this->Forbidden("you are not allowed to create Master role");
             }
             $role = Role::create([
