@@ -251,6 +251,36 @@ class UserController extends Controller
         }
     }
 
+    public function active(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'uuid' => 'required|string|exists:users,uuid',
+                'active' => 'required|in:0,1',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            if (User::whereuuid($request->uuid)->onlyTrashed()->first()) {
+                return $this->badRequest('This user is deleted');
+            }  else {
+                $user = User::whereuuid($request->uuid)->first();
+                $user->active = $request->active;
+                $user->save();
+                if ($request->active == 1) {
+                    return $this->returnSuccessMessage('User activated');
+                } elseif ($request->active == 0) {
+                    return $this->returnSuccessMessage('User not activated');
+                }
+            }
+
+        } catch (\Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+
+    }
+
     public function deleteUser(Request $request)
     {
         DB::beginTransaction();
