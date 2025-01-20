@@ -58,38 +58,6 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $user = auth()->user();
-
-            $messages = [
-                'first_name.min' => 'First Name must be at least 3 characters.',
-                'first_name.max' => 'First Name must be less than 255 characters.',
-                'first_name.string' => 'First Name must be a string.',
-                'first_name.regex' => 'First Name must be a string.',
-                'last_name.required' => 'Last Name is required.',
-                'last_name.min' => 'Last Name must be at least 3 characters.',
-                'last_name.max' => 'Last Name must be less than 255 characters.',
-                'last_name.string' => 'Last Name must be a string.',
-                'last_name.regex' => 'Last Name must be a string.',
-                'email.required' => 'Email is required.',
-                'email.email' => 'Email is not valid.',
-                'email.unique' => 'Email is already in use.',
-                'email.max' => 'Email must be less than 255 characters.',
-                'password.required' => 'Password is required.',
-                'password.min' => 'Password must be at least 8 characters.',
-                'password.string' => 'Password must be a string.',
-                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
-                'password.confirmed' => 'Password does not match.',
-                'old_password.required' => 'Old Password is required.',
-                'old_password.min' => 'Old Password must be at least 8 characters.',
-                'old_password.string' => 'Old Password must be a string.',
-                'phone.required' => 'Phone is required.',
-                'phone.unique' => 'Phone is already in use.',
-                'phone.numeric' => 'Phone must be a number.',
-                'gender.required' => 'Gender is required.',
-                'gender.in' => 'Gender must be a male or female.',
-                'alt.string' => 'Alt must be a string.',
-                'job.string' => 'Jop must be a string.',
-                'job_id.' => 'Jop must be a number.',
-            ];
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -103,7 +71,7 @@ class UserController extends Controller
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
-            ], $messages);
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -117,7 +85,6 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
             }
-            // dd( $request->job ? $request->job : $user->job);
             $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
@@ -149,48 +116,16 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
-            ]);
+                'uuid' => 'required|string|exists:users,uuid',], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
-                $messages = [
-                    'first_name.min' => 'First Name must be at least 3 characters.',
-                    'first_name.max' => 'First Name must be less than 255 characters.',
-                    'first_name.string' => 'First Name must be a string.',
-                    'first_name.regex' => 'First Name must be a string.',
-                    'last_name.required' => 'Last Name is required.',
-                    'last_name.min' => 'Last Name must be at least 3 characters.',
-                    'last_name.max' => 'Last Name must be less than 255 characters.',
-                    'last_name.string' => 'Last Name must be a string.',
-                    'last_name.regex' => 'Last Name must be a string.',
-                    'email.required' => 'Email is required.',
-                    'email.email' => 'Email is not valid.',
-                    'email.unique' => 'Email is already in use.',
-                    'email.max' => 'Email must be less than 255 characters.',
-                    'password.required' => 'Password is required.',
-                    'password.min' => 'Password must be at least 8 characters.',
-                    'password.string' => 'Password must be a string.',
-                    'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
-                    'password.confirmed' => 'Password does not match.',
-                    'old_password.required' => 'Old Password is required.',
-                    'old_password.min' => 'Old Password must be at least 8 characters.',
-                    'old_password.string' => 'Old Password must be a string.',
-                    'phone.required' => 'Phone is required.',
-                    'phone.unique' => 'Phone is already in use.',
-                    'phone.numeric' => 'Phone must be a number.',
-                    'gender.required' => 'Gender is required.',
-                    'gender.in' => 'Gender must be a male or female.',
-                    'alt.string' => 'Alt must be a string.',
-                    'job.string' => 'Jop must be a string.',
-                    'job_id.' => 'Jop must be a number.',
-                ];
                 $validator = Validator::make($request->all(), [
                     'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                     'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                     'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id), 'max:255'],
-                    'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric','regex:/^05\d{8}$/'],
+                    'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric', 'regex:/^05\d{8}$/'],
                     'gender' => 'nullable|in:male,female',
                     'alt' => 'nullable|string',
                     'job' => 'nullable|string',
@@ -199,9 +134,9 @@ class UserController extends Controller
                     'password' =>
                         'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'old_password' => 'nullable|required_with:password|string',
-                    'role'=>"nullable|array",
-                    "role.*"=>"nullable|string|exists:roles,name",
-                ], $messages);
+                    'role' => "nullable|array",
+                    "role.*" => "nullable|string|exists:roles,name",
+                ], message());
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
                 }
@@ -228,12 +163,12 @@ class UserController extends Controller
                         } else {
                             return $this->returnError('Old password is wrong');
                         }
-                    }else{
+                    } else {
                         return $this->returnError('Old password is required');
                     }
                 }
                 $user->save();
-                if($request->role){
+                if ($request->role) {
                     $user->syncRoles($request->role);
                 }
                 DB::commit();
@@ -250,11 +185,10 @@ class UserController extends Controller
     public function active(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
                 'active' => 'required|in:0,1',
-            ]);
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -270,21 +204,18 @@ class UserController extends Controller
                     return $this->returnSuccessMessage('User not activated');
                 }
             }
-
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
-
     }
 
     public function deleteUser(Request $request)
     {
         DB::beginTransaction();
         try {
-
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users',
-            ]);
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -402,7 +333,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
-            ]);
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -423,17 +354,10 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            $messages = [
-                'image.required' => 'Image is required.',
-                'image.image' => 'Image must be a image.',
-                'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
-                'image.max' => 'Image must be less than 2MB.',
-                'type.required' => 'Type is required.',
-            ];
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'type' => 'required|string',
-            ], $messages);
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
