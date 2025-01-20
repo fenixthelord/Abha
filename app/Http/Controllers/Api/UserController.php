@@ -126,7 +126,7 @@ class UserController extends Controller
             $user->image = $request->image ? $request->image : $user->image;
             if ($request->has('password') && !empty($request->password)) {
                 if ($request->has('old_password')) {
-                    if ($user->password == Hash::make($request->old_password)) {
+                    if (Hash::check($request->old_password, $user->password)) {
                         $user->password = $request->password ? Hash::make($request->password) : null;
                         $user->tokens()->delete();
                     } else {
@@ -145,7 +145,7 @@ class UserController extends Controller
         }
     }
 
-    public function UpdateAdmin(Request $request)
+    public function updateAdmin(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -223,7 +223,7 @@ class UserController extends Controller
                 $user->image = $request->image ? $request->image : $user->image;
                 if ($request->has('password') && !empty($request->password)) {
                     if ($request->has('old_password')) {
-                        if ($user->password == Hash::make($request->old_password)) {
+                        if (Hash::check($request->old_password, $user->password)) {
                             $user->password = $request->password ? Hash::make($request->password) : null;
                             $user->tokens()->delete();
                         } else {
