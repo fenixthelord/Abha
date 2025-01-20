@@ -28,35 +28,6 @@ class UserAuthController extends Controller
     {
         DB::beginTransaction();
         try {
-            $messages = [
-                'first_name.required' => 'First Name is required.',
-                'first_name.min' => 'First Name must be at least 3 characters.',
-                'first_name.max' => 'First Name must be less than 255 characters.',
-                'first_name.string' => 'First Name must be a string.',
-                'first_name.regex' => 'First Name must be a string.',
-                'last_name.required' => 'Last Name is required.',
-                'last_name.min' => 'Last Name must be at least 3 characters.',
-                'last_name.max' => 'Last Name must be less than 255 characters.',
-                'last_name.string' => 'Last Name must be a string.',
-                'last_name.regex' => 'Last Name must be a string.',
-                'email.required' => 'Email is required.',
-                'email.email' => 'Email is not valid.',
-                'email.unique' => 'Email is already in use.',
-                'email.max' => 'Email must be less than 255 characters.',
-                'password.required' => 'Password is required.',
-                'password.min' => 'Password must be at least 8 characters.',
-                'password.string' => 'Password must be a string.',
-                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
-                'password.confirmed' => 'Password does not match.',
-                'phone.required' => 'Phone is required.',
-                'phone.unique' => 'Phone is already in use.',
-                'phone.numeric' => 'Phone must be a number.',
-                'gender.required' => 'Gender is required.',
-                'gender.in' => 'Gender must be a male or female.',
-                'alt.string' => 'Alt must be a string.',
-                'job.string' => 'Jop must be a string.',
-                'job_id.' => 'Jop must be a number.',
-            ];
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -71,7 +42,7 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
-            ], $messages);
+            ],  message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -122,15 +93,7 @@ class UserAuthController extends Controller
     public function login(Request $request)
     {
         DB::beginTransaction();
-
         try {
-            $messages = [
-                'user.required' => 'Email is required.',
-                'password.required' => 'Password is required.',
-                'password.min' => 'Password must be at least 8 characters.',
-                'password.string' => 'Password must be a string.',
-                'password.regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
-            ];
             $validator = Validator::make($request->all(), [
                 'user' => [
                     'required',
