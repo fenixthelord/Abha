@@ -450,19 +450,19 @@ class RoleAndPermissionController extends Controller
         }
         try {
 
-            DB::beginTransaction();
-            foreach($request->roleName as $role) {
+                DB::beginTransaction();
+                foreach($request->roleName as $role) {
                 $roles = Role::findByName($role);
 
                 if (!$roles) {
                     return $this->NotFound('Role not found');
                 }
-                if ($role== "Master") {
-                    return $this->returnError('you cannot delete  Master');
-                }
-                $roles->delete();}
-            DB::commit();
-            return $this->returnSuccessMessage('the role deleted successfully');
+                    if ($role== "Master") {
+                        return $this->returnError('you cannot delete  Master');
+                    }
+                    $role->delete();}
+                    DB::commit();
+                    return $this->returnSuccessMessage('the role deleted successfully');
 
 
 
