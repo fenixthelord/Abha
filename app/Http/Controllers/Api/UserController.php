@@ -95,7 +95,8 @@ class UserController extends Controller
                     if (Hash::check($request->old_password, $user->password)) {
                         $user->password = $request->password ? Hash::make($request->password) : null;
                         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
-                    } else {
+                    } else
+                    {
                         return $this->returnError('Old password is wrong');
                     }
                 }else{
