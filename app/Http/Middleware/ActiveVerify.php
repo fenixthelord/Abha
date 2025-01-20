@@ -5,9 +5,11 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Traits\ResponseTrait;
 
 class ActiveVerify
 {
+    use ResponseTrait;
     /**
      * Handle an incoming request.
      *
