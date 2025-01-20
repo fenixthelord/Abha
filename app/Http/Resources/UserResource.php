@@ -26,6 +26,7 @@ class UserResource extends JsonResource
             'alt' => $this->alt,
             'job' => $this->job,
             'job_id' => $this->job_id,
+            'active' => $this->active,
             'role' => $this->role,
 
         ];

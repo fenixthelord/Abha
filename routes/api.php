@@ -46,12 +46,15 @@ Route::prefix('/auth')->group(function () {
         // Link Social Account Route (Requires Authentication)
         Route::post('/auth/link-social', [SocialLoginController::class, 'linkSocialAccount'])
             ->name('auth.link-social');
+        Route::post('active', [UserController::class, 'active']);
         Route::post('logout', [UserAuthController::class, 'logout']);
 
     });
 
 
 });
+    Route::middleware('activeVerfi')->group(function () {
+
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
     //    Route::middleware('verify')->group(function () {
@@ -99,5 +102,6 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
         Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
         Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);});
 });
+    });
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
