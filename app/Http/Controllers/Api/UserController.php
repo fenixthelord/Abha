@@ -104,7 +104,6 @@ class UserController extends Controller
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
-
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -138,8 +137,6 @@ class UserController extends Controller
                 }
             }
             $user->save();
-
-
             DB::commit();
             return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
@@ -203,8 +200,6 @@ class UserController extends Controller
                     'password' =>
                         'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'old_password' => 'nullable|required_with:password|string',
-                    'role'=>'nullable|array',
-                    'role.*' => 'string|exists:roles,name',
                 ], $messages);
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
@@ -237,9 +232,6 @@ class UserController extends Controller
                     }
                 }
                 $user->save();
-                if($request->role){
-                    $user->syncRoles($request->role);
-                }
                 DB::commit();
                 return $this->returnData('data', UserResource::make($user), 'success');
             } else {
