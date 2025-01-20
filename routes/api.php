@@ -57,7 +57,7 @@ Route::prefix('/auth')->group(function () {
 
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-   //     Route::middleware('activeVerfi')->group(function () {
+        Route::middleware('activeVerfi')->group(function () {
             //    Route::middleware('verify')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
             Route::post('/me', [UserController::class, 'user_profile']);
@@ -70,14 +70,14 @@ Route::prefix('/user')->group(function () {
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
-  //      });
+        });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
-   // Route::middleware('activeVerfi')->group(function () {
+
         Route::get('get-verify', [UserController::class, 'sendOtp']);
         Route::post('cheek-verify', [UserController::class, 'verifyOtp']);
-//    });
+
 });
 
 // Role And Permission
@@ -85,7 +85,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(function () {
-   // Route::middleware('activeVerfi')->group(function () {
         Route::get('/', [RoleAndPermissionController::class, 'index']);
         Route::post('/create', [RoleAndPermissionController::class, 'store']);
         Route::post('/permission/create', [RoleAndPermissionController::class, 'CreatePermission']);
@@ -103,7 +102,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
             Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
             Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);
         });
- //   });
+
 });
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
