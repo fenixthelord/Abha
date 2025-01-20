@@ -37,12 +37,12 @@ class RoleAndPermissionController extends Controller
     }
 
     public function store(Request $request)
-    {     // TODO Validate Role name without Space
+    {
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'roleName' => 'required|string|unique:roles,name',
+                'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displayName" => "required|string|unique:roles,displaying",
                 "description" => "required|string",
                 'permission' => 'nullable|array',
@@ -53,6 +53,7 @@ class RoleAndPermissionController extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($request->displayName != "Master" || $request->name != "Master") {
+                return $this->Forbidden("you are not allowed to create Master role");
             }
             $role = Role::create([
                 'name' => $request->roleName,
@@ -95,21 +96,20 @@ class RoleAndPermissionController extends Controller
 
             // Assign multiple permissions
 
-            /*    $permissions = exploder($request->permission);
-    foreach ($permissions as $permission) {
-        $permission=Permission::FindByName($permission);
-            if(!$permission){
-                return $this->NotFound('Permission not found');
-            }
-            else{
-        if($permission->is_admin==true){
-            if($role->name =='Master'){
-                $role->givePermissionTo($permission);
-            }
-            else{
-                return $this->returnError('this is master role permission you can not assign it to this role');
-            }}*/
-            else {
+
+            foreach ($request->permission as $permission) {
+                $permission = Permission::FindByName($permission);
+                if (!$permission) {
+                    return $this->NotFound('Permission not found');
+                }
+
+                if ($permission->is_admin == true) {
+                    if ($role->name != 'Master') {
+                        return $this->Forbidden('this is master role permission you can not assign it to this role');
+                    }
+                }
+
+
                 $role->givePermissionTo($request->permission);
 
 
@@ -136,14 +136,14 @@ class RoleAndPermissionController extends Controller
             $user = User::where("uuid", $request->user_uuid)->first();
             if (!$user) {
                 return $this->NotFound('User not found');
-            } else {
-                if ($request->role == 'Master') {
-                    return $this->Forbidden('this is master role you can not assign it to this user');
-                } else {
-                    $user->syncRoles($request->role);
-                }
-                return $this->returnSuccessMessage('the role has been assigned successfully');
             }
+            if ($request->role == 'Master') {
+                return $this->Forbidden('this is master role you can not assign it to this user');
+            }
+            $user->syncRoles($request->role);
+
+            return $this->returnSuccessMessage('the role has been assigned successfully');
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -164,7 +164,7 @@ class RoleAndPermissionController extends Controller
             if (!$user) {
                 return $this->NotFound('User not found');
             }
-            //  $permissions = explode(",",$request->permissions);
+
             foreach ($request->permissions as $permission) {
 
                 $single_permission = Permission::where('name', $permission)->first();
@@ -211,23 +211,24 @@ class RoleAndPermissionController extends Controller
             $user = User::where("uuid", $request->user_uuid)->first();
             if (!$user) {
                 return $this->NotFound('User not found');
-            } else {
-                if ($user->hasRole('Master')) {
-                    if ($request->roleName == 'Master') {
-                        return $this->Forbidden('this is master role  you can not remove it from Master');
-                    }
-                } else {
-                    // Check if the user has the role before removing it
-                    if ($user->hasRole($request->roleName)) {
-                        // Remove the role from the user
-                        $user->removeRole($request->roleName);
-
-                        return $this->returnSuccessMessage('the role has been removed successfully');
-                    } else {
-                        return $this->returnError("The user doesn't have this role");
-                    }
+            }
+            if ($user->hasRole('Master')) {
+                if ($request->roleName == 'Master') {
+                    return $this->Forbidden('this is master role  you can not remove it from Master');
                 }
             }
+            if (!$user->roles()->where('name', $request->roleآame)->exists()) {
+                return $this->Forbidden('this role does not exist');
+            }
+            // Check if the user has the role before removing it
+            if ($user->hasRole($request->roleName)) {
+                // Remove the role from the user
+                $user->removeRole($request->roleName);
+
+                return $this->returnSuccessMessage('the role has been removed successfully');
+            }
+
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -235,34 +236,34 @@ class RoleAndPermissionController extends Controller
 
     public function RemovePermissionsFromRole(Request $request)
     {
-        DB::beginTransaction();
         $validator = Validator::make($request->all(), [
-            'permissions' => 'required',
-            'roleName' => 'required|string'
+            'permissions' => 'required|array|min:1',
+            'permissions.*' => 'exists:permissions,name',
+            'roleName' => 'required|string|exists:roles,name',
         ]);
+
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
 
-
         try {
+            DB::beginTransaction();
+
+            // Find the role
             $role = Role::findByName($request->roleName);
-            if (!$role) {
-                return $this->NotFound('Role not found');
-            } else {
 
+            // Filter permissions to those the role actually has
+            $permissions = collect($request->permissions)
+                ->filter(fn($permission) => $role->hasPermissionTo($permission));
 
-                foreach ($request->permissions as $permission) {
-                    if ($role->hasPermissionTo($permission)) {
-                        $role->revokePermissionTo($permission);
-
-                        DB::commit();
-
-                    } else return $this->returnError("The role doesn't have this permission");
-                }
-                return $this->returnData('role', RolesResource::make($role));
-                DB::commit();
+            // Revoke the filtered permissions
+            foreach ($permissions as $permission) {
+                $role->revokePermissionTo($permission);
             }
+
+            DB::commit();
+
+            return $this->returnData('role', RolesResource::make($role));
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -272,52 +273,46 @@ class RoleAndPermissionController extends Controller
     public function RemoveDirectPermission(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'permission' => 'required',
-            'user_uuid' => 'required|exists:users,uuid'
-
-
+            'permission' => 'required|array|min:1',
+            'permission.*' => 'string|exists:permissions,name',
+            'user_uuid' => 'required|exists:users,uuid',
         ]);
+
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
+
         try {
             DB::beginTransaction();
 
+            // Fetch the user
             $user = User::where("uuid", $request->user_uuid)->first();
+
             if (!$user) {
+                DB::rollBack();
                 return $this->NotFound('User not found');
-            } else {
-
-                //            if (is_array($request->permission)) {
-
-
-                foreach ($request->permission as $permission) {
-                    // Check if the user has the permission directly (not inherited from roles)
-
-
-                    if ($user->hasDirectPermission($permission)) {
-                        // Remove the permission from the user
-                        $user->revokePermissionTo($permission);
-                    } else {
-                        DB::rollBack();
-                        return $this->returnError(" you can not remove " . $permission . " permission its an role's permission");
-                    }
-                }
-                DB::commit();
-                return $this->returnSuccessMessage('the permission removed successfully');
-
-                //            }
-                //        else {
-                //                if ($user->hasDirectPermission($request->permission)) {
-                //                    // Remove the permission from the user
-                //                    $user->revokePermissionTo($request->permission);
-                //                    return $this->returnSuccessMessage('the ' . $request->permission . " permission has been removed successfully");
-                //
-                //                } else return $this->returnError(" you can not remove " . $request->permission . " permission its an role's permission");
-                //            }
-
-
             }
+
+            $permissions = $request->permission;
+            $removedPermissions = [];
+            $failedPermissions = [];
+
+            foreach ($permissions as $permission) {
+                // Check if the user has the permission directly
+                if ($user->hasDirectPermission($permission)) {
+                    $user->revokePermissionTo($permission);
+                    $removedPermissions[] = $permission;
+                } else {
+                    $failedPermissions[] = $permission;
+                }
+            }
+
+            DB::commit();
+
+            return $this->returnData('result', [
+                'removed_permissions' => $removedPermissions,
+                'failed_permissions' => $failedPermissions,
+            ]);
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -377,51 +372,48 @@ class RoleAndPermissionController extends Controller
         }
     }
 
-    function SyncPermission(Request $request)
+    public function SyncPermission(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'permission' => 'required|array',
+            'permission.*' => 'exists:permissions,name',
+            'roleName' => 'required|string|exists:roles,name',
+            'displayName' => 'required|string',
+            'description' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+
         try {
-
-            $validator = Validator::make($request->all(), [
-                'permission' => 'required|array',
-                'permission.*' => 'exists:permissions,name',
-                'roleName' => 'required|string|exists:roles,name',
-                "displayName" => "required|string",
-                'description' => 'required|string'
-            ]);
-            if ($validator->fails()) {
-                return $this->returnValidationError($validator);
+            // Prevent Master Role Updates
+            if ($request->displayName === "Master" || $request->roleName === "Master") {
+                return $this->returnError('You cannot update the Master role');
             }
+
             DB::beginTransaction();
-            if ($request->displayName == "Master" || $request->roleName == "Master") {
-                return $this->returnError('you cannot update  Master');
-            } else {
-                $role = Role::FindByName($request->roleName);
-                if (!$role) {
-                    return $this->NotFound('Role not found');
-                } else {
 
-                    $role->update(['displaying' => $request->displayName, 'description' => $request->decription]);
+            // Retrieve the role
+            $role = Role::findByName($request->roleName);
 
-                    /*      $permissions = exploder($request->permission);
-                          foreach ($permissions as $permission) {
-                              $singlepermission = Permission::where('name', $permission)->first();
-                              if(!$singlepermission){
-                                  return $this->NotFound('Permission not found');
-                              }
-                              else{
-                              if($permission->is_admin==true){
-
-                                  return $this->returnError('this is master role permission you can not assign it to this role');
-                                  }
-
-                              else{
-                                  $role->givePermissionTo($permission);
-                              }*/
-                    $role = $role->syncPermissions($request->permission);
-                    Db::commit();
-                    return $this->returnData('permission', RolesResource::make($role));
-                }
+            if (!$role) {
+                DB::rollBack();
+                return $this->NotFound('Role not found');
             }
+
+            // Update role metadata
+            $role->update([
+                'displaying' => $request->displayName,
+                'description' => $request->description,
+            ]);
+
+            // Sync permissions
+            $role->syncPermissions($request->permission);
+
+            DB::commit();
+
+            return $this->returnData('role', RolesResource::make($role));
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -450,25 +442,29 @@ class RoleAndPermissionController extends Controller
     public function DeleteRole(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'roleName' => 'required|string|exists:roles,name',
+            'roleName' => 'required|array',
+            'roleName.*' => 'exists:roles,name',
         ]);
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
         try {
-            if ($request->roleName == "Master") {
-                return $this->returnError('you cannot delete  Master');
-            } else {
+
                 DB::beginTransaction();
-                $role = Role::findByName($request->roleName);
-                if (!$role) {
+                foreach($request->roleName as $role) {
+                $roles = Role::findByName($role);
+
+                if (!$roles) {
                     return $this->NotFound('Role not found');
-                } else {
-                    $role->delete();
+                }
+                    if ($role== "Master") {
+                        return $this->returnError('you cannot delete  Master');
+                    }
+                    $role->delete();}
                     DB::commit();
                     return $this->returnSuccessMessage('the role deleted successfully');
-                }
-            }
+
+
 
         } catch (\Exception $exception) {
             DB::rollBack();
