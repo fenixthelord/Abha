@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ResponseTrait;
+use App\Models\User;
 use Illuminate\Http\Request;
 use OwenIt\Auditing\Models\Audit;
 use Carbon\Carbon;
@@ -10,6 +12,7 @@ use Carbon\Carbon;
 
 class AuditLogController extends Controller
 {
+    use ResponseTrait;
     public function index(Request $request)
     {
         // Base query
@@ -50,7 +53,22 @@ class AuditLogController extends Controller
             return $log;
         });
 
-        return response()->json($auditLogs);
+        $auditLogs->getCollection()->transform(function ($log) {
+            if(!empty($log->user_type) && $log->user_type == User::class){
+                $user = User::find($log->user_id);
+                $username = $user->first_name." ".$user->last_name;
+                $uuid = $user->uuid;
+            }else{
+                $username = 'guest';
+                $uuid = null;
+            }
+            $log->user_name = $username;
+            $log->uuid = $uuid;
+
+            return $log;
+        });
+
+         return $this->returnData('data',$auditLogs);
     }
 
 }

@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Traits;
+
 use GuzzleHttp\Client;
-use Google_Client; // Ensure this is autoloaded
+use Google_Client;
 
 trait Firebase
 {
@@ -14,7 +15,7 @@ trait Firebase
      * @return bool
      * @throws \Exception
      */
-    public function HandelDataAndSendNotify($tokens = null, $content = null, $link = 'FLUTTER_NOTIFICATION_CLICK')
+    public function HandelDataAndSendNotify($tokens, $content, $link = 'FLUTTER_NOTIFICATION_CLICK')
     {
         $client = new Client();
 
@@ -28,6 +29,10 @@ trait Firebase
             $object = $content['object'] ?? null;
             $type = $content['type'] ?? null;
             $screen = $content['screen'] ?? null;
+
+
+
+
 
             foreach ($tokens as $token) {
                 $response = $client->post('https://fcm.googleapis.com/v1/projects/smart-abha/messages:send', [
@@ -50,6 +55,8 @@ trait Firebase
                                 'screen' => $screen,
                                 'additional_data' => json_encode($content),
                             ],
+
+
                             'apns' => [
                                 'payload' => [
                                     'aps' => [
@@ -65,6 +72,7 @@ trait Firebase
                 if ($response->getStatusCode() !== 200) {
                     throw new \Exception('Failed to send notification. FCM returned HTTP code: ' . $response->getStatusCode());
                 }
+
             }
 
             return true;
@@ -72,13 +80,6 @@ trait Firebase
             throw new \Exception('Failed to send notification: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Get the access token for Firebase.
-     *
-     * @return string
-     * @throws \Exception
-     */
     function getAccessToken()
     {
         try {
