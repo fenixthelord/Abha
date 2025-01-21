@@ -460,7 +460,7 @@ class RoleAndPermissionController extends Controller
                     if ($role== "Master") {
                         return $this->returnError('you cannot delete  Master');
                     }
-                    $role->delete();}
+                    $roles->delete();}
                     DB::commit();
                     return $this->returnSuccessMessage('the role deleted successfully');
 
