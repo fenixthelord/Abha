@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Permissions\NewPermissionsResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,6 +29,9 @@ class UserResource extends JsonResource
             'job_id' => $this->job_id,
             'active' => $this->active,
             'role' => $this->role,
+            "user_role"=>$this->getRoleNames(),
+            "permission"=>new NewPermissionsResource($this->getAllPermissions())
+
 
         ];
     }

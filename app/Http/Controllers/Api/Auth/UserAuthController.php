@@ -6,6 +6,7 @@ use App\Events\SendOtpPhone;
 use App\Events\UserLogin;
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Carbon\Carbon;
@@ -172,8 +173,7 @@ class UserAuthController extends Controller
 
                 // Include refresh token in the response
                 $data['refresh_token'] = $refreshToken;
-                $data['roles'] = $user->getRoleNames();
-                $data['permissions'] = $user->getPermissionNames();
+
 
                 return $this->returnData('data', $data);
             }
