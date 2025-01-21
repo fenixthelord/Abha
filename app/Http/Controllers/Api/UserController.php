@@ -38,6 +38,7 @@ class UserController extends Controller
             if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 return $this->badRequest('Invalid page number');
             }
+
             $data = [
                 'users' => UserResource::collection($users),
                 'current_page' => $users->currentPage(),
@@ -49,7 +50,7 @@ class UserController extends Controller
             return $this->returnData('data', $data, 'success');
         } catch (\Exception $e) {
             DB::rollBack();
-            abort(400, $e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -97,10 +98,10 @@ class UserController extends Controller
                         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
                     } else
                     {
-                        return $this->returnError('Old password is wrong');
+                        return $this->badRequest('Old password is wrong');
                     }
                 }else{
-                    return $this->returnError('Old password is required');
+                    return $this->badRequest('Old password is required');
                 }
             }
             $user->save();
@@ -108,7 +109,7 @@ class UserController extends Controller
             return $this->returnData('data', UserResource::make($user), 'success');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -162,10 +163,10 @@ class UserController extends Controller
                             $user->password = $request->password ? Hash::make($request->password) : null;
                             $user->tokens()->delete();
                         } else {
-                            return $this->returnError('Old password is wrong');
+                            return $this->badRequest('Old password is wrong');
                         }
                     } else {
-                        return $this->returnError('Old password is required');
+                        return $this->badRequest('Old password is required');
                     }
                 }
                 $user->save();
@@ -175,11 +176,11 @@ class UserController extends Controller
                 DB::commit();
                 return $this->returnData('data', UserResource::make($user), 'success');
             } else {
-                return $this->returnError('User not found');
+                return $this->badRequest('User not found');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -209,7 +210,7 @@ class UserController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -232,7 +233,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -271,7 +272,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            abort(400, $e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -290,6 +291,7 @@ class UserController extends Controller
                     if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                         return $this->badRequest('Invalid page number');
                     }
+
                     $data = [
                         'users' => UserResource::collection($users),
                         'current_page' => $users->currentPage(),
@@ -303,7 +305,7 @@ class UserController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -328,7 +330,7 @@ class UserController extends Controller
                 }
             } else return $this->badRequest('No results found');
         } catch (\Exception $e) {
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -351,7 +353,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -371,7 +373,7 @@ class UserController extends Controller
             return $this->returnData('data', $image, 'Image Uploaded');
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
 
@@ -405,7 +407,7 @@ class UserController extends Controller
             }
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
 
@@ -424,7 +426,7 @@ class UserController extends Controller
                 ->where('otp_expires_at', '>', now())
                 ->firstorfail();
             if (!$user) {
-                return $this->returnError('Invalid OTP Or Expired');
+                return $this->badRequest('Invalid OTP Or Expired');
             }
             $user->otp_code = null;
             $user->otp_expires_at = null;
@@ -434,7 +436,7 @@ class UserController extends Controller
             $this->returnSuccessMessage('OTP verified successfully');
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
 

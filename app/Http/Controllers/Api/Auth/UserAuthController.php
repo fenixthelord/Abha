@@ -86,7 +86,7 @@ class UserAuthController extends Controller
             return $this->returnData('data', $data);
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ class UserAuthController extends Controller
             }
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
     public function logout(Request $request)
@@ -149,7 +149,7 @@ class UserAuthController extends Controller
             return $this->returnSuccessMessage("logged out");
         } catch (\Exception $ex) {
             DB::rollBack();
-            return $this->returnError($ex->getMessage());
+            return $this->badRequest($ex->getMessage());
         }
     }
 
