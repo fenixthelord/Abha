@@ -49,21 +49,21 @@ class NotificationController extends Controller {
     public  function saveDeviceToken(Request $request) {
         DB::beginTransaction();
         $request->validate([
-            'token' => 'required|string|unique:device_tokens,token',
+            'token' => 'required|string',
             'user_uuid' => 'nullable|exists:users,uuid',
         ]);
 
         try {
             $user = User::where('uuid', $request->input('user_uuid'))->first();
-            DeviceToken::create ([
-               'token' => $request->input('token'),
-               'user_id' => $user->id,
+            DeviceToken::firstOrCreate([
+                'token' => $request->input('token'),
+                'user_id' => $user->id,
             ]);
             DB::commit();
             return $this->returnSuccessMessage('Device Token saved successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError('Faild to save device token', $e->getMessage());
+            return $this->returnError('Failed to save device token', $e->getMessage());
         }
     }
 }
