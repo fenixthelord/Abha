@@ -15,6 +15,16 @@ class AuditLogController extends Controller
     use ResponseTrait;
     public function index(Request $request)
     {
+        $request->validate([
+            'model_type' => 'nullable|string',
+            'user_type' => 'nullable|string',
+            'user_id' => 'nullable|integer',
+            'event' => 'nullable|in:created,updated,deleted,restored', // Add event validation
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'per_page' => 'nullable|integer|min:1|max:100', // Allow custom pagination
+            'user_uuid' => 'nullable|string', // Add validation for user_uuid
+        ]);
         // Base query
         $query = Audit::query();
 
@@ -50,25 +60,18 @@ class AuditLogController extends Controller
         $auditLogs->getCollection()->transform(function ($log) {
             $log->created_at_readable = Carbon::parse($log->created_at)->format('Y-m-d H:i:s');
             $log->updated_at_readable = Carbon::parse($log->updated_at)->format('Y-m-d H:i:s');
-            return $log;
-        });
-
-        $auditLogs->getCollection()->transform(function ($log) {
-            if(!empty($log->user_type) && $log->user_type == User::class){
-                $user = User::find($log->user_id);
-                $username = $user->first_name." ".$user->last_name;
-                $uuid = $user->uuid;
-            }else{
-                $username = 'guest';
-                $uuid = null;
+            $log->uuid = $log->fullName = null;
+            if($log->user_type){
+                $user = new $log->user_type;
+                $details = $user->find($log->user_id)->first();
+                $log->uuid = $details->uuid;
+                $log->fullName = $details->first_name." ".$details->last_name;
             }
-            $log->user_name = $username;
-            $log->uuid = $uuid;
 
             return $log;
         });
 
-         return $this->returnData('data',$auditLogs);
+        return $this->returnData('data',$auditLogs);
     }
 
 }
