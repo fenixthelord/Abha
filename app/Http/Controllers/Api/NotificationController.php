@@ -33,6 +33,7 @@ class NotificationController extends Controller {
         }
 
         try {
+
             $status = $this->HandelDataAndSendNotify($tokens, $content);
             DB::commit();
             return $status

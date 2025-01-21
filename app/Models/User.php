@@ -73,7 +73,16 @@ class User extends Authenticatable  implements Auditable
 
     public function transformAudit(array $data): array
     {
-        //$data['user_type'] = auth()->user() ? auth()->user()->role : null;
+        $data['user_type'] = auth()->check() ? auth()->user()->role : 'guest';
+        $data['user_id'] = $this->id; // Include the user ID
+        $data['user_uuid'] = $this->uuid; // Include the UUID
+        $data['full_name'] = "{$this->first_name} {$this->last_name}"; // Full name
+        $data['username'] = $this->email; // Or another username field
+
+        $data['ip_address'] = request()->ip(); // Include IP address
+        $data['user_agent'] = request()->header('User-Agent'); // Include user agent
+
         return $data;
     }
+
 }

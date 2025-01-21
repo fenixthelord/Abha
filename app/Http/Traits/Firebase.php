@@ -15,10 +15,10 @@ trait Firebase
      * @return bool
      * @throws \Exception
      */
-    public function HandelDataAndSendNotify($tokens=null, $content=null, $link = 'FLUTTER_NOTIFICATION_CLICK')
+    public function HandelDataAndSendNotify($tokens, $content, $link = 'FLUTTER_NOTIFICATION_CLICK')
     {
         $client = new Client();
-//        dd($this->getAccessToken());
+
         try {
             if (empty($tokens)) {
                 return false;
@@ -35,7 +35,7 @@ trait Firebase
 
 
             foreach ($tokens as $token) {
-                $response = $client->post('https://fcm.googleapis.com/v1/projects/blue-59cbc/messages:send', [
+                $response = $client->post('https://fcm.googleapis.com/v1/projects/smart-abha/messages:send', [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $this->getAccessToken(),
                         'Content-Type' => 'application/json',
