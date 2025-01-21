@@ -6,6 +6,7 @@ use App\Events\SendOtpPhone;
 use App\Events\UserLogin;
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Carbon\Carbon;
@@ -110,7 +111,6 @@ class UserAuthController extends Controller
             if (User::where($username, $request->user)->onlyTrashed()->first()) {
                 return $this->badRequest('this user is deleted');
             } elseif ($user = User::where($username, $request->user)->first()){
-                DB::commit();
                 if (!$user || !Hash::check($request->password, $user->password)) {
                     return $this->Unauthorized('email or phone or password false');
                 } else {
@@ -118,23 +118,23 @@ class UserAuthController extends Controller
                     $data['user'] = UserResource::make($user);
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
-                    // Generate a refresh token
-                    $refreshToken = Str::random(60);
-                    $user->update([
-                        'refresh_token' => Hash::make($refreshToken),
-                        'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
-                    ]);
-                    // Include refresh token in the response
-                    $data['refresh_token'] = $refreshToken;
-                    $data['roles'] = $user->getRoleNames();
-                    $data['permissions'] = $user->getPermissionNames();
-                    return $this->returnData('data', $data);
-                }
-            }
+                // Generate a refresh token
+                $refreshToken = Str::random(60);
+                $user->update([
+                    'refresh_token' => Hash::make($refreshToken),
+                    'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+                ]);
+
+                // Include refresh token in the response
+                $data['refresh_token'] = $refreshToken;
+
+
+                return $this->returnData('data', $data);
+            }}
             else {
                 return $this->Unauthorized('email or phone or password false');
-            }
-        } catch (\Exception $ex) {
+            }}
+         catch (\Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());
         }
