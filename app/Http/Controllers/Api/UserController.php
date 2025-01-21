@@ -35,7 +35,7 @@ class UserController extends Controller
                 return $this->oldSearch(request());
             }
             $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
-            if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
+            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 return $this->badRequest('Invalid page number');
             }
             $data = [
@@ -253,9 +253,10 @@ class UserController extends Controller
                     ->orWhere('job', 'like', "%$search%")
                     ->orWhere('job_id', 'like', "%$search%");
             })->paginate($perPage, ['*'], 'page', $pageNumber)) {
-                if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
-                    return $this->badRequest('Invalid page number');
-                }
+                if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                return $this->badRequest('Invalid page number');
+            }
+
                 $data = [
                     'users' => UserResource::collection($users),
                     'current_page' => $users->currentPage(),
@@ -286,7 +287,7 @@ class UserController extends Controller
                 if (in_array($key, $fillable) && !empty($value)) {
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $users = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-                    if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
+                    if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                         return $this->badRequest('Invalid page number');
                     }
                     $data = [
