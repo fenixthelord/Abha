@@ -18,7 +18,7 @@ class AuditLogController extends Controller
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',
-            'user_id' => 'nullable|integer',
+            'user_id' => 'nullable|string',
             'event' => 'nullable|in:created,updated,deleted,restored', // Add event validation
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
