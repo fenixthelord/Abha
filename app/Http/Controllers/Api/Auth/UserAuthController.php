@@ -34,7 +34,7 @@ class UserAuthController extends Controller
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
-                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
@@ -43,7 +43,7 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
-            ],  message());
+            ], message());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -110,7 +110,7 @@ class UserAuthController extends Controller
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
             if (User::where($username, $request->user)->onlyTrashed()->first()) {
                 return $this->badRequest('this user is deleted');
-            } elseif ($user = User::where($username, $request->user)->first()){
+            } elseif ($user = User::where($username, $request->user)->first()) {
                 if (!$user || !Hash::check($request->password, $user->password)) {
                     return $this->Unauthorized('email or phone or password false');
                 } else {
@@ -118,27 +118,28 @@ class UserAuthController extends Controller
                     $data['user'] = UserResource::make($user);
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
-                // Generate a refresh token
-                $refreshToken = Str::random(60);
-                $user->update([
-                    'refresh_token' => Hash::make($refreshToken),
-                    'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
-                ]);
+                    // Generate a refresh token
+                    $refreshToken = Str::random(60);
+                    $user->update([
+                        'refresh_token' => Hash::make($refreshToken),
+                        'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+                    ]);
 
-                // Include refresh token in the response
-                $data['refresh_token'] = $refreshToken;
+                    // Include refresh token in the response
+                    $data['refresh_token'] = $refreshToken;
 
 
-                return $this->returnData('data', $data);
-            }}
-            else {
+                    return $this->returnData('data', $data);
+                }
+            } else {
                 return $this->Unauthorized('email or phone or password false');
-            }}
-         catch (\Exception $ex) {
+            }
+        } catch (\Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());
         }
     }
+
     public function logout(Request $request)
     {
         DB::beginTransaction();
