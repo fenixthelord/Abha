@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class NotifyGroupController extends Controller
 {
@@ -18,46 +20,63 @@ class NotifyGroupController extends Controller
     // Create a new notify group
     public function createNotifyGroup(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:notify_groups,name',
-            'description' => 'nullable|string',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|unique:notify_groups,name',
+                'description' => 'nullable|string',
+            ]);
+            DB::beginTransaction();
+            $notifyGroup = NotifyGroup::create([
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'model' => $request->input('model'),
+            ]);
 
-        $notifyGroup = NotifyGroup::create([
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'model' => $request->input('model'),
-        ]);
-
-        return $this->returnData('group', GroupResource::make($notifyGroup));
+            DB::commit();
+            return $this->returnData('group', GroupResource::make($notifyGroup));
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->badRequest($e->getMessage());
+        }
     }
 
     // Add users to a notify group
     public function addUsersToNotifyGroup(Request $request, $notifyGroupUuid)
     {
-        $request->validate([
-            'user_ids' => 'required|array',
-            'user_ids.*' => 'exists:users,id',
-        ]);
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'user_ids' => 'required|array',
+                'user_ids.*' => 'exists:users,id',
+            ]);
 
-        $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
-        $notifyGroup->users()->syncWithoutDetaching($request->input('user_ids'));
+            $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
+            $notifyGroup->users()->syncWithoutDetaching($request->input('user_ids'));
 
-        return $this->returnSuccessMessage('Users added to notify group successfully');
+            return $this->returnSuccessMessage('Users added to notify group successfully');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->badRequest($e->getMessage());
+        }
     }
 
     // Remove users from a notify group
     public function removeUsersFromNotifyGroup(Request $request, $notifyGroupUuid)
     {
-        $request->validate([
-            'user_ids' => 'required|array',
-            'user_ids.*' => 'exists:users,id',
-        ]);
-
-        $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
-        $notifyGroup->users()->detach($request->input('user_ids'));
-
-        return $this->returnSuccessMessage('Users removed from notify group successfully');
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'user_ids' => 'required|array',
+                'user_ids.*' => 'exists:users,id',
+            ]);
+            $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
+            $notifyGroup->users()->detach($request->input('user_ids'));
+            DB::commit();
+            return $this->returnSuccessMessage('Users removed from notify group successfully');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->badRequest($e->getMessage());
+        }
     }
 
     // Send notification to a notify group
@@ -96,7 +115,7 @@ class NotifyGroupController extends Controller
             $perPage = $request->input('per_page', 10); // Default to 10 items per page
             $notifyGroups = NotifyGroup::paginate($perPage);
 
-            return $this->returnData('groups',GroupResource::collection($notifyGroups));
+            return $this->returnData('groups', GroupResource::collection($notifyGroups));
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
