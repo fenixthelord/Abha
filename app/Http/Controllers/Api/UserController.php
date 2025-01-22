@@ -118,7 +118,7 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',], message());
+                'uuid' => 'required|string|exists:users,uuid',], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
