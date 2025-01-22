@@ -21,7 +21,7 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-        $this->middleware('super-admin')->only(['store']);
+        //    $this->middleware('super-admin')->only(['store']);
     }
 
     public function index()
@@ -55,9 +55,9 @@ class RoleAndPermissionController extends Controller
             if ($request->displayName == "Master" || $request->name == "Master") {
                 return $this->Forbidden("you are not allowed to create Master role");
             }
-            $user=auth()->user();
-            if($user->HasRole('Master')){
-                $request->roleName="Master_".$request->roleName;
+            $user = auth()->user();
+            if ($user->HasRole('Master')) {
+                $request->roleName = "Master_" . $request->roleName;
             }
             $role = Role::create([
                 'name' => $request->roleName,
@@ -92,7 +92,9 @@ class RoleAndPermissionController extends Controller
         }
         try {
 
-
+            if ($this->isMasterRole($request->roleName)) {
+                return $this->Forbidden("you are not allowed to assign permissions to this role");
+            }
             $role = \App\Models\Role\Role::findByName($request->roleName);
             if (!$role) {
                 return $this->NotFound('Role not found');
@@ -123,6 +125,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnError($exception->getMessage());
         }
     }
+
+
 
     public function assignRole(Request $request)
 
@@ -198,7 +202,6 @@ class RoleAndPermissionController extends Controller
         }
     }
 
-
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
@@ -252,7 +255,9 @@ class RoleAndPermissionController extends Controller
 
         try {
             DB::beginTransaction();
-
+            if ($this->isMasterRole($request->roleName)) {
+                return $this->Forbidden("you are not allowed to remove permissions to this role");
+            }
             // Find the role
             $role = Role::findByName($request->roleName);
 
@@ -358,7 +363,6 @@ class RoleAndPermissionController extends Controller
         }
     }
 
-
     public function GetUserPermissions(Request $request)
 
     {
@@ -402,6 +406,9 @@ class RoleAndPermissionController extends Controller
             DB::beginTransaction();
 
             // Retrieve the role
+            if($this->isMasterRole($request->roleName)) {
+                return $this->Forbidden("you are not allowed to update this role");
+            }
             $role = Role::findByName($request->roleName);
 
             if (!$role) {
@@ -457,26 +464,38 @@ class RoleAndPermissionController extends Controller
         }
         try {
 
-                DB::beginTransaction();
-                foreach($request->roleName as $role) {
+            DB::beginTransaction();
+            $user = auth()->user();
+            foreach ($request->roleName as $role) {
                 $roles = Role::findByName($role);
 
                 if (!$roles) {
                     return $this->NotFound('Role not found');
                 }
-                if($role )
-                    if ($role== "Master") {
-                        return $this->returnError('you cannot delete  Master');
-                    }
-                    $roles->delete();}
-                    DB::commit();
-                    return $this->returnSuccessMessage('the role deleted successfully');
+                if ($this->isMasterRole($role)) {
 
+                    /*  if(!$user->hasRole("Master")) {
+                          return $this->forbidden('You cannot delete the Master role');
+
+                      }*/
+                    return $this->forbidden('You cannot delete the Master role');
+                }
+                if ($role == "Master") {
+                    return $this->Forbidden('you cannot delete  Master');
+                }
+                $roles->delete();
+            }
+            DB::commit();
+            return $this->returnSuccessMessage('the role deleted successfully');
 
 
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
+    }
+    public function isMasterRole($roleName)
+    {
+        return str_starts_with($roleName, 'Master_');
     }
 }
