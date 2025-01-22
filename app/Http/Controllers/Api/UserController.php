@@ -72,7 +72,7 @@ class UserController extends Controller
                 'password' =>
                     'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -138,7 +138,7 @@ class UserController extends Controller
                     'old_password' => 'nullable|required_with:password|string',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",
-                ], message());
+                ], messageValidation());
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
                 }
@@ -190,7 +190,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
                 'active' => 'required|in:0,1',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -220,7 +220,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -340,7 +340,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -364,7 +364,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'type' => 'required|string',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -417,7 +417,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|string',
-            ]);
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
