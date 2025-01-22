@@ -29,8 +29,8 @@ class UserResource extends JsonResource
             'job_id' => $this->job_id,
             'active' => $this->active,
             'role' => $this->role,
-            /*"user_role"=>$this->getRoleNames(),
-            "permission"=>new NewPermissionsResource($this->getAllPermissions())*/
+            "user_role"=>$this->getRoleNames(),
+            "permission"=>new NewPermissionsResource($this->getAllPermissions())
 
 
         ];
