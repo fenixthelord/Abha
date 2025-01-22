@@ -128,6 +128,7 @@ class UserAuthController extends Controller
                     // Include refresh token in the response
                     $data['refresh_token'] = $refreshToken;
 
+                    DB::commit();
 
                     return $this->returnData('data', $data);
                 }
