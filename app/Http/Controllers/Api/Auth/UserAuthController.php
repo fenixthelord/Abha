@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Events\SendOtpPhone;
-use App\Events\UserLogin;
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\FileUploader;
+use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use App\Http\Traits\ResponseTrait;
-use App\Http\Traits\FileUploader;
 
 
 class UserAuthController extends Controller
