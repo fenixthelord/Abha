@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         'super-admin'=> \App\Http\Middleware\SuperAdminMiddleWare::class,
         'verify' => \App\Http\Middleware\Verify::class,
         'activeVerify' => \App\Http\Middleware\ActiveVerify::class,
+        'admin'=>\App\Http\Middleware\is_admin::class,
 
 
     ];

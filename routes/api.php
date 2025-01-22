@@ -37,7 +37,7 @@ Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
 
 Route::prefix('/auth')->group(function () {
     // Authentication Routes
-    Route::post('register', [UserAuthController::class, 'register']);
+    Route::post('register', [UserAuthController::class, 'register'])->middleware('admin');;
     Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePasswordController::class, 'forgotPassword']);
     Route::post('/reset-password', [ChangePasswordController::class, 'reset_password']);
@@ -46,7 +46,7 @@ Route::prefix('/auth')->group(function () {
         // Link Social Account Route (Requires Authentication)
         Route::post('/auth/link-social', [SocialLoginController::class, 'linkSocialAccount'])
             ->name('auth.link-social');
-        Route::post('active', [UserController::class, 'active']);
+        Route::post('active', [UserController::class, 'active'])->middleware('admin');
         Route::post('logout', [UserAuthController::class, 'logout']);
     });
 
@@ -62,11 +62,11 @@ Route::prefix('/user')->group(function () {
                     Route::get('/me', [UserController::class, 'user_profile']);
                     Route::post('send', [UserController::class, 'sendOTP']);
                     Route::post('update-profile', [UserController::class, 'update']);
-                    Route::post('update', [UserController::class, 'updateAdmin']);
+                    Route::post('update', [UserController::class, 'updateAdmin'])->middleware('admin');;
                     Route::post('upload', [UserController::class, 'addImage']);
-                    Route::post('delete-user', [UserController::class, 'deleteUser']);
-                    Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
-                    Route::post('restore_user', [UserController::class, 'restoreUser']);
+                    Route::post('delete-user', [UserController::class, 'deleteUser'])->middleware('admin');;
+                    Route::get('show-deleted', [UserController::class, 'showDeleteUser'])->middleware('admin');;
+                    Route::post('restore_user', [UserController::class, 'restoreUser'])->middleware('admin');;
                     Route::post('search', [UserController::class, 'searchUser']);
                 });
     });

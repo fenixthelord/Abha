@@ -13,6 +13,11 @@ use Carbon\Carbon;
 class AuditLogController extends Controller
 {
     use ResponseTrait;
+    public function __construct()
+    {
+        // Apply middleware to all actions in this controller
+        $this->middleware('admin');
+    }
     public function index(Request $request)
     {
         $request->validate([
