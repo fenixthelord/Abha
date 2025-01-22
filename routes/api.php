@@ -48,7 +48,6 @@ Route::prefix('/auth')->group(function () {
             ->name('auth.link-social');
         Route::post('active', [UserController::class, 'active']);
         Route::post('logout', [UserAuthController::class, 'logout']);
-
     });
 
 

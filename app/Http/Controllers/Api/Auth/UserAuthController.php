@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Events\SendOtpPhone;
-use App\Events\UserLogin;
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\FileUploader;
+use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use App\Http\Traits\ResponseTrait;
-use App\Http\Traits\FileUploader;
 
 
 class UserAuthController extends Controller
@@ -63,7 +59,7 @@ class UserAuthController extends Controller
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
-                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
@@ -144,7 +140,7 @@ class UserAuthController extends Controller
                     }
                 ],
                 'password' =>
-                'required|string',
+                    'required|string',
             ], $messages);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 401);
