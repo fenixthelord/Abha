@@ -1,5 +1,5 @@
 <?php
-function message()
+function messageValidation()
 {
     return [
         'first_name.required' => 'First Name is required.',
@@ -44,8 +44,12 @@ function message()
         'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
         'image.max' => 'Image must be less than 2MB.',
         'type.required' => 'Type is required.',
-
-
     ];
+}
+if (!function_exists('SupportedLanguages')) {
+    function SupportedLanguages()
+    {
+        return ['en', 'fr', 'ar', 'de'];
+    }
 }
 ?>
