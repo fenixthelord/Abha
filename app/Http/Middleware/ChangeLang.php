@@ -16,11 +16,11 @@ class ChangeLang
      */
     public function handle(Request $request, Closure $next)
     {
+        $lang = 'en';
         if (in_array($request->header('Accept-Language'), SupportedLanguages())) {
             $lang = $request->header('Accept-Language');
         }
 
-        $lang = 'en';
 
         app()->setlocale($lang);
         return $next($request);
