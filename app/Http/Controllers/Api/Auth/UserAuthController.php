@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CustomPermissionResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Http\Traits\ResponseTrait;
@@ -158,6 +159,7 @@ class UserAuthController extends Controller
             } else {
                 //               event(new UserLogin($user));
                 $data['user'] = UserResource::make($user);
+                $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
                 $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
                 // Generate a refresh token
