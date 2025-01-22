@@ -53,6 +53,7 @@ class NotifyGroupController extends Controller
             $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
             $notifyGroup->users()->syncWithoutDetaching($request->input('user_ids'));
 
+            DB::commit();
             return $this->returnSuccessMessage('Users added to notify group successfully');
         } catch (Exception $e) {
             DB::rollBack();
