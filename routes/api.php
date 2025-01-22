@@ -56,24 +56,26 @@ Route::prefix('/auth')->group(function () {
 
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-            //    Route::middleware('verify')->group(function () {
-            Route::get('/all', [UserController::class, 'index']);
-            Route::post('/me', [UserController::class, 'user_profile']);
-            Route::get('/me', [UserController::class, 'user_profile']);
-            Route::post('send', [UserController::class, 'sendOTP']);
-            Route::post('update-profile', [UserController::class, 'update']);
-            Route::post('update', [UserController::class, 'updateAdmin']);
-            Route::post('upload', [UserController::class, 'addImage']);
-            Route::post('delete-user', [UserController::class, 'deleteUser']);
-            Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
-            Route::post('restore_user', [UserController::class, 'restoreUser']);
-            Route::post('search', [UserController::class, 'searchUser']);
+                Route::middleware('activeVerify')->group(function () {
+                    Route::get('/all', [UserController::class, 'index']);
+                    Route::post('/me', [UserController::class, 'user_profile']);
+                    Route::get('/me', [UserController::class, 'user_profile']);
+                    Route::post('send', [UserController::class, 'sendOTP']);
+                    Route::post('update-profile', [UserController::class, 'update']);
+                    Route::post('update', [UserController::class, 'updateAdmin']);
+                    Route::post('upload', [UserController::class, 'addImage']);
+                    Route::post('delete-user', [UserController::class, 'deleteUser']);
+                    Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+                    Route::post('restore_user', [UserController::class, 'restoreUser']);
+                    Route::post('search', [UserController::class, 'searchUser']);
+                });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
-
+    Route::middleware('activeVerify')->group(function () {
         Route::get('get-verify', [UserController::class, 'sendOtp']);
         Route::post('cheek-verify', [UserController::class, 'verifyOtp']);
+    });
 
 });
 
@@ -82,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(function () {
+    Route::middleware('activeVerify')->group(function () {
         Route::get('/', [RoleAndPermissionController::class, 'index']);
         Route::post('/create', [RoleAndPermissionController::class, 'store']);
         Route::post('/permission/create', [RoleAndPermissionController::class, 'CreatePermission']);
@@ -99,7 +102,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
             Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
             Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);
         });
-
+    });
 });
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
