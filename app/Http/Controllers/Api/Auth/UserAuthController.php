@@ -43,7 +43,7 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
-            ], message());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -103,7 +103,7 @@ class UserAuthController extends Controller
                             $fail("email or phone or password false.");
                         }
                     }
-                ], 'password' => 'required|string',], message());
+                ], 'password' => 'required|string',], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 401);
             }
