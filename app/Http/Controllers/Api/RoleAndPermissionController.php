@@ -55,6 +55,10 @@ class RoleAndPermissionController extends Controller
             if ($request->displayName == "Master" || $request->name == "Master") {
                 return $this->Forbidden("you are not allowed to create Master role");
             }
+            $user=auth()->user();
+            if($user->HasRole('Master')){
+                $request->roleName="Master_".$request->roleName;
+            }
             $role = Role::create([
                 'name' => $request->roleName,
                 "displaying" => $request->displayName,
@@ -321,6 +325,8 @@ class RoleAndPermissionController extends Controller
 
     public function CreatePermission(Request $request)
     {
+
+
         $validatedData = Validator::make($request->all(), [
             'name' => 'required|string|unique:permissions,name|regex:/^[^\s]+$/',
             'displaying' => 'required|string|unique:permissions,displaying',
@@ -335,6 +341,7 @@ class RoleAndPermissionController extends Controller
 
             // Create a single permission
             DB::beginTransaction();
+
             $permission = Permission::create([
                 'name' => $request->name,
 
@@ -457,6 +464,7 @@ class RoleAndPermissionController extends Controller
                 if (!$roles) {
                     return $this->NotFound('Role not found');
                 }
+                if($role )
                     if ($role== "Master") {
                         return $this->returnError('you cannot delete  Master');
                     }
