@@ -113,6 +113,7 @@ class UserAuthController extends Controller
                 } else {
                     //               event(new UserLogin($user));
                     $data['user'] = UserResource::make($user);
+                    $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
                     // Generate a refresh token
