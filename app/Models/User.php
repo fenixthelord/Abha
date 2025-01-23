@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
-
+use Illuminate\Support\Str;
 
 class User extends Authenticatable  implements Auditable
 {
@@ -82,6 +82,22 @@ class User extends Authenticatable  implements Auditable
         $data['user_agent'] = request()->header('User-Agent');
 
         return $data;
+    }
+
+    // Automatically generate UUID when creating a new NotifyGroup
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->uuid = Str::uuid();
+        });
+    }
+
+    // Relationship with users
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'notify_group_user');
     }
 
 }
