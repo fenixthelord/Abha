@@ -11,10 +11,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\DeviceToken;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
-class NotificationController extends Controller {
+class NotificationController extends Controller
+{
     use Firebase, ResponseTrait;
-    public function sendNotification(Request $request) {
+
+    public function sendNotification(Request $request)
+    {
 
         DB::beginTransaction();
 
@@ -48,7 +52,8 @@ class NotificationController extends Controller {
         }
     }
 
-    public  function saveDeviceToken(Request $request) {
+    public function saveDeviceToken(Request $request)
+    {
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string',
@@ -68,6 +73,7 @@ class NotificationController extends Controller {
             return $this->returnError('Failed to save device token', $e->getMessage());
         }
     }
+
     public function allNotification(Request $request)
     {
         try {
