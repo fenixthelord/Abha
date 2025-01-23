@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\NotificationResource;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\DeviceToken;
@@ -64,6 +66,36 @@ class NotificationController extends Controller {
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError('Failed to save device token', $e->getMessage());
+        }
+    }
+    public function allNotification(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                "perPage" => 'nullable|integer|min:9'
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $customer = $request->user();
+            $pageNumber = $request->input('page', 1);
+            $perPage = $request->input("perPage", 10);
+            $notifications = Notification::paginate($perPage, ['*'], 'page', $pageNumber);
+            if ($pageNumber > $notifications->lastPage()) {
+                return $this->badRequest('Invalid page number');
+            }
+
+            $data = [
+                "notification" => NotificationResource::collection($notifications),
+                'current_page' => $notifications->currentPage(),
+                'next_page' => $notifications->nextPageUrl(),
+                'previous_page' => $notifications->previousPageUrl(),
+                'total_pages' => $notifications->lastPage(),
+            ];
+            return $this->returnData("data", $data);
+        } catch (\Exception $ex) {
+            return $this->badRequest($ex->getMessage());
         }
     }
 }
