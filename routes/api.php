@@ -118,3 +118,9 @@ Route::prefix('notify-groups')->group(function () {
 
     Route::post('/{notifyGroupId}/send-notification', [NotifyGroupController::class, 'sendNotificationToNotifyGroup']);
 });
+
+Route::post('/notifications', [NotificationController::class, 'store'])
+    ->middleware('auth:sanctum');
+
+Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications'])
+    ->middleware('auth:sanctum');
