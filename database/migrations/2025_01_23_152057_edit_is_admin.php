@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->boolean('is_admin')->default(false)->change();
+
         });
     }
 
