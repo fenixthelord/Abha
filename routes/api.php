@@ -1,8 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
+use App\Http\Controllers\Api\Auth\UserAuthController;
+use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RoleAndPermissionController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\NotifyGroupController;
+ 
 
 /*
 |--------------------------------------------------------------------------
