@@ -7,6 +7,7 @@ use App\Http\Resources\NotificationResource;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Notification;
+use App\Models\NotifyGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\DeviceToken;
@@ -117,11 +118,11 @@ class NotificationController extends Controller
             'recipients.*' => [
                 'string'
 
-               /* function ($attribute, $value, $fail) {
-                    if (!preg_match('/^(user|group):[a-f0-9-]{36}$/', $value)) {
-                        $fail('you have to specify a valid user or group.');
-                    }
-                }*/
+                /* function ($attribute, $value, $fail) {
+                     if (!preg_match('/^(user|group):[a-f0-9-]{36}$/', $value)) {
+                         $fail('you have to specify a valid user or group.');
+                     }
+                 }*/
             ],
         ]);
 
@@ -135,14 +136,33 @@ class NotificationController extends Controller
         $notification = Notification::create([
             'title' => $request['title'],
             'description' => $request['description'],
-            'image' => $request['image']??null,
-            'url' => $request['url']??null,
-            'scheduled_at' => $request['scheduled_at']??null,
+            'image' => $request['image'] ?? null,
+            'url' => $request['url'] ?? null,
+            'scheduled_at' => $request['scheduled_at'] ?? null,
             'sender_id' => $request->user()->id,
         ]);
-
-        foreach ($request['recipients'] as $recipient) {
-            $this->processRecipient($notification, $recipient);
+        if ($request->has('group')) {
+            if (NotifyGroup::whereuuid($request->group)) {
+                $notification->recipients()->create([
+                    'recipient_type' => 'group',
+                    'recipient_uuid' => $request->group,
+                ]);
+            }
+        }
+        if ($request['token']) {
+            if ($recipient[0] == '*') {
+                $notification->for_all = true;
+                $notification->save();
+            } else {
+                foreach ($request['recipients'] as $recipient) {
+                    if (User::whereuuid($recipient)) {
+                        $notification->recipients()->create([
+                            'recipient_type' => 'user',
+                            'recipient_uuid' => $recipient
+                        ]);
+                    }
+                }
+            }
         }
 
         return $this->returnSuccessMessage('Notification sent successfully.');
@@ -150,7 +170,7 @@ class NotificationController extends Controller
 
     private function processRecipient(Notification $notification, string $recipient)
     {
-        if ($recipient === '*') {
+        if ($recipient == '*') {
             $notification->for_all = true;
             $notification->save();
             return true;
