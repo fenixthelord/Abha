@@ -157,24 +157,23 @@ class NotificationController extends Controller
         }
 
 
-        foreach ($recipient as $type => $uuid) {
+        [$type, $uuid] = explode(':', $recipient);
 
-            // التحقق من صحة الـ ID
-            $model = match ($type) {
-                'user' => \App\Models\User::class,
-                'group' => \App\Models\NotifyGroup::class,
-                default => null
-            };
+        // التحقق من صحة الـ ID
+        $model = match ($type) {
+            'user' => \App\Models\User::class,
+            'group' => \App\Models\NotifyGroup::class,
+            default => null
+        };
 
-            if (!$model || !$model::where('uuid', $uuid)->exists()) {
-                return $this->badRequest('Recipient not found.');
-            }
-
-            $notification->recipients()->create([
-                'recipient_type' => $type,
-                'recipient_uuid' => $uuid
-            ]);
+        if (!$model || !$model::where('uuid', $uuid)->exists()) {
+            return $this->badRequest('Recipient not found.');
         }
+
+        $notification->recipients()->create([
+            'recipient_type' => $type,
+            'recipient_uuid' => $uuid
+        ]);
     }
 
     public function getUserNotifications(Request $request)
