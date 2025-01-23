@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\UserLogin;
+use App\Models\Role\Permission;
 use App\Events\UserRegistered;
 use App\Listeners\SendLoginOtpEmail;
 use App\Listeners\SendOtpEmail;
@@ -30,7 +31,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 
     /**

@@ -30,7 +30,7 @@ Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
 
 Route::prefix('/auth')->group(function () {
     // Authentication Routes
-    Route::post('register', [UserAuthController::class, 'register'])->middleware('admin');;
+    Route::post('register', [UserAuthController::class, 'register']);
     Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePasswordController::class, 'forgotPassword']);
     Route::post('/reset-password', [ChangePasswordController::class, 'reset_password']);
