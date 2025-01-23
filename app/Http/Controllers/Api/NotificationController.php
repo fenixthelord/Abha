@@ -104,4 +104,118 @@ class NotificationController extends Controller
             return $this->badRequest($ex->getMessage());
         }
     }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'image' => 'required|string',
+            'url' => 'required|string',
+            'schedule_at' => 'nullable|date',
+            'recipients' => 'required|array',
+            'recipients.*' => [
+                'string','in:user,group',
+
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/^(user|group):[a-f0-9-]{36}$/', $value)) {
+                        $fail('you have to specify a valid user or group.');
+                    }
+                }
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+        $data = $validator->validated();
+        if (in_array('*', $data['recipients']) && count($data['recipients']) > 1) {
+            return $this->badRequest('You cannot send notifications to one and more recipients.');
+        }
+        $notification = Notification::create([
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'image' => $data['image'],
+            'url' => $data['url'],
+            'scheduled_at' => $data['scheduled_at'],
+            'sender_id' => $request->user()->id,
+        ]);
+
+        foreach ($data['recipients'] as $recipient) {
+            $this->processRecipient($notification, $recipient);
+        }
+
+        return $this->returnSuccessMessage('Notification sent successfully.');
+    }
+
+    private function processRecipient(Notification $notification, string $recipient)
+    {
+        if ($recipient === '*') {
+            $notification->for_all = true;
+            $notification->save();
+            return true;
+        }
+
+
+        [$type, $uuid] = explode(':', $recipient);
+
+        // التحقق من صحة الـ ID
+        $model = match ($type) {
+            'user' => \App\Models\User::class,
+            'group' => \App\Models\NotifyGroup::class,
+            default => null
+        };
+
+        if (!$model || !$model::where('uuid', $uuid)->exists()) {
+            return $this->badRequest('Recipient not found.');
+        }
+
+        $notification->recipients()->create([
+            'recipient_type' => $type,
+            'recipient_uuid' => $uuid
+        ]);
+    }
+
+    public function getUserNotifications(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'perPage' => 'nullable|integer|min:9',
+                'uuid' => 'required|exists:users,uuid',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
+            if ($user = User::where('uuid', $request->uuid)->first()) {
+                $notifications = Notification::where('for_all', true)
+                    ->orwhereHas('recipients', function ($query) use ($user) {
+                        $query->where(function ($q) use ($user) {
+                            $q->where('recipient_type', 'user')
+                                ->where('recipient_uuid', $user->uuid);
+                        })
+                            ->orWhere(function ($q2) use ($user) {
+                                $q2->where('recipient_type', 'group')
+                                    ->whereIn('recipient_uuid', $user->groups()->pluck('uuid'));
+                            });
+                    })->with('recipients')->paginate($perPage, ['*'], 'page', $pageNumber);
+                if ($pageNumber > $notifications->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                    return $this->badRequest('Invalid page number');
+                }
+                $data = [
+                    'users' => NotificationResource::collection($notifications),
+                    'current_page' => $notifications->currentPage(),
+                    'next_page' => $notifications->nextPageUrl(),
+                    'previous_page' => $notifications->previousPageUrl(),
+                    'total_pages' => $notifications->lastPage(),
+                ];
+                return $this->returnData("data", $data);
+            } else {
+                return $this->badRequest('user not found.');
+            }
+        } catch (\Exception $ex) {
+            return $this->badRequest($ex->getMessage());
+        }
+    }
 }
