@@ -24,8 +24,14 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
+        if(!auth()->user()->hasRole("Master_Admin")){
+            return $this->Forbidden("You are not authorized to do this action");
+        }
         DB::beginTransaction();
         try {
+
+
+
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -44,6 +50,7 @@ class UserAuthController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+
             $user = User::create([
                 'uuid' => Str::orderedUuid(),
                 'first_name' => $request->first_name,

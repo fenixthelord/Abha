@@ -13,8 +13,12 @@ use Carbon\Carbon;
 class AuditLogController extends Controller
 {
     use ResponseTrait;
+
     public function index(Request $request)
     {
+        if(!auth()->user()->hasRole("Master_Admin")){
+            return $this->Forbidden("You are not authorized to do this action");
+        }
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',

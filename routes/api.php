@@ -1,14 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\{AuditLogController,
-    Auth\ChangePasswordController,
-    Auth\SocialLoginController,
-    Auth\UserAuthController,
-    LanguageController,
-    NotificationController,
-    NotifyGroupController,
-    RoleAndPermissionController,
-    UserController,};
+use App\Http\Controllers\Api\Auth\SocialLoginController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,6 +62,19 @@ Route::prefix('/user')->group(function () {
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
         });
+                Route::middleware('activeVerify')->group(function () {
+                    Route::get('/all', [UserController::class, 'index']);
+                    Route::post('/me', [UserController::class, 'user_profile']);
+                    Route::get('/me', [UserController::class, 'user_profile']);
+                    Route::post('send', [UserController::class, 'sendOTP']);
+                    Route::post('update-profile', [UserController::class, 'update']);
+                    Route::post('update', [UserController::class, 'updateAdmin'])->middleware('admin');;
+                    Route::post('upload', [UserController::class, 'addImage']);
+                    Route::post('delete-user', [UserController::class, 'deleteUser'])->middleware('admin');;
+                    Route::get('show-deleted', [UserController::class, 'showDeleteUser'])->middleware('admin');;
+                    Route::post('restore_user', [UserController::class, 'restoreUser'])->middleware('admin');;
+                    Route::post('search', [UserController::class, 'searchUser']);
+                });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {

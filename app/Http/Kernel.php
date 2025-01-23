@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
         'activeVerify' => \App\Http\Middleware\ActiveVerify::class,
 
 
+
     ];
 }
