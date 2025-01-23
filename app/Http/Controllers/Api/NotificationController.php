@@ -110,18 +110,18 @@ class NotificationController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'required|string',
-            'url' => 'required|string',
+            'image' => 'nullable|string',
+            'url' => 'nullable|string',
             'schedule_at' => 'nullable|date',
             'recipients' => 'required|array',
             'recipients.*' => [
-                'string','in:user,group',
+                'string'
 
-                function ($attribute, $value, $fail) {
+               /* function ($attribute, $value, $fail) {
                     if (!preg_match('/^(user|group):[a-f0-9-]{36}$/', $value)) {
                         $fail('you have to specify a valid user or group.');
                     }
-                }
+                }*/
             ],
         ]);
 
@@ -133,15 +133,15 @@ class NotificationController extends Controller
             return $this->badRequest('You cannot send notifications to one and more recipients.');
         }
         $notification = Notification::create([
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'image' => $data['image'],
-            'url' => $data['url'],
-            'scheduled_at' => $data['scheduled_at'],
+            'title' => $request['title'],
+            'description' => $request['description'],
+            'image' => $request['image']??null,
+            'url' => $request['url']??null,
+            'scheduled_at' => $request['scheduled_at']??null,
             'sender_id' => $request->user()->id,
         ]);
 
-        foreach ($data['recipients'] as $recipient) {
+        foreach ($request['recipients'] as $recipient) {
             $this->processRecipient($notification, $recipient);
         }
 
@@ -157,23 +157,24 @@ class NotificationController extends Controller
         }
 
 
-        [$type, $uuid] = explode(':', $recipient);
+        foreach ($recipient as $type => $uuid) {
 
-        // التحقق من صحة الـ ID
-        $model = match ($type) {
-            'user' => \App\Models\User::class,
-            'group' => \App\Models\NotifyGroup::class,
-            default => null
-        };
+            // التحقق من صحة الـ ID
+            $model = match ($type) {
+                'user' => \App\Models\User::class,
+                'group' => \App\Models\NotifyGroup::class,
+                default => null
+            };
 
-        if (!$model || !$model::where('uuid', $uuid)->exists()) {
-            return $this->badRequest('Recipient not found.');
+            if (!$model || !$model::where('uuid', $uuid)->exists()) {
+                return $this->badRequest('Recipient not found.');
+            }
+
+            $notification->recipients()->create([
+                'recipient_type' => $type,
+                'recipient_uuid' => $uuid
+            ]);
         }
-
-        $notification->recipients()->create([
-            'recipient_type' => $type,
-            'recipient_uuid' => $uuid
-        ]);
     }
 
     public function getUserNotifications(Request $request)

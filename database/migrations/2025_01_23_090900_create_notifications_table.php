@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('image')->nullable();
-            $table->string('url');
+            $table->string('url')->nullable();
             $table->boolean('for_all')->default(false);
             $table->unsignedBigInteger('sender_id');
             $table->timestamp('schedule_at')->nullable();
