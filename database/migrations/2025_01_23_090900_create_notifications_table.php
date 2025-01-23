@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->uuid();
             $table->string('title');
             $table->text('description');
             $table->string('image')->nullable();
             $table->string('url');
-            $table->unsignedBigInteger('group_id');
+            $table->boolean('for_all')->default(false);
             $table->unsignedBigInteger('sender_id');
-            $table->timestamp('scheduled_at')->nullable();
+            $table->timestamp('schedule_at')->nullable();
             $table->timestamps();
         });
     }
