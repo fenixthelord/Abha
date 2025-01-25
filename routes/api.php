@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
- 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -77,11 +77,11 @@ Route::prefix('/user')->group(function () {
                     Route::get('/me', [UserController::class, 'user_profile']);
                     Route::post('send', [UserController::class, 'sendOTP']);
                     Route::post('update-profile', [UserController::class, 'update']);
-                    Route::post('update', [UserController::class, 'updateAdmin'])->middleware('admin');;
+                    Route::post('update', [UserController::class, 'updateAdmin']);
                     Route::post('upload', [UserController::class, 'addImage']);
-                    Route::post('delete-user', [UserController::class, 'deleteUser'])->middleware('admin');;
-                    Route::get('show-deleted', [UserController::class, 'showDeleteUser'])->middleware('admin');;
-                    Route::post('restore_user', [UserController::class, 'restoreUser'])->middleware('admin');;
+                    Route::post('delete-user', [UserController::class, 'deleteUser']);
+                    Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+                    Route::post('restore_user', [UserController::class, 'restoreUser']);
                     Route::post('search', [UserController::class, 'searchUser']);
                 });
     });
