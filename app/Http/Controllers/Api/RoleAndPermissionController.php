@@ -59,11 +59,11 @@ class RoleAndPermissionController extends Controller
             if ($user->HasRole('Master')) {
                 $request->roleName = "Master_" . $request->roleName;
             }
+
             $role = Role::create([
                 'name' => $request->roleName,
                 "displaying" => $request->displayName,
                 'description' => $request->description,
-
             ]);
 
 
