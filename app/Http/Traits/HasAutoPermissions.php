@@ -23,9 +23,9 @@ trait HasAutoPermissions
                 ]);
 
             }
-            /*if ($ownerRole) {
+            if ($ownerRole) {
                 $ownerRole->givePermissionTo($permission);
-            }*/
+            }
         });
 
     }
