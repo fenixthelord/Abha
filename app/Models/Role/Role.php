@@ -12,7 +12,7 @@ use OwenIt\Auditing\Auditable as AuditingTrait;
 class Role extends BaseRole implements Auditable
 {
     use AuditingTrait;
-    use HasAutoPermissions;
+    //use HasAutoPermissions;
 
     // You may add additional properties or methods here
 }

@@ -12,6 +12,6 @@ use App\Http\Traits\HasAutoPermissions;
 class Permission extends BasePermission implements Auditable
 {
     use AuditingTrait;
-    use HasAutoPermissions;
+    //use HasAutoPermissions;
     // You may add additional properties or methods here
 }

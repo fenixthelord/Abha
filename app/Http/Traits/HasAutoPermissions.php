@@ -13,6 +13,7 @@ trait HasAutoPermissions
             $modelName = strtolower(class_basename($model));
             $actions = ['create', 'edit', 'show', 'delete', 'restore'];
             $ownerRole = Role::where('name', 'Master_Owner')->first();
+
             foreach ($actions as $action) {
               $permission =  Permission::firstOrCreate([
                     'name' => "{$modelName}.{$action}",
@@ -22,10 +23,9 @@ trait HasAutoPermissions
                 ]);
 
             }
-            if ($ownerRole) {
-
+            /*if ($ownerRole) {
                 $ownerRole->givePermissionTo($permission);
-            }
+            }*/
         });
 
     }
