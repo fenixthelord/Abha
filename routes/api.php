@@ -123,7 +123,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
 Route::prefix('notify-groups')->group(function () {
-    Route::post('/', [NotifyGroupController::class, 'allGroup']);
+    Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 

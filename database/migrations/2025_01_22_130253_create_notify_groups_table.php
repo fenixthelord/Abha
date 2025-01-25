@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Group/channel name
             $table->string('description')->nullable();
-            $table->string('model');
+            $table->string('model')->default('Users');
             $table->uuid()->unique();
             $table->timestamps();
         });

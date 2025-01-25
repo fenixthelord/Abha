@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notify_group_user', function (Blueprint $table) {
-            $table->foreignId('notify_group_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id');
-            $table->primary(['notify_group_id', 'user_id']);
+            $table->uuid('notify_group_uuid'); // Use UUID for notify group
+            $table->uuid('user_uuid'); // Use UUID for user
+            $table->primary(['notify_group_uuid', 'user_uuid']); // Composite primary key
+
+            // Foreign key constraints
+            $table->foreign('notify_group_uuid')
+                ->references('uuid')
+                ->on('notify_groups')
+                ->onDelete('cascade');
         });
     }
 
