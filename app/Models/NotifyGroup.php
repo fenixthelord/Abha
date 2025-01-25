@@ -26,7 +26,7 @@ class NotifyGroup extends Model
     // Relationship with users
     public function users()
     {
-        return $this->belongsToMany(User::class, 'notify_group_user');
+        return $this->belongsToMany(User::class, 'notify_group_user', 'notify_group_uuid', 'user_uuid', 'uuid', 'uuid');
     }
 
 }
