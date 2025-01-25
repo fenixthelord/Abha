@@ -114,7 +114,7 @@ class UserController extends Controller
     }
 
     public function updateAdmin(Request $request)
-    {     if(!auth()->user()->hasRole("Master_Admin")){
+    {     if(!auth()->user()->hasRole("Master_Admin")|!auth()->user()->hasRole("Master")){
         return $this->Forbidden("You are not authorized to do this action");
     }
         DB::beginTransaction();
@@ -188,9 +188,10 @@ class UserController extends Controller
 
     public function active(Request $request)
     {
-        if(!auth()->user()->hasRole("Master_Admin")){
+        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
             return $this->Forbidden("You are not authorized to do this action");
         }
+
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
@@ -220,7 +221,7 @@ class UserController extends Controller
     }
 
     public function deleteUser(Request $request)
-    {      if(!auth()->user()->hasRole("Master_Admin")){
+    {      if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
         return $this->Forbidden("You are not authorized to do this action");
     }
         DB::beginTransaction();

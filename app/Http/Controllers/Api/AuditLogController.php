@@ -16,7 +16,7 @@ class AuditLogController extends Controller
 
     public function index(Request $request)
     {
-        if(!auth()->user()->hasRole("Master_Admin")){
+        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
             return $this->Forbidden("You are not authorized to do this action");
         }
         $request->validate([
