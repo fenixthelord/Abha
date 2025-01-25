@@ -20,18 +20,20 @@ class NotifyGroupController extends Controller
     // Create a new notify group
     public function createNotifyGroup(Request $request)
     {
+        DB::beginTransaction();
         try {
             $request->validate([
                 'name' => 'required|string|unique:notify_groups,name',
                 'description' => 'nullable|string',
+                'user_uuids' => 'required|array',
+                'user_uuids.*' => 'exists:users,uuid',
             ]);
-            DB::beginTransaction();
             $notifyGroup = NotifyGroup::create([
                 'name' => $request->input('name'),
                 'description' => $request->input('description'),
                 'model' => $request->input('model'),
             ]);
-
+            $this->addUsersToNotifyGroup($request,$notifyGroup->uuid);
             DB::commit();
             return $this->returnData('group', GroupResource::make($notifyGroup));
         } catch (Exception $e) {
@@ -46,12 +48,12 @@ class NotifyGroupController extends Controller
         try {
             DB::beginTransaction();
             $request->validate([
-                'user_ids' => 'required|array',
-                'user_ids.*' => 'exists:users,id',
+                'user_uuids' => 'required|array',
+                'user_uuids.*' => 'exists:users,uuid',
             ]);
 
             $notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->firstOrFail();
-            $notifyGroup->users()->syncWithoutDetaching($request->input('user_ids'));
+            $notifyGroup->users()->syncWithoutDetaching($request->input('user_uuids'));
 
             DB::commit();
             return $this->returnSuccessMessage('Users added to notify group successfully');
