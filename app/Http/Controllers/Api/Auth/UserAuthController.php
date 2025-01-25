@@ -24,8 +24,14 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
+        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
+            return $this->Forbidden("You are not authorized to do this action");
+        }
         DB::beginTransaction();
         try {
+
+
+
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -44,6 +50,7 @@ class UserAuthController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+
             $user = User::create([
                 'uuid' => Str::orderedUuid(),
                 'first_name' => $request->first_name,
@@ -90,7 +97,7 @@ class UserAuthController extends Controller
 
     public function login(Request $request)
     {
-        DB::beginTransaction();
+
         try {
             $validator = Validator::make($request->all(), [
                 'user' => [
@@ -113,7 +120,12 @@ class UserAuthController extends Controller
                 } else {
                     //               event(new UserLogin($user));
                     $data['user'] = UserResource::make($user);
-                    $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
+                    if($user->hasRole('Master')){
+                        $data['custom_permissions'] = [['action'=>'manage','subject'=>'all']];
+                    }else{
+                        $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
+                    }
+
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
                     // Generate a refresh token
@@ -126,7 +138,7 @@ class UserAuthController extends Controller
                     // Include refresh token in the response
                     $data['refresh_token'] = $refreshToken;
 
-                    DB::commit();
+
 
                     return $this->returnData('data', $data);
                 }
@@ -134,7 +146,7 @@ class UserAuthController extends Controller
                 return $this->Unauthorized('email or phone or password false');
             }
         } catch (\Exception $ex) {
-            DB::rollBack();
+
             return $this->badRequest($ex->getMessage());
         }
     }
@@ -195,6 +207,7 @@ class UserAuthController extends Controller
             ]);
 
             DB::commit();
+
 
             return $this->returnData('data', [
                 'token' => $accessToken,

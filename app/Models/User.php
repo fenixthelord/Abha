@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Http\Traits\HasAutoPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,6 +17,7 @@ class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
+    use HasAutoPermissions;
     /**
      * The attributes that are mass assignable.
      *
@@ -95,9 +97,9 @@ class User extends Authenticatable  implements Auditable
     }
 
     // Relationship with users
-    public function users()
+    public function notifyGroups()
     {
-        return $this->belongsToMany(User::class, 'notify_group_user');
+        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_uuid', 'notify_group_uuid', 'uuid', 'uuid');
     }
 
 }

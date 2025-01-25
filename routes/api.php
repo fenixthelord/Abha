@@ -1,15 +1,17 @@
 <?php
 
-use App\Http\Controllers\Api\{AuditLogController,
-    Auth\ChangePasswordController,
-    Auth\SocialLoginController,
-    Auth\UserAuthController,
-    LanguageController,
-    NotificationController,
-    NotifyGroupController,
-    RoleAndPermissionController,
-    UserController,};
+use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\Auth\ChangePasswordController;
+use App\Http\Controllers\Api\Auth\SocialLoginController;
+use App\Http\Controllers\Api\Auth\UserAuthController;
+use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RoleAndPermissionController;
+use App\Http\Controllers\Api\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\NotifyGroupController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +71,19 @@ Route::prefix('/user')->group(function () {
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
         });
+                Route::middleware('activeVerify')->group(function () {
+                    Route::get('/all', [UserController::class, 'index']);
+                    Route::post('/me', [UserController::class, 'user_profile']);
+                    Route::get('/me', [UserController::class, 'user_profile']);
+                    Route::post('send', [UserController::class, 'sendOTP']);
+                    Route::post('update-profile', [UserController::class, 'update']);
+                    Route::post('update', [UserController::class, 'updateAdmin']);
+                    Route::post('upload', [UserController::class, 'addImage']);
+                    Route::post('delete-user', [UserController::class, 'deleteUser']);
+                    Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+                    Route::post('restore_user', [UserController::class, 'restoreUser']);
+                    Route::post('search', [UserController::class, 'searchUser']);
+                });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
@@ -108,7 +123,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
 Route::prefix('notify-groups')->group(function () {
-    Route::post('/', [NotifyGroupController::class, 'allGroup']);
+    Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 
