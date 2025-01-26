@@ -20,39 +20,60 @@ class NotificationController extends Controller
 
     public function sendNotification(Request $request)
     {
-
         DB::beginTransaction();
 
-        $tokens = $request->input('tokens', []);
-        $content = [
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-            'type' => $request->input('data.type', null),
-            'object' => $request->input('data.object', null),
-            'screen' => $request->input('data.screen', null),
-        ];
-
-        if (empty($tokens)) {
-            return $this->badRequest('Tokens are required.');
-        }
-        if (empty($content['title']) || empty($content['body'])) {
-            return $this->badRequest('Title and body are required.');
-        }
-
         try {
+            // Validate request
+            $request->validate([
+                'title' => 'required|string',
+                'body' => 'required|string',
+                'image' => 'nullable|string',
+                'data' => 'nullable|array',
+                'group_uuid' => 'nullable|exists:notify_groups,uuid',
+                'user_uuids' => 'nullable|array',
+                'user_uuids.*' => 'exists:users,uuid',
+            ]);
 
+            // Fetch device tokens
+            $tokens = [];
+
+            if ($request->has('group_uuid')) {
+                // Fetch tokens for all users in the group
+                $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
+                $userIds = $group->users()->pluck('users.id');
+                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+                //dd($tokens);
+            } elseif ($request->has('user_uuids')) {
+                // Fetch tokens for custom users
+                $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
+                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+            }
+
+            if (empty($tokens)) {
+                return $this->badRequest('No device tokens found for the specified users or group.');
+            }
+
+            // Prepare notification content
+            $content = [
+                'title' => $request->input('title'),
+                'body' => $request->input('body'),
+                'image' => $request->input('image'),
+                'data' => $request->input('data', []), // Additional metadata
+            ];
+
+            // Send notifications
             $status = $this->HandelDataAndSendNotify($tokens, $content);
+
             DB::commit();
+
             return $status
                 ? $this->returnSuccessMessage('Notifications sent successfully!')
                 : $this->returnError('Failed to send notifications.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
-
     public function saveDeviceToken(Request $request)
     {
         DB::beginTransaction();
