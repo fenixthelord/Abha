@@ -7,20 +7,25 @@ use App\Models\Role\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Http\Traits\ResponseTrait;
+use function PHPUnit\Framework\isEmpty;
 
 class OwnerSeeder extends Seeder
 {
     use ResponseTrait;
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $owner = Role::where('name',"Master_Owner")->first();
-        $permission=Permission::where('is_admin',0)->get();
-        if(!$owner){
+        $owner = Role::where('name', "Master_Owner")->first();
+        $permission = Permission::where('is_admin', 0)->get();
+        if (!$owner) {
             $this->NotFound('Owner not found');
         }
-        $owner->syncPermissions($permission);
+        if (!$permission->isEmpty()) {
+
+            $owner->syncPermissions($permission);
+        }
     }
 }
