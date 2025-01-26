@@ -26,53 +26,43 @@ trait Firebase
 
             $title = $content['title'] ?? null;
             $body = $content['body'] ?? null;
-            $object = $content['object'] ?? null;
-            $type = $content['type'] ?? null;
-            $screen = $content['screen'] ?? null;
-
-
-
-
+            $image = $content['image'] ?? null;
+            $data = $content['data'] ?? [];
 
             foreach ($tokens as $token) {
+                $payload = [
+                    'message' => [
+                        'token' => $token,
+                        'notification' => [
+                            'title' => $title,
+                            'body' => $body,
+                            'image' => $image, // Add image support
+                        ],
+                        'data' => array_merge([
+                            'click_action' => $link,
+                        ], $data), // Include additional metadata
+                        'apns' => [
+                            'payload' => [
+                                'aps' => [
+                                    'sound' => "default",
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+
                 $response = $client->post('https://fcm.googleapis.com/v1/projects/smart-abha/messages:send', [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $this->getAccessToken(),
                         'Content-Type' => 'application/json',
                         'Accept' => 'application/json',
                     ],
-                    'json' => [
-                        'message' => [
-                            'token' => $token,
-                            'notification' => [
-                                'title' => $title,
-                                'body' => $body,
-                            ],
-                            'data' => [
-                                'click_action' => $link,
-                                'type' => $type,
-                                'object' => json_encode($object),
-                                'screen' => $screen,
-                                'additional_data' => json_encode($content),
-                            ],
-
-
-                            'apns' => [
-                                'payload' => [
-                                    'aps' => [
-                                        'sound' => "default",
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
+                    'json' => $payload,
                 ]);
 
-                // Check for success response
                 if ($response->getStatusCode() !== 200) {
                     throw new \Exception('Failed to send notification. FCM returned HTTP code: ' . $response->getStatusCode());
                 }
-
             }
 
             return true;

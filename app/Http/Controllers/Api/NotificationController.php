@@ -20,33 +20,64 @@ class NotificationController extends Controller
 
     public function sendNotification(Request $request)
     {
-
         DB::beginTransaction();
 
-        $tokens = $request->input('tokens', []);
-        $content = [
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-            'type' => $request->input('data.type', null),
-            'object' => $request->input('data.object', null),
-            'screen' => $request->input('data.screen', null),
-        ];
-
-        if (empty($tokens)) {
-            return $this->badRequest('Tokens are required.');
-        }
-        if (empty($content['title']) || empty($content['body'])) {
-            return $this->badRequest('Title and body are required.');
-        }
-
         try {
+            // Validate request
+            $request->validate([
+                'title' => 'required|string',
+                'body' => 'required|string',
+                'image' => 'nullable|string',
+                'data' => 'nullable|array',
+                'group_uuid' => 'nullable|exists:notify_groups,uuid',
+                'user_uuids' => 'nullable|array',
+                //'user_uuids.*' => 'exists:users,uuid',
+            ]);
 
+            // Fetch device tokens
+            $tokens = [];
+            $content = [
+                'title' => $request->input('title'),
+                'body' => $request->input('body'),
+                'image' => $request->input('image'),
+                'data' => $request->input('data', []), // Additional metadata
+            ];
+
+            if ($request->has('group_uuid')) {
+                // Fetch tokens for all users in the group
+                $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
+                $userIds = $group->users()->pluck('users.id');
+                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+            } elseif ($request->has('user_uuids')) {
+                if ($request->user_uuids[0] == '*') {
+                    $this->store($request);
+                    User::chunk(100, function ($users) use ($content) {
+                        foreach ($users as $user) {
+                            $tokens = $user->deviceTokens()->pluck('token');
+                            $status = $this->HandelDataAndSendNotify($tokens, $content);
+                        }
+                    });
+                    return $status
+                        ? $this->returnSuccessMessage('Notifications sent successfully!')
+                        : $this->returnError('Failed to send notifications.');
+                } else {
+                    $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
+                }
+
+                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+            }
+            $this->store($request);
+
+            if (empty($tokens)) {
+                return $this->badRequest('No device tokens found for the specified users or group.');
+            }
             $status = $this->HandelDataAndSendNotify($tokens, $content);
+
             DB::commit();
+
             return $status
                 ? $this->returnSuccessMessage('Notifications sent successfully!')
                 : $this->returnError('Failed to send notifications.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());
@@ -110,51 +141,42 @@ class NotificationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'body' => 'required|string',
             'image' => 'nullable|string',
             'url' => 'nullable|string',
             'schedule_at' => 'nullable|date',
-            'recipients' => 'required|array',
-            'recipients.*' => [
-                'string'
-
-                /* function ($attribute, $value, $fail) {
-                     if (!preg_match('/^(user|group):[a-f0-9-]{36}$/', $value)) {
-                         $fail('you have to specify a valid user or group.');
-                     }
-                 }*/
-            ],
         ]);
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
         $data = $validator->validated();
-        if (in_array('*', $data['recipients']) && count($data['recipients']) > 1) {
+        /*if (in_array('*', $data['recipients']) && count($data['recipients']) > 1) {
             return $this->badRequest('You cannot send notifications to one and more recipients.');
-        }
+        }*/
         $notification = Notification::create([
             'title' => $request['title'],
-            'description' => $request['description'],
+            'description' => $request['body'],
             'image' => $request['image'] ?? null,
             'url' => $request['url'] ?? null,
             'scheduled_at' => $request['scheduled_at'] ?? null,
             'sender_id' => $request->user()->id,
         ]);
-        if ($request->has('group')) {
-            if (NotifyGroup::whereuuid($request->group)) {
+        if ($request->has('group_uuid')) {
+            if (NotifyGroup::whereuuid($request->group_uuid)) {
                 $notification->recipients()->create([
                     'recipient_type' => 'group',
-                    'recipient_uuid' => $request->group,
+                    'recipient_uuid' => $request->group_uuid,
                 ]);
             }
         }
-        if ($request['token']) {
+        if ($request['user_uuids']) {
+            $recipient = $request['user_uuids'];
             if ($recipient[0] == '*') {
                 $notification->for_all = true;
                 $notification->save();
             } else {
-                foreach ($request['recipients'] as $recipient) {
+                foreach ($request['user_uuids'] as $recipient) {
                     if (User::whereuuid($recipient)) {
                         $notification->recipients()->create([
                             'recipient_type' => 'user',

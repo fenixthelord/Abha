@@ -27,9 +27,6 @@ use App\Http\Controllers\Api\NotifyGroupController;
 // Change Lang
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 
-// Send Notifications
-Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
-Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
 
 
 // Login Throw Social (***** For Customers Only ******) Don't Use it
@@ -122,8 +119,25 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
+
+
+// *************** Notification *******************
+
+Route::prefix('notification')->group(function () {
+
+    Route::post('/send', [NotificationController::class, 'sendNotification']);
+});
+// Send Notifications
+//Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
+Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
+
+
+
 Route::prefix('notify-groups')->group(function () {
     Route::get('/', [NotifyGroupController::class, 'allGroup']);
+
+    Route::get('/{groupUuid}', [NotifyGroupController::class, 'groupDetail']);
+    Route::post('/{groupUuid}', [NotifyGroupController::class, 'editGroup']);
 
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 
