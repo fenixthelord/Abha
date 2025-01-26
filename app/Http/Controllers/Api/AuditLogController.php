@@ -16,7 +16,7 @@ class AuditLogController extends Controller
 
     public function index(Request $request)
     {
-        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
+        if(!auth()->user()?->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
             return $this->Forbidden("You are not authorized to do this action");
         }
         $request->validate([
@@ -72,9 +72,13 @@ class AuditLogController extends Controller
             $log->uuid = $log->fullName = null;
             if($log->user_type){
                 $user = new $log->user_type;
-                $details = $user->find($log->user_id)->first();
-                $log->uuid = $details->uuid;
-                $log->fullName = $details->first_name." ".$details->last_name;
+                $details = $user->find($log->user_id);
+
+                // Check if user details were found
+                if ($details) {
+                    $log->uuid = $details->uuid;
+                    $log->fullName = $details->first_name . " " . $details->last_name;
+                }
             }
 
             return $log;
