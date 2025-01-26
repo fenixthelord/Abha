@@ -62,7 +62,8 @@ class AuditLogController extends Controller
         $query->orderBy('created_at', 'desc');
 
         // Paginate results
-        $auditLogs = $query->paginate(25);
+        $perPage = isset($request->per_page) ? $request->per_page : 10;
+        $auditLogs = $query->paginate($perPage);
 
         // Format dates
         $auditLogs->getCollection()->transform(function ($log) {
