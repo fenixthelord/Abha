@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notify_groups', function (Blueprint $table) {
+        Schema::create('notification_details', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Group/channel name
-            $table->string('description')->nullable();
-            $table->string('model')->default('Users');
-            $table->uuid()->unique();
+            $table->uuid();
+            $table->foreignId('notification_id')->constrained('notifications');
+            $table->enum('recipient_type', ['user', 'group']);
+            $table->string('recipient_uuid');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notify_groups');
+        Schema::dropIfExists('notification_details');
     }
 };

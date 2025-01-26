@@ -97,9 +97,9 @@ class User extends Authenticatable  implements Auditable
     }
 
     // Relationship with users
-    public function users()
+    public function notifyGroups()
     {
-        return $this->belongsToMany(User::class, 'notify_group_user');
+        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_uuid', 'notify_group_uuid', 'uuid', 'uuid');
     }
 
 }
