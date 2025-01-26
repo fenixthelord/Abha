@@ -27,6 +27,11 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('user.show')) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
+
         DB::beginTransaction();
         try {
             $pageNumber = request()->input('page', 1);
@@ -114,9 +119,10 @@ class UserController extends Controller
     }
 
     public function updateAdmin(Request $request)
-    {     if(!auth()->user()->hasRole("Master_Admin")&&!auth()->user()->hasRole("Master")){
-        return $this->Forbidden("You are not authorized to do this action");
-    }
+    {      $user = auth()->user();
+        if (!$user->hasPermissionTo('user.update')) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -190,10 +196,11 @@ class UserController extends Controller
     }
 
     public function active(Request $request)
-    {
-        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
-            return $this->Forbidden("You are not authorized to do this action");
+    {        $user = auth()->user();
+        if (!$user->hasPermissionTo('user.restore')) {
+            return $this->Forbidden("you don't have permission to access this page");
         }
+
 
         try {
             $validator = Validator::make($request->all(), [
@@ -227,9 +234,11 @@ class UserController extends Controller
     }
 
     public function deleteUser(Request $request)
-    {      if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
-        return $this->Forbidden("You are not authorized to do this action");
-    }
+    {         $user = auth()->user();
+        if (!$user->hasPermissionTo('user.delete')) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
+
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -332,7 +341,12 @@ class UserController extends Controller
 
     public function showDeleteUser()
     {
+
         try {
+            $user = auth()->user();
+            if (!$user->hasPermissionTo('user.delete')) {
+                return $this->Forbidden("you don't have permission to access this page");
+            }
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             if ($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)) {
@@ -356,6 +370,10 @@ class UserController extends Controller
 
     public function restoreUser(Request $request)
     {
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('user.restore')) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
