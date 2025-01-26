@@ -20,7 +20,7 @@ class NotificationController extends Controller
 
     public function sendNotification(Request $request)
     {
- //       DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             // Validate request
@@ -36,26 +36,31 @@ class NotificationController extends Controller
 
             // Fetch device tokens
             $tokens = [];
+            $content = [
+                'title' => $request->input('title'),
+                'body' => $request->input('body'),
+                'image' => $request->input('image'),
+                'data' => $request->input('data', []), // Additional metadata
+            ];
 
             if ($request->has('group_uuid')) {
                 // Fetch tokens for all users in the group
                 $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
                 $userIds = $group->users()->pluck('users.id');
                 $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
-                //dd($tokens);
             } elseif ($request->has('user_uuids')) {
-                // Fetch tokens for custom users
-                if($request->user_uuids[0] == '*'){
-                    // all users
-                    User::chunk(100, function ($users) {
+                if ($request->user_uuids[0] == '*') {
+                    $this->store($request);
+                    User::chunk(100, function ($users) use ($content) {
                         foreach ($users as $user) {
-                            // قم بإجراء عمليات على كل مستخدم (مثال: تحديث حقل)
                             $tokens = $user->deviceTokens()->pluck('token');
                             $status = $this->HandelDataAndSendNotify($tokens, $content);
                         }
                     });
-                    dd($tokens);
-                }else{
+                    return $status
+                        ? $this->returnSuccessMessage('Notifications sent successfully!')
+                        : $this->returnError('Failed to send notifications.');
+                } else {
                     $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
                 }
 
@@ -66,28 +71,19 @@ class NotificationController extends Controller
             if (empty($tokens)) {
                 return $this->badRequest('No device tokens found for the specified users or group.');
             }
-
-            // Prepare notification content
-            $content = [
-                'title' => $request->input('title'),
-                'body' => $request->input('body'),
-                'image' => $request->input('image'),
-                'data' => $request->input('data', []), // Additional metadata
-            ];
-
-            // Send notifications
             $status = $this->HandelDataAndSendNotify($tokens, $content);
 
-        //    DB::commit();
+            DB::commit();
 
             return $status
                 ? $this->returnSuccessMessage('Notifications sent successfully!')
                 : $this->returnError('Failed to send notifications.');
         } catch (\Exception $e) {
- //           DB::rollBack();
+            DB::rollBack();
             return $this->returnError($e->getMessage());
         }
     }
+
     public function saveDeviceToken(Request $request)
     {
         DB::beginTransaction();

@@ -136,6 +136,9 @@ Route::post('/save-device-token', [NotificationController::class, 'saveDeviceTok
 Route::prefix('notify-groups')->group(function () {
     Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
+    Route::get('/{groupUuid}', [NotifyGroupController::class, 'groupDetail']);
+    Route::post('/{groupUuid}', [NotifyGroupController::class, 'editGroup']);
+
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 
     Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);

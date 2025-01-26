@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\UserResource;
 use App\Models\DeviceToken;
 use App\Models\NotifyGroup;
 use Illuminate\Http\Request;
@@ -131,6 +132,44 @@ class NotifyGroupController extends Controller
             return $this->returnData('groups', GroupResource::collection($notifyGroups));
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
+        }
+    }
+    public function groupDetail($groupUuid)
+    {
+        try {
+            if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
+                $data['group'] = GroupResource::make($group);
+                $data['members'] = UserResource::collection($group->users);
+                return $this->returnData('group', $data);
+            }else{
+                return $this->badRequest('Group not found');
+            }
+        }catch (Exception $e) {
+            return $this->badRequest($e->getMessage());
+        }
+    }
+    public function editGroup(Request $request, $groupUuid)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'name' => 'nullable|string|unique:notify_groups,name',
+                'description' => 'nullable|string',
+                'model' => 'nullable|string',
+            ]);
+            if($group = NotifyGroup::whereuuid($groupUuid)->first()){
+                $group->name = $request->name ?? $group->name;
+                $group->description = $request->description ?? $group->description;
+                $group->model = $request->model ?? $group->model;
+                $group->save();
+            DB::commit();
+            return $this->returnData('group', GroupResource::make($group));
+            }else{
+                return $this->badRequest('Group not found');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->badRequest($e->getMessage());
         }
     }
 }
