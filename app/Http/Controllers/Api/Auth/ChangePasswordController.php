@@ -69,8 +69,8 @@ class ChangePasswordController extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($user = User::where('email', $request->email)
-                ->where('verify_code', $request->code)
-                ->where('otp_expires_at', '>', now())
+                /*->where('verify_code', $request->code)
+                ->where('otp_expires_at', '>', now())*/
                 ->first()
             ) {
                 $user->update([
