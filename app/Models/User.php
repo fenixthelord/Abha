@@ -106,7 +106,7 @@ class User extends Authenticatable  implements Auditable
     // Relationship with device tokens
     public function deviceTokens()
     {
-        return $this->hasMany(DeviceToken::class, 'user_uuid', 'uuid');
+        return $this->hasMany(DeviceToken::class);
     }
 
 }
