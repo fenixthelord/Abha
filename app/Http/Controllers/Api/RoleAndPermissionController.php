@@ -68,6 +68,13 @@ class RoleAndPermissionController extends Controller
 
 
             if ($request->has('permission') && !empty($request->permission)) {
+                foreach($request->permission as $perm){
+
+                    if($perm->is_admin==1){
+                        if($request->roleName="Master")
+                        $this->Forbidden("this is a Master permission you cant assign it to ");
+                    }
+                }
                 $role->syncPermissions($request->permission);
             }
 
