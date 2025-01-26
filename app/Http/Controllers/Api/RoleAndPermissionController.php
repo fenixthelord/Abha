@@ -21,7 +21,8 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         // Apply middleware to all actions in this controller
-          $this->middleware('super-admin')->only(['store']);
+
+
     }
 
     public function index()
@@ -38,9 +39,14 @@ class RoleAndPermissionController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('role.create')) {
+            return $this->Forbidden("You don't have permission to create role");
+        }
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
+
             $validator = Validator::make($request->all(), [
                 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displayName" => "required|string|unique:roles,displaying",
@@ -52,10 +58,11 @@ class RoleAndPermissionController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+
             if ($request->displayName == "Master" || $request->name == "Master") {
                 return $this->Forbidden("you are not allowed to create Master role");
             }
-            $user = auth()->user();
+
             if ($user->HasRole('Master')) {
                 $request->roleName = "Master_" . $request->roleName;
             }
@@ -68,12 +75,12 @@ class RoleAndPermissionController extends Controller
 
 
             if ($request->has('permission') && !empty($request->permission)) {
-                foreach($request->permission as $perm){
-                 $permission = Permission::where("name",$perm)->first();
-                    if($permission->is_admin == 1){
+                foreach ($request->permission as $perm) {
+                    $permission = Permission::where("name", $perm)->first();
+                    if ($permission->is_admin == 1) {
 
 
-                      return  $this->Forbidden("this is a Master permission you can not assign it to this role");
+                        return $this->Forbidden("this is a Master permission you can not assign it to this role");
                     }
                 }
                 $role->syncPermissions($request->permission);
@@ -134,7 +141,10 @@ class RoleAndPermissionController extends Controller
         }
     }
 
-
+    public function isMasterRole($roleName)
+    {
+        return str_starts_with($roleName, 'Master_');
+    }
 
     public function assignRole(Request $request)
 
@@ -166,9 +176,10 @@ class RoleAndPermissionController extends Controller
     }
 
     public function assignPermission(Request $request)
-    {      if(!auth()->user()->hasRole("Master_Admin")){
-        return $this->Forbidden("You are not authorized to do this action");
-    }
+    {
+        if (!auth()->user()->hasRole("Master_Admin")) {
+            return $this->Forbidden("You are not authorized to do this action");
+        }
         $validatedData = Validator::make($request->all(), [
             'user_uuid' => 'required|exists:users,uuid',
             'permissions' => 'nullable'
@@ -415,8 +426,8 @@ class RoleAndPermissionController extends Controller
 
             DB::beginTransaction();
 
-            // Retrieve the role
-            if($this->isMasterRole($request->roleName)) {
+
+            if ($this->isMasterRole($request->roleName)) {
                 return $this->Forbidden("you are not allowed to update this role");
             }
             $role = Role::findByName($request->roleName);
@@ -503,9 +514,5 @@ class RoleAndPermissionController extends Controller
             DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
-    }
-    public function isMasterRole($roleName)
-    {
-        return str_starts_with($roleName, 'Master_');
     }
 }
