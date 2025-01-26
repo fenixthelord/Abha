@@ -114,7 +114,7 @@ class UserController extends Controller
     }
 
     public function updateAdmin(Request $request)
-    {     if(!auth()->user()->hasRole("Master_Admin")|!auth()->user()->hasRole("Master")){
+    {     if(!auth()->user()->hasRole("Master_Admin")&&!auth()->user()->hasRole("Master")){
         return $this->Forbidden("You are not authorized to do this action");
     }
         DB::beginTransaction();
@@ -125,6 +125,9 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
+                if($user->hasRole("Master")){
+                    return $this->Forbidden('This user is Master account and can not be updated');
+                }
                 $validator = Validator::make($request->all(), [
                     'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                     'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -204,6 +207,9 @@ class UserController extends Controller
                 return $this->badRequest('This user is deleted');
             } else {
                 if ($user = User::whereuuid($request->uuid)->first()) {
+                    if($user->hasRole("Master")){
+                        return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
+                    }
                     $user->active = $request->active;
                     $user->save();
                     if ($user->active == 1) {
@@ -233,6 +239,12 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
+                if(!$user){
+                    return $this->NotFound('User not found');
+                }
+                if($user->hasRole("Master")){
+                    return $this->Forbidden('This user is Master and can not be deleted');
+                }
                 $user->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('User deleted successfully');
