@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GroupResource extends JsonResource
+class GroupUser extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +14,8 @@ class GroupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
-        return ['uuid' => $this->uuid, 'name' => $this->name, 'description' => $this->description,
-            'user' => GroupUser::collection($this->users()->get())
-
-            ];
+        return [
+            'uuid' => $this->uuid,
+            'name' => $this->first_name . ' ' . $this->last_name];
     }
 }
