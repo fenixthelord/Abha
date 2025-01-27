@@ -96,6 +96,9 @@ class User extends Authenticatable  implements Auditable
             $model->uuid = Str::uuid();
         });
     }
+    protected $auditExclude = [
+        'password',
+    ];
 
     // Relationship with notify groups
     public function groups()
