@@ -16,8 +16,9 @@ class AuditLogController extends Controller
 
     public function index(Request $request)
     {
-        if(!auth()->user()?->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
-            return $this->Forbidden("You are not authorized to do this action");
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('audit.show')) {
+            return $this->Forbidden("you don't have permission to access this page");
         }
         $request->validate([
             'model_type' => 'nullable|string',

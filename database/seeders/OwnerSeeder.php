@@ -19,13 +19,13 @@ class OwnerSeeder extends Seeder
     public function run(): void
     {
         $owner = Role::where('name', "Master_Owner")->first();
+        if ($owner) {
+
         $permission = Permission::where('is_admin', 0)->get();
-        if (!$owner) {
-            $this->NotFound('Owner not found');
-        }
+
         if (!$permission->isEmpty()) {
 
             $owner->syncPermissions($permission);
-        }
+        }}
     }
 }
