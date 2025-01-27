@@ -6,6 +6,7 @@ use App\Models\Role\Permission;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
+use App\Models\Role\Role;
 
 class PermissionSeed extends Seeder
 {
@@ -26,6 +27,7 @@ class PermissionSeed extends Seeder
         }
 
         $this->command->info('Permissions seeded successfully!');
+        $this->MasterPermission();
     }
 
     /**
@@ -76,5 +78,17 @@ class PermissionSeed extends Seeder
                 'is_admin' => 0,
             ]);
         }
+
+    }
+    protected function MasterPermission()
+    {
+        $master=Role::where('name','Master')->first();
+        if($master){
+            $permissions=Permission::all();
+            if (!$permissions->isEmpty()){
+
+            $master->syncPermissions($permissions);
+        }}
+
     }
 }
