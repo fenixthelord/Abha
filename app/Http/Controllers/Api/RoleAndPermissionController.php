@@ -42,7 +42,7 @@ class RoleAndPermissionController extends Controller
 
     public function store(Request $request)
     {
-        $user = auth()->user();
+       $user = auth()->user();
         if (!$user->hasPermissionTo('role.create')) {
             return $this->Forbidden("You don't have permission to create role");
         }
@@ -229,6 +229,10 @@ class RoleAndPermissionController extends Controller
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
+        $user=auth()->user();
+        if(!$user->hasPermissionTo("role.delete")){
+            return $this->Forbidden("you are not allowed to remove role from the user");
+        }
         $validator = Validator::make($request->all(), [
             'user_uuid' => 'required|exists:users,uuid',
             'roleName' => 'required|string'
@@ -267,6 +271,10 @@ class RoleAndPermissionController extends Controller
 
     public function RemovePermissionsFromRole(Request $request)
     {
+        $user=auth()->user();
+        if(!$user->hasPermissionTo("permission.delete")){
+            return $this->Forbidden("you are not allowed to do this action");
+        }
         $validator = Validator::make($request->all(), [
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'exists:permissions,name',
@@ -305,6 +313,10 @@ class RoleAndPermissionController extends Controller
 
     public function RemoveDirectPermission(Request $request)
     {
+        $user=auth()->user();
+        if(!$user->hasPermissionTo("permission.delete")){
+            return $this->Forbidden("you are not allowed to do this action");
+        }
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',

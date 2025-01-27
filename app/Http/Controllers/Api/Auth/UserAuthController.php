@@ -24,9 +24,10 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
-        if(!auth()->user()->hasRole("Master_Admin") && !auth()->user()->hasRole("Master")){
-            return $this->Forbidden("You are not authorized to do this action");
-        }
+       $user=auth()->user();
+       if(!$user->hasPermissionTo("user.create")){
+           return $this->Forbidden("you don't have permission");
+       }
         DB::beginTransaction();
         try {
 
