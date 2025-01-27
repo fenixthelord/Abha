@@ -27,10 +27,6 @@ use App\Http\Controllers\Api\NotifyGroupController;
 // Change Lang
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 
-// Send Notifications
-Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
-Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
-
 
 // Login Throw Social (***** For Customers Only ******) Don't Use it
 Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
@@ -71,19 +67,19 @@ Route::prefix('/user')->group(function () {
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
         });
-                Route::middleware('activeVerify')->group(function () {
-                    Route::get('/all', [UserController::class, 'index']);
-                    Route::post('/me', [UserController::class, 'user_profile']);
-                    Route::get('/me', [UserController::class, 'user_profile']);
-                    Route::post('send', [UserController::class, 'sendOTP']);
-                    Route::post('update-profile', [UserController::class, 'update']);
-                    Route::post('update', [UserController::class, 'updateAdmin']);
-                    Route::post('upload', [UserController::class, 'addImage']);
-                    Route::post('delete-user', [UserController::class, 'deleteUser']);
-                    Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
-                    Route::post('restore_user', [UserController::class, 'restoreUser']);
-                    Route::post('search', [UserController::class, 'searchUser']);
-                });
+        Route::middleware('activeVerify')->group(function () {
+            Route::get('/all', [UserController::class, 'index']);
+            Route::post('/me', [UserController::class, 'user_profile']);
+            Route::get('/me', [UserController::class, 'user_profile']);
+            Route::post('send', [UserController::class, 'sendOTP']);
+            Route::post('update-profile', [UserController::class, 'update']);
+            Route::post('update', [UserController::class, 'updateAdmin']);
+            Route::post('upload', [UserController::class, 'addImage']);
+            Route::post('delete-user', [UserController::class, 'deleteUser']);
+            Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
+            Route::post('restore_user', [UserController::class, 'restoreUser']);
+            Route::post('search', [UserController::class, 'searchUser']);
+        });
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
@@ -122,10 +118,26 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
+
+// *************** Notification *******************
+
+Route::prefix('notification')->group(function () {
+
+    Route::post('/send', [NotificationController::class, 'sendNotification']);
+});
+// Send Notifications
+//Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
+Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
+
+
 Route::prefix('notify-groups')->group(function () {
     Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
+
+    Route::get('/{groupUuid}/show', [NotifyGroupController::class, 'groupDetail']);
+
+    Route::post('/{groupUuid}/edit', [NotifyGroupController::class, 'editGroup']);
 
     Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
 

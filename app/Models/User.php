@@ -55,6 +55,7 @@ class User extends Authenticatable  implements Auditable
     protected $hidden = [
         'password',
         'remember_token',
+        'OTP',
     ];
 
     /**
@@ -95,11 +96,20 @@ class User extends Authenticatable  implements Auditable
             $model->uuid = Str::uuid();
         });
     }
+    protected $auditExclude = [
+        'password',
+    ];
 
-    // Relationship with users
-    public function notifyGroups()
+    // Relationship with notify groups
+    public function groups()
     {
         return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_uuid', 'notify_group_uuid', 'uuid', 'uuid');
+    }
+
+    // Relationship with device tokens
+    public function deviceTokens()
+    {
+        return $this->hasMany(DeviceToken::class);
     }
 
 }
