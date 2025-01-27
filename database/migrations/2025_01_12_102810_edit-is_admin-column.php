@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             //
-            $table->enum('is_admin', ['true', 'false'])->default('false')->after('group')->change();
+            //$table->enum('is_admin', ['true', 'false'])->default('false')->after('group')->change();
         });
     }
 
