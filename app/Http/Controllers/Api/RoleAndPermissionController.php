@@ -17,12 +17,18 @@ use Illuminate\Support\Facades\Validator;
 class RoleAndPermissionController extends Controller
 {
     use ResponseTrait;
+    protected $model;
 
     public function __construct()
     {
+
         // Apply middleware to all actions in this controller
-          $this->middleware('super-admin')->only(['store']);
-    }
+      /*  $this->middleware('super-admin')->only(['store']);
+        $this->middleware('permission:Companies.Show', ['only' => ['index', 'show']]);
+        $this->middleware('permission:Companies.Add', ['only' => ['create', 'store']]);
+        $this->middleware('permission:Companies.Update', ['only' => ['update', 'edit']]);
+        $this->middleware('permission:Companies.Delete', ['only' => ['destroy']]);
+   */ }
 
     public function index()
     {
