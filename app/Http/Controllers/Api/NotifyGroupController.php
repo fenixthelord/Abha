@@ -95,6 +95,9 @@ class NotifyGroupController extends Controller
         if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
 
             $userIds = $notifyGroup->users()->pluck('users.id');
+            if(!$userIds){
+                return $this->badRequest('Group does not  have user');
+            }
             $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
 
             if (empty($tokens)) {
