@@ -27,7 +27,7 @@ class SaveCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => 'required|uuid',
+            'department_uuid' => 'required|uuid|exists:departments,uuid',
             'department_name' => 'required|string',
             'chields' => 'nullable|array',
         ];

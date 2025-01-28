@@ -17,12 +17,8 @@ class CategoryResource extends JsonResource
         return [
             'uuid' => $this->uuid,
             'name' => $this->name,
-            'chields' => $this->when($this->showChildren, CategoryResource::collection($this->children)),
+            "parent_name" => $this->department->name ?? $this->parent?->name,
+            // 'chields' => CategoryResource::collection($this->children),
         ];
-    }
-    public function hideChildren()
-    {
-        $this->showChildren = false;
-        return $this;
     }
 }

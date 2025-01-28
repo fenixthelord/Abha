@@ -25,15 +25,16 @@ class CategoryController extends Controller
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
-            $categoriesQuery = Category::query()
-                ->where('department_id', '!=', null);
+            $categoriesQuery = Category::query();
+            //     ->where('department_id', '!=', null);
             if ($request->has('department_uuid') &&  !$request->has('parent_category_uuid')) {
-                $categoriesQuery->whereHas('department', function ($q) use ($request) {
-                    $q->where("uuid", $request->department_uuid);
-                });
+                $department_id = Department::where('uuid', $request->department_uuid)->pluck('id')->firstOrFail();
+                $categoriesQuery->where("department_id", $department_id);
             } elseif ($request->has('parent_category_uuid')) {
-                $categoriesQuery->where("uuid", $request->parent_category_uuid);
+                $category_id = Category::where('uuid', $request->parent_category_uuid)->pluck('id')->firstOrFail();
+                $categoriesQuery->where("parent_id", $category_id);
             }
+
             $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
 
             if ($request->page > $categories->lastPage()) {
@@ -41,7 +42,6 @@ class CategoryController extends Controller
             }
 
             $data = CategoryResource::collection($categories);
-
             return $this->PaginateData(
                 data: $data,
                 object: $categories,
@@ -132,31 +132,30 @@ class CategoryController extends Controller
     }
 
     public function filter(FilterRequest $request)
-{
-    try {
-        $query = Department::query();
+    {
+        try {
+            $query = Department::query();
 
-        if ($request->has("department_uuid")) {
-            $query->where("uuid", $request->department_uuid);
-        }
+            if ($request->has("department_uuid")) {
+                $query->where("uuid", $request->department_uuid);
+            }
 
-        $departments = $query->get();
+            $departments = $query->get();
 
-        if ($departments->isEmpty()) {
-            return $this->notFound('No departments found.');
-        }
+            if ($departments->isEmpty()) {
+                return $this->notFound('No departments found.');
+            }
 
-        $data['department'] = DepartmentResource::collection($departments);
+            $data['department'] = DepartmentResource::collection($departments);
 
-        if ($request->has('department_uuid')) {
-            $categories = $departments->load('categories')->pluck('categories')->flatten();
-            $data["categories"] = CategoryResource::collection($categories)->each->hideChildren();
-        }
+            if ($request->has('department_uuid')) {
+                $categories = $departments->load('categories')->pluck('categories')->flatten();
+                $data["categories"] = CategoryResource::collection($categories)->each->hideChildren();
+            }
 
-        return $this->returnData('data' , $data);
+            return $this->returnData('data', $data);
         } catch (\Throwable $e) {
-        return $this->badRequest($e->getMessage());
+            return $this->badRequest($e->getMessage());
+        }
     }
-}
-
 }
