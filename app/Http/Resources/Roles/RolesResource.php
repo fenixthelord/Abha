@@ -14,8 +14,11 @@ class RolesResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray($request): array
-    {
+    { if ($this->name == 'Master') {
+        return [];
+    }
         return [
+
             'id' => $this->id,
             'name' => $this->name,
             'displaying'=>$this->displaying,
