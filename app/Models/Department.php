@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Department extends Model
+class Department extends Model implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
+    use HasFactory, SoftDeletes, HasTranslations;
+    use \OwenIt\Auditing\Auditable;
+
 
     private $translatable = ['name'];
     protected $fillable = [
