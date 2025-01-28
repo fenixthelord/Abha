@@ -79,7 +79,7 @@ class CategoryController extends Controller
                     $q->where("uuid", $request->category_uuid);
                 });
 
-            $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get()  ;
+            $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get();
             $data['department'] = DepartmentResource::collection($departments);
             $data['categories'] =  CategoryResource::collection($categories);
 
@@ -109,9 +109,8 @@ class CategoryController extends Controller
     public function show(ShowCategoriesRequest $request, $department_uuid)
     {
         try {
-
             $department = Department::where('uuid', $department_uuid)->firstOrFail();
-            $data["department"] = DepartmentResource::make($department->load("allChildren"));
+            $data["department"] = DepartmentResource::make($department->load("categories"));
 
             return $this->returnData("data", $data);
         } catch (\Exception $e) {

@@ -17,12 +17,12 @@ class DepartmentResource extends JsonResource
     return [
       'uuid' => $this->uuid,
       'name' => $this->name,
-      'chields' => $this->whenLoaded('allChildren', function () {
-        return CategoryResource::collection($this->children->load('children'));
-      }),
       'chields' => $this->whenLoaded('categories', function () {
-        return CategoryResource::collection($this->children);
+        return CategoryResource::collection($this->categories()->where("parent_id", null)->get()->load("children"));
       }),
+      // 'categories' => $this->whenLoaded('categories', function () {
+      //   return CategoryResource::collection($this->children);
+      // }),
 
     ];
   }

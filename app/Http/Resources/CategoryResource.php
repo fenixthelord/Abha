@@ -14,6 +14,8 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // dd($this->children);
+
         return [
             'uuid' => $this->uuid,
             'name' => $this->name,
