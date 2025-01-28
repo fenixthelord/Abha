@@ -25,22 +25,19 @@ class CategoryController extends Controller
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
-            $categoriesQuery = Category::query();
-            //     ->where('department_id', '!=', null);
-            if ($request->has('department_uuid') &&  !$request->has('parent_category_uuid')) {
-                $department_id = Department::where('uuid', $request->department_uuid)->pluck('id')->firstOrFail();
-                $categoriesQuery->where("department_id", $department_id);
-            } elseif ($request->has('parent_category_uuid')) {
-                $category_id = Category::where('uuid', $request->parent_category_uuid)->pluck('id')->firstOrFail();
-                $categoriesQuery->where("parent_id", $category_id);
-            }
-
+            $categoriesQuery = Category::query()
+                ->when($request->has('department_uuid') &&  !$request->has('parent_category_uuid'), function ($q) use ($request) {
+                    $department_id = Department::where('uuid', $request->department_uuid)->pluck('id')->firstOrFail();
+                    $q->where("department_id", $department_id);
+                })
+                ->when($request->has('parent_category_uuid'), function ($q) use ($request) {
+                    $category_id = Category::where('uuid', $request->parent_category_uuid)->pluck('id')->firstOrFail();
+                    $q->where("parent_id", $category_id);
+                });
             $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
-
             if ($request->page > $categories->lastPage()) {
                 return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
             }
-
             $data = CategoryResource::collection($categories);
             return $this->PaginateData(
                 data: $data,
