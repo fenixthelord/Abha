@@ -161,6 +161,7 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
 
 Route::group(["prefix" => "/categories"], function () {
     Route::get("/", [CategoryController::class, "index"]);
+    Route::delete("/delete", [CategoryController::class, "delete"]);
     Route::get("/filter", [CategoryController::class, "filter"]);
     Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DeleteCategoryRequest;
+use App\Http\Requests\DeleteCatigoryRequest;
 use App\Http\Requests\FilterRequest;
 use App\Http\Requests\IndexCategoryRequest;
 use App\Http\Requests\SaveCategoriesRequest;
@@ -14,6 +16,7 @@ use App\Models\Category;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -54,6 +57,47 @@ class CategoryController extends Controller
                 key: "categories"
             );
         } catch (\Throwable $e) {
+            return $this->badRequest($e->getMessage());
+        }
+    }
+
+    public function filter(FilterRequest $request)
+    {
+        try {
+            $query = Department::query()
+                ->when($request->has("department_uuid"), function ($q) use ($request) {
+                    $q->where("uuid", $request->department_uuid);
+                });
+
+            $departments = $query->get();
+
+            if ($departments->isEmpty()) {
+                return $this->notFound('No departments found.');
+            }
+
+            $data['department'] = DepartmentResource::collection($departments);
+
+            if ($request->has('department_uuid')) {
+                $categories = Category::where('department_id', $departments->pluck("id")->first())->get();
+                $data['categories'] = CategoryResource::collection($categories);
+            }
+
+            return $this->returnData('data', $data);
+        } catch (\Throwable $e) {
+            return $this->badRequest($e->getMessage());
+        }
+    }
+
+    public function delete(DeleteCategoryRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $category = Category::where('uuid', $request->uuid)->firstOrFail();
+            $category->deleteWithChildren();
+            DB::commit();
+            return $this->returnSuccessMessage("Category and all related sup-categories deleted successfully");
+        } catch (\Exception $e) {
+            DB::rollBack();
             return $this->badRequest($e->getMessage());
         }
     }
@@ -134,33 +178,6 @@ class CategoryController extends Controller
 
         foreach ($obsoleteCategories as $category) {
             $category->deleteWithChildren();
-        }
-    }
-
-    public function filter(FilterRequest $request)
-    {
-        try {
-            $query = Department::query()
-                ->when($request->has("department_uuid"), function ($q) use ($request) {
-                    $q->where("uuid", $request->department_uuid);
-                });
-
-            $departments = $query->get();
-
-            if ($departments->isEmpty()) {
-                return $this->notFound('No departments found.');
-            }
-
-            $data['department'] = DepartmentResource::collection($departments);
-
-            if ($request->has('department_uuid')) {
-                $categories = Category::where('department_id', $departments->pluck("id")->first())->get();
-                $data['categories'] = CategoryResource::collection($categories);
-            }
-
-            return $this->returnData('data', $data);
-        } catch (\Throwable $e) {
-            return $this->badRequest($e->getMessage());
         }
     }
 }
