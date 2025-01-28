@@ -47,7 +47,7 @@ class CategoryController extends Controller
                 return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
             }
             $data = CategoryResource::collection($categories);
-        
+
             return $this->PaginateData(
                 data: $data,
                 object: $categories,
@@ -140,11 +140,10 @@ class CategoryController extends Controller
     public function filter(FilterRequest $request)
     {
         try {
-            $query = Department::query();
-
-            if ($request->has("department_uuid")) {
-                $query->where("uuid", $request->department_uuid);
-            }
+            $query = Department::query()
+                ->when($request->has("department_uuid"), function ($q) use ($request) {
+                    $q->where("uuid", $request->department_uuid);
+                });
 
             $departments = $query->get();
 
@@ -155,8 +154,8 @@ class CategoryController extends Controller
             $data['department'] = DepartmentResource::collection($departments);
 
             if ($request->has('department_uuid')) {
-                $categories = $departments->load('categories')->pluck('categories')->flatten();
-                $data["categories"] = CategoryResource::collection($categories)->each->hideChildren();
+                $categories = Category::where('department_id', $departments->pluck("id")->first())->get();
+                $data['categories'] = CategoryResource::collection($categories);
             }
 
             return $this->returnData('data', $data);

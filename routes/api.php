@@ -161,8 +161,8 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
 
 Route::group(["prefix" => "/categories"], function () {
     Route::get("/", [CategoryController::class, "index"]);
-    Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
     Route::get("/filter", [CategoryController::class, "filter"]);
+    Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
 
     /**
      * This Route is Create , Update and Delete Categories
