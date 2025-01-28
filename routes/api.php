@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Auth\UserAuthController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DepartmentsControllers;
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
@@ -28,6 +30,7 @@ use App\Http\Controllers\Api\NotifyGroupController;
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 
 
+
 // Login Throw Social (***** For Customers Only ******) Don't Use it
 Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
     ->name('auth.social-login');
@@ -47,8 +50,6 @@ Route::prefix('/auth')->group(function () {
         Route::post('active', [UserController::class, 'active']);
         Route::post('logout', [UserAuthController::class, 'logout']);
     });
-
-
 });
 
 
@@ -87,7 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('get-verify', [UserController::class, 'sendOtp']);
         Route::post('cheek-verify', [UserController::class, 'verifyOtp']);
     });
-
 });
 
 // Role And Permission
@@ -119,6 +119,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
 
+
 // *************** Notification *******************
 
 Route::prefix('notification')->group(function () {
@@ -130,14 +131,14 @@ Route::prefix('notification')->group(function () {
 Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
 
 
+
 Route::prefix('notify-groups')->group(function () {
     Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
+    Route::get('/{groupUuid}', [NotifyGroupController::class, 'groupDetail']);
+    Route::post('/{groupUuid}', [NotifyGroupController::class, 'editGroup']);
+
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
-
-    Route::get('/{groupUuid}/show', [NotifyGroupController::class, 'groupDetail']);
-
-    Route::post('/{groupUuid}/edit', [NotifyGroupController::class, 'editGroup']);
 
     Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
 
@@ -151,3 +152,28 @@ Route::post('/notifications', [NotificationController::class, 'store'])
 
 Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications'])
     ->middleware('auth:sanctum');
+
+
+/**
+ * All Departments and Categories
+ * 
+ */
+
+Route::group(["prefix" => "/categories"], function () {
+    Route::get("/", [CategoryController::class, "index"]);
+    Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
+    Route::get("/filter", [CategoryController::class, "filter"]);
+
+    /**
+     * This Route is Create , Update and Delete Categories
+     * @param department_uuid
+     */
+    Route::post("/save", [CategoryController::class, "save"]);
+});
+Route::prefix('departments')->group(function () {
+    Route::get('/', [DepartmentsControllers::class, 'index']);
+    Route::get('/{uuid}/show', [DepartmentsControllers::class, 'show']);
+    Route::post('/create', [DepartmentsControllers::class, 'store']);
+    Route::put('/{uuid}/update', [DepartmentsControllers::class, 'update']);
+    Route::delete('/{uuid}/destroy', [DepartmentsControllers::class, 'destroy']);
+});

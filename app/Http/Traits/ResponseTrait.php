@@ -223,4 +223,20 @@ trait ResponseTrait
         ], Response::HTTP_NOT_FOUND);
     }
 
+    public function PaginateData($key ,$data, $object)
+    {
+        return response()->json([
+            'status' => true,
+            'code' => Response::HTTP_OK,
+            'msg' => null,
+            "data" => [
+                $key => $data ,
+                'current_page' => $object->currentPage(),
+                'next_page' => $object->nextPageUrl(),
+                'previous_page' => $object->previousPageUrl(),
+                'total_pages' => $object->lastPage(),
+            ]
+        ], Response::HTTP_OK);
+    }
+
 }
