@@ -3,6 +3,7 @@
 namespace App\Models\Role;
 
 use App\Http\Traits\HasAutoPermissions;
+use App\Models\Scopes\MasterScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role as BaseRole;
@@ -16,4 +17,8 @@ class Role extends BaseRole   implements Auditable
     //use HasAutoPermissions;
 
     // You may add additional properties or methods here
+    protected static function booted()
+    {
+        static::addGlobalScope(new MasterScope());
+    }
 }
