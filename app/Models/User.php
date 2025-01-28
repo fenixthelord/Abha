@@ -12,12 +12,19 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasAutoPermissions;
+    use HasAutoPermissions, HasTranslations;
+
+
+    private $translatable = [
+        'first_name',
+        'last_name',
+    ];
     /**
      * The attributes that are mass assignable.
      *
@@ -44,7 +51,7 @@ class User extends Authenticatable  implements Auditable
         'refresh_token',
         'refresh_token_expires_at',
     ];
-    protected $dates = ['deleted_at','refresh_token_expires_at'];
+    protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
 
     /**
@@ -111,5 +118,4 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
-
 }
