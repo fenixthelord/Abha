@@ -64,23 +64,24 @@ class CategoryController extends Controller
     public function filter(FilterRequest $request)
     {
         try {
-            $query = Department::query()
+            $departmentQuery = Department::query()
                 ->when($request->has("department_uuid"), function ($q) use ($request) {
                     $q->where("uuid", $request->department_uuid);
                 });
 
-            $departments = $query->get();
+            $departments = $departmentQuery->get();
 
-            if ($departments->isEmpty()) {
-                return $this->notFound('No departments found.');
-            }
+            $categoryQuery = Category::query()
+                ->when($request->has("department_uuid") && !$request->has("category_uuid"),  function ($q) use ($departments) {
+                    $q->where("parent_id", null)->where("department_id", $departments->first()->id);
+                })
+                ->when($request->has("category_uuid"), function ($q) use ($request) {
+                    $q->where("uuid", $request->category_uuid);
+                });
 
+            $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get()  ;
             $data['department'] = DepartmentResource::collection($departments);
-
-            if ($request->has('department_uuid')) {
-                $categories = Category::where('department_id', $departments->pluck("id")->first())->get();
-                $data['categories'] = CategoryResource::collection($categories);
-            }
+            $data['categories'] =  CategoryResource::collection($categories);
 
             return $this->returnData('data', $data);
         } catch (\Throwable $e) {
@@ -121,80 +122,107 @@ class CategoryController extends Controller
     public function add(SaveCategoriesRequest $request)
     {
         try {
+            $department = Department::where('uuid', $request->department_uuid)->first();
+
             DB::beginTransaction();
-            $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
-            $this->addCategories(
-                department: $department,
-                categories: $request->validated('chields'),
-                parentId: null
-            );
+
+            $this->processCategories($department->id, $request->chields);
+
             DB::commit();
             return $this->returnSuccessMessage("Categories updated successfully");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return $this->badRequest($e->getMessage());
         }
     }
 
 
-
-
-    public function save(SaveCategoriesRequest $request)
-    {
-        try {
-
-            DB::beginTransaction();
-
-            $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
-
-            $this->addCategories(
-                department: $department,
-                categories: $request->validated('chields'),
-                parentId: null
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->badRequest($e->getMessage());
-        }
-    }
-
-    private function addCategories($department, $categories, $parentId = null)
+    private function processCategories($departmentId, $categories, $parentId = null)
     {
         foreach ($categories as $categoryData) {
-            $category = Category::firstOrCreate(
-                [
-                    'department_id' => $parentId ?  null : $department->id,
+            // Skip existing categories (identified by UUID)
+            if (!empty($categoryData['uuid'])) {
+                $existingCategory = Category::where('uuid', $categoryData['uuid'])->first();
+                $currentParentId = $existingCategory->parent_id;
+            }
+            // Create new categories
+            else {
+                $newCategory = Category::create([
+                    'name' => $categoryData['name'],
+                    'department_id' => $departmentId,
                     'parent_id' => $parentId,
-                    'name' => $categoryData['name']
-                ],
-                ['name' => $categoryData['name']]
-            );
+                ]);
+                $currentParentId = $newCategory->id;
+            }
 
-            // Recursively handle children
+            // Process children recursively
             if (!empty($categoryData['chields'])) {
-                $this->addCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
+                $this->processCategories(
+                    $departmentId,
+                    $categoryData['chields'],
+                    $currentParentId
                 );
             }
         }
     }
 
-    private function pruneDeletedCategories(
-        Department $department,
-        array $currentCategories,
-        ?int $parentId = null
-    ) {
-        $currentNames = collect($currentCategories)->pluck('name')->toArray();
 
-        $obsoleteCategories = Category::where('department_id', $department->id)
-            ->where('parent_id', $parentId)
-            ->whereNotIn('name', $currentNames)
-            ->get();
+    // public function save(SaveCategoriesRequest $request)
+    // {
+    //     try {
 
-        foreach ($obsoleteCategories as $category) {
-            $category->deleteWithChildren();
-        }
-    }
+    //         DB::beginTransaction();
+
+    //         $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
+
+    //         $this->addCategories(
+    //             department: $department,
+    //             categories: $request->validated('chields'),
+    //             parentId: null
+    //         );
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return $this->badRequest($e->getMessage());
+    //     }
+    // }
+
+    // private function addCategories($department, $categories, $parentId = null)
+    // {
+    //     foreach ($categories as $categoryData) {
+    //         $category = Category::firstOrCreate(
+    //             [
+    //                 'department_id' => $parentId ?  null : $department->id,
+    //                 'parent_id' => $parentId,
+    //                 'name' => $categoryData['name']
+    //             ],
+    //             ['name' => $categoryData['name']]
+    //         );
+
+    //         // Recursively handle children
+    //         if (!empty($categoryData['chields'])) {
+    //             $this->addCategories(
+    //                 department: $department,
+    //                 categories: $categoryData['chields'],
+    //                 parentId: $category->id
+    //             );
+    //         }
+    //     }
+    // }
+
+    // private function pruneDeletedCategories(
+    //     Department $department,
+    //     array $currentCategories,
+    //     ?int $parentId = null
+    // ) {
+    //     $currentNames = collect($currentCategories)->pluck('name')->toArray();
+
+    //     $obsoleteCategories = Category::where('department_id', $department->id)
+    //         ->where('parent_id', $parentId)
+    //         ->whereNotIn('name', $currentNames)
+    //         ->get();
+
+    //     foreach ($obsoleteCategories as $category) {
+    //         $category->deleteWithChildren();
+    //     }
+    // }
 }

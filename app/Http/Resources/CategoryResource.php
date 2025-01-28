@@ -17,7 +17,7 @@ class CategoryResource extends JsonResource
         return [
             'uuid' => $this->uuid,
             'name' => $this->name,
-            "parent_name" => $this->department->name ?? $this->parent?->name,
+            "parent_name" => $this->parent?->name ?? $this->department?->name,
             'chields' => $this->whenLoaded('children', function () {
                 return CategoryResource::collection($this->children->load('children'));
             }),

@@ -27,6 +27,7 @@ class FilterRequest extends FormRequest
     {
         return [
           "department_uuid" => "nullable|exists:departments,uuid",
+          "category_uuid" => "nullable|exists:categories,uuid",
         ];
     }
 
