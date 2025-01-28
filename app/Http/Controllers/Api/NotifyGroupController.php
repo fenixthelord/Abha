@@ -161,11 +161,16 @@ class NotifyGroupController extends Controller
                 'name' => ['nullable','string',Rule::unique('notify_groups', 'name')->ignore($group->id)],
                 'description' => 'nullable|string',
                 'model' => 'nullable|string',
+                'user_uuids' => 'nullable|array',
+           //     'user_uuids.*' => 'exists:users,uuid',
             ]);
                 $group->name = $request->name ?? $group->name;
                 $group->description = $request->description ?? $group->description;
                 $group->model = $request->model ?? $group->model;
                 $group->save();
+                $group->users()->sync($request->user_uuids);
+
+
             DB::commit();
             return $this->returnData('group', GroupResource::make($group));
             }else{
