@@ -18,7 +18,9 @@ class CategoryResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             "parent_name" => $this->department->name ?? $this->parent?->name,
-            // 'chields' => CategoryResource::collection($this->children),
+            'chields' => $this->whenLoaded('children', function () {
+                return CategoryResource::collection($this->children->load('children'));
+            }),
         ];
     }
 }

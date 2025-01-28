@@ -92,8 +92,10 @@ class CategoryController extends Controller
     {
         try {
             DB::beginTransaction();
+
             $category = Category::where('uuid', $request->uuid)->firstOrFail();
             $category->deleteWithChildren();
+
             DB::commit();
             return $this->returnSuccessMessage("Category and all related sup-categories deleted successfully");
         } catch (\Exception $e) {
@@ -102,18 +104,39 @@ class CategoryController extends Controller
         }
     }
 
+
     public function show(ShowCategoriesRequest $request, $department_uuid)
     {
         try {
 
-            $department = Department::with("categories.children")->where('uuid', $department_uuid)->first();
-            $data["department"] = DepartmentResource::make($department);
+            $department = Department::where('uuid', $department_uuid)->firstOrFail();
+            $data["department"] = DepartmentResource::make($department->load("allChildren"));
 
             return $this->returnData("data", $data);
         } catch (\Exception $e) {
             return $this->badRequest($e->getMessage());
         }
     }
+
+    public function add(SaveCategoriesRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
+            $this->addCategories(
+                department: $department,
+                categories: $request->validated('chields'),
+                parentId: null
+            );
+            DB::commit();
+            return $this->returnSuccessMessage("Categories updated successfully");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->badRequest($e->getMessage());
+        }
+    }
+
+
 
 
     public function save(SaveCategoriesRequest $request)
@@ -124,24 +147,21 @@ class CategoryController extends Controller
 
             $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
 
-            $this->updateCategories(
+            $this->addCategories(
                 department: $department,
                 categories: $request->validated('chields'),
                 parentId: null
             );
-
-            DB::commit();
-            return $this->returnSuccessMessage("Categories updated successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->badRequest($e->getMessage());
         }
     }
 
-    private function updateCategories($department, $categories, $parentId = null)
+    private function addCategories($department, $categories, $parentId = null)
     {
         foreach ($categories as $categoryData) {
-            $category = Category::updateOrCreate(
+            $category = Category::firstOrCreate(
                 [
                     'department_id' => $parentId ?  null : $department->id,
                     'parent_id' => $parentId,
@@ -152,16 +172,13 @@ class CategoryController extends Controller
 
             // Recursively handle children
             if (!empty($categoryData['chields'])) {
-                $this->updateCategories(
+                $this->addCategories(
                     department: $department,
                     categories: $categoryData['chields'],
                     parentId: $category->id
                 );
             }
         }
-
-        // Soft-delete any categories not in the new structure
-        $this->pruneDeletedCategories($department, $categories, $parentId);
     }
 
     private function pruneDeletedCategories(
