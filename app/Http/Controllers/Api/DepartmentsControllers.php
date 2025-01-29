@@ -47,7 +47,7 @@ class DepartmentsControllers extends Controller
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             $search = $request->search;
-            if ($department = Department::where('name', $search)
+            if ($department = Department::where('name','like' , "%$search%")
                 ->paginate($perPage, ['*'], 'page', $pageNumber)) {
                 if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
                     return $this->badRequest('Invalid page number');
@@ -87,7 +87,7 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|unique:departments,name|max:255',
+                'name' => ['required','max:255',Rule::unique('departments', 'name->en')]
             ], [
                 'name.required' => 'Department name is required.',
                 'name.unique' => 'Department name already exists.',

@@ -167,7 +167,7 @@ class RoleAndPermissionController extends Controller
     }
 
     public function assignPermission(Request $request)
-    {      if(!auth()->user()->hasRole("Master_Admin")){
+    {      if(!auth()->user()->hasPermissionTo("user.update")){
         return $this->Forbidden("You are not authorized to do this action");
     }
         $validatedData = Validator::make($request->all(), [
