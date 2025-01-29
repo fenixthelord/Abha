@@ -10,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Category extends Model implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
+    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable ,HasTranslations;
 
     public $translatable = ['name'];
 

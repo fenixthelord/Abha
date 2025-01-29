@@ -184,10 +184,7 @@ class CategoryController extends Controller
             ->get();
         foreach ($obsoleteCategories as $category) {
             // Get all children of the current category
-            $children = $category->children;
-
-            // Delete each child and its descendants
-            $children->each->deleteWithChildren();
+            $children = $category->deleteWithChildren();
         }
     }
 
