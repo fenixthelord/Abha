@@ -27,8 +27,11 @@ class RoleAndPermissionController extends Controller
 
     public function index()
     {
-
+if(!auth()->user()->hasPermissionTo("role.show")){
+    return $this->Forbidden("you don't have permission to access this page");
+}
         if (auth()->user()->hasRole('Master')) {
+
             $roles = Role::all();
 
         } else {
@@ -42,6 +45,9 @@ class RoleAndPermissionController extends Controller
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
+            if(!auth()->user()->hasPermissionTo("role.create")){
+                return $this->Forbidden("you don't have permission to access this page");
+            }
             $validator = Validator::make($request->all(), [
                 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displayName" => "required|string|unique:roles,displaying",
@@ -140,6 +146,9 @@ class RoleAndPermissionController extends Controller
     public function assignRole(Request $request)
 
     {
+        if (!auth()->user()->hasPermissionTo("user.update")) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
@@ -216,6 +225,9 @@ class RoleAndPermissionController extends Controller
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
+        if(!auth()->user()->hasPermissionTo("user.update")){
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         $validator = Validator::make($request->all(), [
             'user_uuid' => 'required|exists:users,uuid',
             'roleName' => 'required|string'
@@ -378,6 +390,7 @@ class RoleAndPermissionController extends Controller
 
     {
         try {
+
             $user = User::where("uuid", $request->user_uuid)->first();
             if (!$user) {
                 return $this->NotFound('User not found');
@@ -395,7 +408,9 @@ class RoleAndPermissionController extends Controller
     }
 
     public function SyncPermission(Request $request)
-    {
+    {  if(!auth()->user()->hasPermissionTo("role.update")){
+        return $this->Forbidden("you don't have permission to access this page");
+    }
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
@@ -448,6 +463,9 @@ class RoleAndPermissionController extends Controller
     public function GetAllPermissions()
     {
         try {
+            if(auth()->user()->hasPermissionTo("permission.show")){
+                return $this->Forbidden("you don't have permission to access this page");
+            }
             if (auth()->user()->hasrole('Master')) {
                 $permission = Permission::all();
             } else {
@@ -465,7 +483,9 @@ class RoleAndPermissionController extends Controller
     }
 
     public function DeleteRole(Request $request)
-    {
+    {   if(!auth()->user()->hasPermissionTo("role.delete")){
+        return $this->Forbidden("you don't have permission to access this page");
+    }
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
