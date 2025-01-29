@@ -21,23 +21,20 @@ class DepartmentsControllers extends Controller
         try {
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
-
-            $department = Department::query()
+            $departments = Department::query()
                 ->when($request->has('search'), function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%');
                 });
-
-
-            $department = $department->paginate($perPage, ['*'], 'page', $pageNumber);
-
+            $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
+                $pageNumber = 1;
+                $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
+                $data = DepartmentResource::collection($department);
+                return $this->PaginateData("groups" , $data, $department);
             }
 
             $data =  DepartmentResource::collection($department);
-
-            return $this->PaginateData("department" , $data, $department);
-            return $this->returnData('data', $data, 'success');
+            return $this->PaginateData("department", $data, $department);
         } catch (\Exception $e) {
             return $this->badRequest($e->getMessage());
         }
