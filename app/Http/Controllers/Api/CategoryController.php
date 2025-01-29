@@ -50,6 +50,7 @@ class CategoryController extends Controller
             if ($request->page > $categories->lastPage()) {
                 return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
             }
+
             $data = CategoryResource::collection($categories);
 
             return $this->PaginateData(
@@ -80,9 +81,12 @@ class CategoryController extends Controller
                     $q->where("uuid", $request->category_uuid);
                 });
 
-            $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get();
             $data['department'] = DepartmentResource::collection($departments);
-            $data['categories'] =  CategoryResource::collection($categories);
+            $data['categories'] = null ;
+            if ($request->has("department_uuid")) {
+                $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get();
+                $data['categories'] =  CategoryResource::collection($categories);
+            }
 
             return $this->returnData('data', $data);
         } catch (\Throwable $e) {
@@ -162,7 +166,11 @@ class CategoryController extends Controller
                 );
             }
         }
-
+        // $d = [
+        //     $categoryData , 
+        //     $parentId
+        // ];
+        // dd($d);
         // Soft-delete any categories not in the new structure
         $this->pruneDeletedCategories($department, $categories, $parentId);
     }
@@ -173,17 +181,21 @@ class CategoryController extends Controller
         ?int $parentId = null
     ) {
         $currentNames = collect($currentCategories)->pluck('name')->toArray();
-        // if ($currentCategories[0]["name"] !== "ahmed") {
-        //     dd($currentCategories);
-        // }
+
+
         $obsoleteCategories = Category::where('department_id', $department->id)
             ->where('parent_id', $parentId)
             ->whereNotIn('name', $currentNames)
             ->get();
         foreach ($obsoleteCategories as $category) {
-            $category->deleteWithChildren();
+            // Get all children of the current category
+            $children = $category->children;
+
+            // Delete each child and its descendants
+            $children->each->deleteWithChildren();
         }
     }
+
 
 
     public function update(UpdateCategoriesRequest $request) {}
