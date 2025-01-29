@@ -11,7 +11,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Department extends Model implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
+    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 
     public $translatable = ['name'];
     protected $fillable = [
