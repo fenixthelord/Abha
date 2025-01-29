@@ -19,7 +19,7 @@ class DepartmentsControllers extends Controller
     public function index(Request $request)
     {
         try {
-            $pageNumber = request()->input('page', 1);
+            $pageNumber = $request->has("search") ? $this->pageNumber : request()->input('page', $this->pageNumber);
             $perPage = request()->input('perPage', 10);
 
             $department = Department::query()
@@ -36,7 +36,7 @@ class DepartmentsControllers extends Controller
 
             $data =  DepartmentResource::collection($department);
 
-            return $this->PaginateData("department" , $data, $department);
+            return $this->PaginateData("department", $data, $department);
             return $this->returnData('data', $data, 'success');
         } catch (\Exception $e) {
             return $this->badRequest($e->getMessage());
