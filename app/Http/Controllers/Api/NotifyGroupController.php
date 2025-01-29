@@ -144,7 +144,6 @@ class NotifyGroupController extends Controller
             }
             return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
 
-            return $this->returnData('groups', GroupResource::collection($notifyGroups));
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
