@@ -9,6 +9,7 @@ use App\Http\Requests\FilterRequest;
 use App\Http\Requests\IndexCategoryRequest;
 use App\Http\Requests\SaveCategoriesRequest;
 use App\Http\Requests\ShowCategoriesRequest;
+use App\Http\Requests\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Traits\ResponseTrait;
@@ -163,6 +164,10 @@ class CategoryController extends Controller
                 );
             }
         }
+    }
+
+    public function update (UpdateCategoriesRequest $request) {
+
     }
 
 
