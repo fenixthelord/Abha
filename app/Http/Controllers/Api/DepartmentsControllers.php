@@ -47,7 +47,7 @@ class DepartmentsControllers extends Controller
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             $search = $request->search;
-            if ($department = Department::where('name', $search)
+            if ($department = Department::where('name','like' , "%$search%")
                 ->paginate($perPage, ['*'], 'page', $pageNumber)) {
                 if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
                     return $this->badRequest('Invalid page number');
