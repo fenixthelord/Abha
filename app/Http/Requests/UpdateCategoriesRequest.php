@@ -7,137 +7,81 @@ use App\Models\Category;
 use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class UpdateCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
-
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
-
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'department_uuid' => $this->department_uuid,
+    //     ]);
+    // }
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
-            'department_uuid' => [
-                'required', // Ensure field is present
-                'uuid',     // Ensure valid UUID format
-                Rule::exists('departments', 'uuid')->where('deleted_at', null), // Ensure exists in DB
-            ],
-            'chields' => 'required|array',
-            'chields.*.uuid' => 'required|uuid|exists:categories,uuid',
-            'chields.*.name' => 'required|string',
+            'department_uuid' => 'required|uuid|exists:departments,uuid',
+            'chields' => 'nullable|array',
         ];
     }
 
-    // public function withValidator($validator)
-    // {
-    //     $validator->after(function ($validator) {
-            // $uuids = [];
-            // $this->collectUuids($this->input('chields'), $uuids);
+    protected function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $this->validateChields($validator, $this->input('chields', []), 'chields');
+        });
+    }
 
-            // Check for duplicate UUIDs in request
-            // if (count($uuids) !== count(array_unique($uuids))) {
-            //     $validator->errors()->add('chields', 'Duplicate UUIDs found in the structure.');
-            //     return;
-            // }
-            // dd($validator->validate()->errors()->first());
-            // if ($validator->validate()->errors())
+    private function validateChields($validator, $chields, $path = 'chields')
+    {
+        $names = [];
+        foreach ($chields as $index => $child) {
+            $currentPath = "{$path}.{$index}";
 
-            // Validate name uniqueness and parent relationships
-            // $this->validateFirstChields(
-            //     $validator,
-            //     $this->input('chields'),
-            //     $this->input('department_uuid'),
-                
-            // );
-    //     });
-    // }
+            // Validate child structure
+            $childValidator = Validator::make($child, [
+                'name' => 'required|string',
+                'chields' => 'nullable|array',
+            ]);
 
-    // protected function collectUuids($chields, &$uuids)
-    // {
-        // foreach ($chields as $child) {
-        //     // Ensure the 'uuid' key exists before accessing it
-        //     if (!isset($child['uuid'])) {
-        //         continue; // Skip this child if 'uuid' is missing
-        //     }
+            if ($childValidator->fails()) {
+                foreach ($childValidator->errors()->messages() as $key => $messages) {
+                    foreach ($messages as $message) {
+                        $validator->errors()->add("{$currentPath}.{$key}", $message);
+                    }
+                }
+            }
 
-        //     $uuids[] = $child['uuid'];
+            // Check for duplicate names in this same level
+            $name = $child['name'] ?? null;
+            if ($name !== null) {
+                if (in_array($name, $names)) {
+                    $validator->errors()->add("{$currentPath}.name", "The name '{$name}' must be unique within this level.");
+                } else {
+                    $names[] = $name;
+                }
+            }
 
-        //     // Recursively collect UUIDs from nested children
-        //     if (isset($child['chields']) && is_array($child['chields'])) {
-        //         $this->collectUuids($child['chields'], $uuids);
-        //     }
-        // }
-    // }
-
-    // protected function validateFirstChields($validator, $chields, $department_uuid ) {
-    //     $department = Department::where('uuid', $department_uuid)->first();
-    //     if (!$department) {
-    //         $validator->errors()->add('department_uuid', 'Department not found.');
-    //         return;
-    //     }
-
-    //     foreach ($chields as $index => $child) {
-    //         // Ensure the 'uuid' key exists before accessing it
-    //         if (!isset($child['uuid'])) {
-    //             $validator->errors()->add("chields.$index.uuid", 'UUID is required for all items.');
-    //             return;
-    //         }
-
-    //         // Check name uniqueness among siblings
-    //         $exists = Category::where('department_id', $department->id)
-    //             ->where('name', $child['name'])
-    //             ->where('uuid', '!=', $child['uuid'])
-    //             ->exists();
-
-    //         if ($exists) {
-    //             $validator->errors()->add("chields.$index.name", 'Name must be unique in this hierarchy level.');
-    //             return;
-    //         }
-
-    //         // Recursively validate children
-    //         if (isset($child['chields']) && is_array($child['chields'])) {
-    //             // $this->validateChields($validator, $child['chields'], $child['uuid']);
-    //         }
-    //     }
-    // }
-    // protected function validateChields($validator, $chields, $parentUuid )
-    // {
-    //     foreach ($chields as $index => $child) {
-    //         // Ensure the 'uuid' key exists before accessing it
-    //         if (!isset($child['uuid'])) {
-    //             $validator->errors()->add("chields.$index.uuid", 'UUID is required for all items.');
-    //             return;
-    //         }
-
-    //         $parent = Category::where('uuid', $parentUuid)->first();
-    //         // dd($parentUuid);
-    //         if (!$parent) {
-    //             $validator->errors()->add("chields.$index.parent", 'Parent department not found.');
-    //             return;
-
-    //         }
-
-    //         // Check name uniqueness among siblings
-    //         $exists = Category::where('parent_id', $parent->id)
-    //             ->where('name', $child['name'])
-    //             ->where('uuid', '!=', $child['uuid'])
-    //             ->exists();
-
-    //         if ($exists) {
-    //             $validator->errors()->add("chields.$index.name", 'Name must be unique in this hierarchy level.');
-    //             return;
-    //         }
-
-    //         // Recursively validate children
-    //         if (isset($child['chields']) && is_array($child['chields'])) {
-    //             $this->validateChields($validator, $child['chields'], $child['uuid']);
-    //         }
-    //     }
-    // }
+            // Recursively validate children
+            if (!empty($child['chields'])) {
+                $this->validateChields($validator, $child['chields'], "{$currentPath}.chields");
+            }
+        }
+    }
 
     public function failedValidation($validator)
     {

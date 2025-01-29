@@ -166,12 +166,7 @@ class CategoryController extends Controller
                 );
             }
         }
-        // $d = [
-        //     $categoryData , 
-        //     $parentId
-        // ];
-        // dd($d);
-        // Soft-delete any categories not in the new structure
+
         $this->pruneDeletedCategories($department, $categories, $parentId);
     }
 

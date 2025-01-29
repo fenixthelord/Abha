@@ -165,7 +165,8 @@ Route::group(["prefix" => "/categories"], function () {
     Route::get("/filter", [CategoryController::class, "filter"]);
     Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
     Route::post("/add", [CategoryController::class, "add"]);
-    Route::put("/{category_uuid}/update", [CategoryController::class, "update"]);
+    Route::put("/{department_uuid}/update", [CategoryController::class, "update"]);
+    Route::get("/{department_uuid}/update", [CategoryController::class, "showDepartmentWithChields"]);
 });
 Route::prefix('departments')->group(function () {
     Route::get('/', [DepartmentsControllers::class, 'index']);
