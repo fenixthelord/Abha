@@ -87,7 +87,7 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|unique:departments,name|max:255',
+                'name' => ['required','max:255',Rule::unique('departments', 'name->en')]
             ], [
                 'name.required' => 'Department name is required.',
                 'name.unique' => 'Department name already exists.',
