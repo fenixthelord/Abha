@@ -131,7 +131,7 @@ class CategoryController extends Controller
 
             $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
 
-            $this->updateCategories(
+            $this->createCategories(
                 department: $department,
                 categories: $request->validated('chields'),
                 parentId: null
@@ -145,7 +145,7 @@ class CategoryController extends Controller
         }
     }
 
-    private function updateCategories($department, $categories, $parentId = null)
+    private function createCategories($department, $categories, $parentId = null)
     {
         foreach ($categories as $categoryData) {
             $category = Category::updateOrCreate(
@@ -159,7 +159,7 @@ class CategoryController extends Controller
 
             // Recursively handle children
             if (!empty($categoryData['chields'])) {
-                $this->updateCategories(
+                $this->createCategories(
                     department: $department,
                     categories: $categoryData['chields'],
                     parentId: $category->id
