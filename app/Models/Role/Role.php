@@ -21,7 +21,7 @@ class Role extends BaseRole   implements Auditable
     // You may add additional properties or methods here
     protected static function booted()
     {
-        static::addGlobalScope(new MasterScope());
+        //static::addGlobalScope(new MasterScope());
     }
 
     private $translatable = ['displaying'];
