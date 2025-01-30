@@ -49,7 +49,7 @@ class UserController extends Controller
             $data['users'] =  UserResource::collection($users);
 
             DB::commit();
-            return $this->PaginateData($data, $user);
+            return $this->PaginateData($data, $users);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
