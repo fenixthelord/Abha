@@ -24,10 +24,10 @@ class UserAuthController extends Controller
 
     public function register(Request $request)
     {
-       $user=auth()->user();
-       if(!$user->hasPermissionTo("user.create")){
-           return $this->Forbidden("you don't have permission");
-       }
+        $user = auth()->user();
+        if (!$user->hasPermissionTo("user.create")) {
+            return $this->Forbidden("you don't have permission");
+        }
         DB::beginTransaction();
         try {
 
@@ -38,7 +38,7 @@ class UserAuthController extends Controller
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
-                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
@@ -71,9 +71,11 @@ class UserAuthController extends Controller
             if (!$request->role) {
                 $user->assignRole('employee'); // Default role
             } else {
-                if($request->role!="Master"){
-                $user->syncRoles($request->role);}
-                else{ $user->assignRole('employee');}
+                if ($request->role != "Master") {
+                    $user->syncRoles($request->role);
+                } else {
+                    $user->assignRole('employee');
+                }
             }
             if ($user) {
                 event(new UserRegistered($user));
@@ -91,7 +93,7 @@ class UserAuthController extends Controller
             // Include refresh token in the response
             $data['refresh_token'] = $refreshToken;
 
-            return $this->returnData('data', $data);
+            return $this->returnData($data);
         } catch (\Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());
@@ -104,13 +106,17 @@ class UserAuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'user' => [
-                    'required', 'string', function ($attribute, $value, $fail) {
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
                         if (!User::where($field, $value)->exists()) {
                             $fail("email or phone or password false.");
                         }
                     }
-                ], 'password' => 'required|string',], messageValidation());
+                ],
+                'password' => 'required|string',
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 401);
             }
@@ -123,10 +129,10 @@ class UserAuthController extends Controller
                 } else {
                     //               event(new UserLogin($user));
                     $data['user'] = UserResource::make($user);
-                    if($user->hasRole('Master')){
-                        $data['custom_permissions'] = [['action'=>'manage','subject'=>'all']];
-                    }else{
-                        $data['custom_permissions'] = CustomPermissionResource::collection( $user->getAllPermissions());
+                    if ($user->hasRole('Master')) {
+                        $data['custom_permissions'] = [['action' => 'manage', 'subject' => 'all']];
+                    } else {
+                        $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
                     }
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
@@ -144,7 +150,7 @@ class UserAuthController extends Controller
 
 
 
-                    return $this->returnData('data', $data);
+                    return $this->returnData($data);
                 }
             } else {
                 return $this->Unauthorized('email or phone or password false');
@@ -213,7 +219,7 @@ class UserAuthController extends Controller
             DB::commit();
 
 
-            return $this->returnData('data', [
+            return $this->returnData([
                 'token' => $accessToken,
                 'refresh_token' => $refreshToken,
             ]);

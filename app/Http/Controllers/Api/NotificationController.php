@@ -131,7 +131,7 @@ class NotificationController extends Controller
                 'previous_page' => $notifications->previousPageUrl(),
                 'total_pages' => $notifications->lastPage(),
             ];
-            return $this->returnData("data", $data);
+            return $this->($data);
         } catch (\Exception $ex) {
             return $this->badRequest($ex->getMessage());
         }
@@ -245,14 +245,8 @@ class NotificationController extends Controller
                 if ($pageNumber > $notifications->lastPage() || $pageNumber < 1 || $perPage < 1) {
                     return $this->badRequest('Invalid page number');
                 }
-                $data = [
-                    'users' => NotificationResource::collection($notifications),
-                    'current_page' => $notifications->currentPage(),
-                    'next_page' => $notifications->nextPageUrl(),
-                    'previous_page' => $notifications->previousPageUrl(),
-                    'total_pages' => $notifications->lastPage(),
-                ];
-                return $this->returnData("data", $data);
+                $data['users'] = NotificationResource::collection($notifications);
+                return $this->PaginateData($data , $notifications );
             } else {
                 return $this->badRequest('user not found.');
             }

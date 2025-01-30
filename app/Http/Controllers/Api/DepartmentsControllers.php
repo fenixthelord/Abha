@@ -30,7 +30,7 @@ class DepartmentsControllers extends Controller
                 $pageNumber = 1;
                 $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
                 $data = DepartmentResource::collection($department);
-                return $this->PaginateData("groups" , $data, $department);
+                return $this->PaginateData("groups", $data, $department);
             }
 
             $data =  DepartmentResource::collection($department);
@@ -46,7 +46,8 @@ class DepartmentsControllers extends Controller
     {
         try {
             if ($department = Department::whereuuid($uuid)->first()) {
-                return $this->returnData('department', DepartmentResource::make($department));
+                $data['department'] =  DepartmentResource::make($department);
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('Department not found');
             }
@@ -70,8 +71,10 @@ class DepartmentsControllers extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($department = Department::create(['name' => $request->name])) {
+                $data['department'] = DepartmentResource::make($department);
+
                 DB::commit();
-                return $this->returnData('department', DepartmentResource::make($department), 'success created department');
+                return $this->returnData($data, 'success created department');
             } else {
                 return $this->badRequest('try again later');
             }
@@ -94,8 +97,9 @@ class DepartmentsControllers extends Controller
                 }
                 $department->name = $request->name ?? $department->name;
                 $department->save();
+                $data['department'] =  DepartmentResource::make($department) ;
                 DB::commit();
-                return $this->returnData('department', DepartmentResource::make($department));
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('Department not found');
             }

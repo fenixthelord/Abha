@@ -57,12 +57,11 @@ class CategoryController extends Controller
                 }
             }
 
-            $data = CategoryResource::collection($categories);
+            $data["categories"] = CategoryResource::collection($categories);
 
             return $this->PaginateData(
                 data: $data,
                 object: $categories,
-                key: "categories"
             );
         } catch (\Throwable $e) {
             return $this->badRequest($e->getMessage());
@@ -94,7 +93,7 @@ class CategoryController extends Controller
                 $data['categories'] =  CategoryResource::collection($categories);
             }
 
-            return $this->returnData('data', $data);
+            return $this->returnData($data);
         } catch (\Throwable $e) {
             return $this->badRequest($e->getMessage());
         }
@@ -123,7 +122,7 @@ class CategoryController extends Controller
             $department = Department::where('uuid', $department_uuid)->firstOrFail();
             $data["department"] = DepartmentResource::make($department->load("categories"));
 
-            return $this->returnData("data", $data);
+            return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->badRequest($e->getMessage());
         }
