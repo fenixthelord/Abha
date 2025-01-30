@@ -10,6 +10,7 @@ use App\Http\Requests\FilterRequest;
 use App\Http\Requests\IndexCategoryRequest;
 use App\Http\Requests\SaveCategoriesRequest;
 use App\Http\Requests\ShowCategoriesRequest;
+use App\Http\Requests\ShowCategoryRequest;
 use App\Http\Requests\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DepartmentResource;
@@ -67,6 +68,21 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
+
+    public function showCategory(ShowCategoryRequest $request)
+    {
+        try {
+            $category = Category::where('uuid', $request->category_uuid)->firstOrFail();
+            $categoryInfo = $category->department()->first();
+            // dd($categoryInfo->name);
+            $data["test"] = DepartmentResource::make($categoryInfo->load("categories"));
+            // dd($data);
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
 
     public function filter(FilterRequest $request)
     {
