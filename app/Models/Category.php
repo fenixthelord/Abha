@@ -7,12 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
-use Illuminate\Support\Str;
-
 
 class Category extends Model implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
+    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable ,HasTranslations;
 
     private $translatable = ['name'];
 
@@ -28,7 +26,7 @@ class Category extends Model implements Auditable
         parent::boot();
 
         static::creating(function ($model) {
-            $model->uuid = Str::uuid();
+            $model->uuid = \Str::uuid();
         });
     }
 

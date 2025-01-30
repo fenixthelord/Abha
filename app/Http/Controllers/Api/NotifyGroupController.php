@@ -129,11 +129,21 @@ class NotifyGroupController extends Controller
     public function allGroup(Request $request)
     {
         try {
-            // Fetch all notify groups with optional pagination
-            $perPage = $request->input('per_page', 10); // Default to 10 items per page
-            $notifyGroups = NotifyGroup::paginate($perPage);
+            $pageNumber = request()->input('page', 1);
+            $perPage = request()->input('perPage', 10);
+            $groups = NotifyGroup::query()
+                ->when($request->has('search'), function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+            $notifyGroups = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
+            if ($pageNumber > $notifyGroups->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                $pageNumber = 1;
+                $notifyGroup = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
+                $data = GroupResource::collection($notifyGroup);
+                return $this->PaginateData("groups" , $data, $notifyGroup);
+            }
+            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
 
-            return $this->returnData('groups', GroupResource::collection($notifyGroups));
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
