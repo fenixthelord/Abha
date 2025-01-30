@@ -6,6 +6,7 @@ use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class DeleteCategoryRequest extends FormRequest
 {
@@ -25,14 +26,12 @@ class DeleteCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        // dd($this->parent_category_uuid);
         return [
             'uuid' => [
                 'required',
-                function ($attribute, $value, $fail) {
-                    if (!Category::where('uuid', $value)->exists()) {
-                        $fail('The ' . $attribute . ' is invalid.');
-                    }
-                }
+                // 'exists:categories,uuid',
+                Rule::exists("categories" , "uuid")->where("deleted_at", null)
             ]
         ];
     }
