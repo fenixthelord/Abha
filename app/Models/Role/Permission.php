@@ -8,7 +8,7 @@ use Spatie\Permission\Models\Permission as BasePermission;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
 use App\Http\Traits\HasAutoPermissions;
-use Spatie\Translatable\HasTranslations;
+//use Spatie\Translatable\HasTranslations;
 
 class Permission extends BasePermission  implements Auditable
 {
@@ -16,7 +16,7 @@ class Permission extends BasePermission  implements Auditable
     use \OwenIt\Auditing\Auditable;
     //use HasAutoPermissions;
     // You may add additional properties or methods here
-    use HasTranslations;
+//    use HasTranslations;
 
-    private $translatable = ['displaying'];
+   // private $translatable = ['displaying'];
 }
