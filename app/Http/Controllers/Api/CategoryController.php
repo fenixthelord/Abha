@@ -152,7 +152,6 @@ class CategoryController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $department = Department::where('uuid', $request->department_uuid)->first();
 
             $this->createCategories(

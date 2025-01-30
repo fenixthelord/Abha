@@ -39,7 +39,9 @@ class UserController extends Controller
             if ($request->search) {
                 return $this->oldSearch(request());
             }
-            $users = User::paginate($perPage, ['*'], 'page', $pageNumber);
+            $users = User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'Master');
+            })->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 return $this->badRequest('Invalid page number');
             }

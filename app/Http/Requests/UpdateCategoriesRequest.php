@@ -38,6 +38,10 @@ class UpdateCategoriesRequest extends FormRequest
                 'uuid',
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
 
+            ],
+            "chields" => [
+                "required",
+                "array"
             ]
         ];
     }
@@ -62,7 +66,6 @@ class UpdateCategoriesRequest extends FormRequest
                     'uuid',
                     Rule::exists("categories", "uuid")->where("deleted_at", null)
                 ],
-                'name' => 'required|string',
                 'name' => 'required|string',
                 'chields' => 'nullable|array',
             ]);

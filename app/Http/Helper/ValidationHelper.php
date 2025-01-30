@@ -44,6 +44,7 @@ function messageValidation()
         'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
         'image.max' => 'Image must be less than 2MB.',
         'type.required' => 'Type is required.',
+        'roleName.unique' => 'Role name is already in use.'
     ];
 }
 if (!function_exists('SupportedLanguages')) {

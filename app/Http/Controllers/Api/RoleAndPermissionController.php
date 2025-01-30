@@ -27,15 +27,12 @@ class RoleAndPermissionController extends Controller
 
     public function index()
     {
-        if (!auth()->user()->hasPermissionTo("role.show")) {
-            return $this->Forbidden("you don't have permission to access this page");
-        }
-        if (auth()->user()->hasRole('Master')) {
+if(!auth()->user()->hasPermissionTo("role.show")){
+    return $this->Forbidden("you don't have permission to access this page");
+}
 
-            $roles = Role::all();
-        } else {
             $roles = Role::where('name', '!=', 'Master')->get();
-        }
+
         $data['role'] = RolesResource::collection($roles);
         return $this->returnData($data);
     }
@@ -45,7 +42,7 @@ class RoleAndPermissionController extends Controller
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
-            if (!auth()->user()->hasPermissionTo("role.create")) {
+            if(!auth()->user()->hasPermissionTo("role.create")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
             $validator = Validator::make($request->all(), [
@@ -75,9 +72,9 @@ class RoleAndPermissionController extends Controller
 
 
             if ($request->has('permission') && !empty($request->permission)) {
-                foreach ($request->permission as $perm) {
-                    $permission = Permission::where("name", $perm)->first();
-                    if ($permission->is_admin == 1) {
+                foreach($request->permission as $perm){
+                 $permission = Permission::where("name",$perm)->first();
+                    if($permission->is_admin == 1){
 
 
                         return  $this->Forbidden("this is a Master permission you can not assign it to this role");
@@ -205,6 +202,8 @@ class RoleAndPermissionController extends Controller
                     if (!$user->hasRole('Master')) {
                         //                                $user->givePermissionTo($permission);
                         return $this->Forbidden('this is master permission you can not assign it to this user');
+
+
                     }
                 }
 
@@ -213,6 +212,8 @@ class RoleAndPermissionController extends Controller
 
                 return $this->returnSuccessMessage('the permission has been assigned successfully');
             }
+
+
         } catch (\Exception $exception) {
             return $exception->getMessage();
         }
@@ -447,6 +448,15 @@ class RoleAndPermissionController extends Controller
             $role->save();
 
             // Sync permissions
+            foreach ($request->permission as $permissionName) {
+                $permission = Permission::findByName($permissionName);
+                if (!$permission) {
+                    return $this->NotFound('Permission not found');
+                }
+                if ($permission->is_admin==true) {
+                    return $this->Forbidden("you are not allowed to add Master permission");
+                }
+            }
             $role->syncPermissions($request->permission);
             $data['role'] = RolesResource::make($role);
             DB::commit();
@@ -464,12 +474,9 @@ class RoleAndPermissionController extends Controller
             if (!auth()->user()->hasPermissionTo("permission.show")) {
                 return $this->Forbidden("you don't have permission to access this page");
             }
-            if (auth()->user()->hasrole('Master')) {
-                $permission = Permission::all();
-            } else {
 
                 $permission = Permission::where('is_admin', false)->get();
-            }
+
 
             $resource = new NewPermissionsResource($permission);
             $data['permission'] = $resource;
