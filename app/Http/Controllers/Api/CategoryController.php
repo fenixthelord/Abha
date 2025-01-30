@@ -49,7 +49,12 @@ class CategoryController extends Controller
             $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
 
             if ($request->page > $categories->lastPage()) {
-                return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
+                if ($request->has("department_uuid") || $request->has("parent_category_uuid")) {
+                    $pageNumber =  1;
+                    $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
+                } else {
+                    return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
+                }
             }
 
             $data = CategoryResource::collection($categories);
@@ -212,23 +217,5 @@ class CategoryController extends Controller
             }
         }
 
-        // $this->pruneDeletedCategories($department, $categories, $parentId);
     }
-
-    // private function pruneDeletedCategories(
-    //     Department $department,
-    //     array $currentCategories,
-    //     ?int $parentId = null
-    // ) {
-    //     $currentUuids = collect($currentCategories)->pluck('uuid')->filter()->toArray();
-
-    //     $obsoleteCategories = Category::where('department_id', $department->id)
-    //         ->where('parent_id', $parentId)
-    //         ->whereNotIn('uuid', $currentUuids)
-    //         ->get();
-
-    //     foreach ($obsoleteCategories as $category) {
-    //         $category->deleteWithChildren(); // Ensure this method deletes children
-    //     }
-    // }
 }
