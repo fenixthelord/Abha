@@ -46,18 +46,13 @@ class UserController extends Controller
                 return $this->badRequest('Invalid page number');
             }
 
-            $data = [
-                'users' => UserResource::collection($users),
-                'current_page' => $users->currentPage(),
-                'next_page' => $users->nextPageUrl(),
-                'previous_page' => $users->previousPageUrl(),
-                'total_pages' => $users->lastPage(),
-            ];
+            $data['users'] =  UserResource::collection($users);
+
             DB::commit();
-            return $this->returnData('data', $data, 'success');
+            return $this->PaginateData($data, $user);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -77,7 +72,7 @@ class UserController extends Controller
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], messageValidation());
             if ($validator->fails()) {
@@ -103,37 +98,39 @@ class UserController extends Controller
                     if (Hash::check($request->old_password, $user->password)) {
                         $user->password = $request->password ? Hash::make($request->password) : null;
                         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
-                    } else
-                    {
+                    } else {
                         return $this->badRequest('Old password is wrong');
                     }
-                }else{
+                } else {
                     return $this->badRequest('Old password is required');
                 }
             }
             $user->save();
+            $data['data'] = UserResource::make($user);
             DB::commit();
-            return $this->returnData('data', UserResource::make($user), 'success');
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
     public function updateAdmin(Request $request)
-    {      $user = auth()->user();
+    {
+        $user = auth()->user();
         if (!$user->hasPermissionTo('user.update')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',], messageValidation());
+                'uuid' => 'required|string|exists:users,uuid',
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
-                if($user->hasRole("Master")){
+                if ($user->hasRole("Master")) {
                     return $this->Forbidden('This user is Master account and can not be updated');
                 }
                 $validator = Validator::make($request->all(), [
@@ -147,7 +144,7 @@ class UserController extends Controller
                     'job_id' => 'nullable|string',
                     'image' => 'nullable|string',
                     'password' =>
-                        'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'old_password' => 'nullable|required_with:password|string',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",
@@ -186,19 +183,22 @@ class UserController extends Controller
                 if ($request->role) {
                     $user->syncRoles($request->role);
                 }
+
+                $data['data'] =  UserResource::make($user);
                 DB::commit();
-                return $this->returnData('data', UserResource::make($user), 'success');
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('User not found');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
     public function active(Request $request)
-    {        $user = auth()->user();
+    {
+        $user = auth()->user();
         if (!$user->hasPermissionTo('user.restore')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
@@ -216,7 +216,7 @@ class UserController extends Controller
                 return $this->badRequest('This user is deleted');
             } else {
                 if ($user = User::whereuuid($request->uuid)->first()) {
-                    if($user->hasRole("Master")){
+                    if ($user->hasRole("Master")) {
                         return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
                     }
                     $user->active = $request->active;
@@ -231,12 +231,13 @@ class UserController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
     public function deleteUser(Request $request)
-    {         $user = auth()->user();
+    {
+        $user = auth()->user();
         if (!$user->hasPermissionTo('user.delete')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
@@ -250,10 +251,10 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
-                if(!$user){
+                if (!$user) {
                     return $this->NotFound('User not found');
                 }
-                if($user->hasRole("Master")){
+                if ($user->hasRole("Master")) {
                     return $this->Forbidden('This user is Master and can not be deleted');
                 }
                 $user->delete();
@@ -264,7 +265,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -286,24 +287,18 @@ class UserController extends Controller
                     ->orWhere('job_id', 'like', "%$search%");
             })->paginate($perPage, ['*'], 'page', $pageNumber)) {
                 if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
-            }
+                    return $this->badRequest('Invalid page number');
+                }
 
-                $data = [
-                    'users' => UserResource::collection($users),
-                    'current_page' => $users->currentPage(),
-                    'next_page' => $users->nextPageUrl(),
-                    'previous_page' => $users->previousPageUrl(),
-                    'total_pages' => $users->lastPage(),
-                ];
+                $data['users'] = UserResource::collection($users);
                 DB::commit();
-                return $this->returnData('data', $data, 'success');
+                return $this->PaginateData($data, $users);
             } else {
                 return $this->badRequest('Invalid search');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -323,20 +318,14 @@ class UserController extends Controller
                         return $this->badRequest('Invalid page number');
                     }
 
-                    $data = [
-                        'users' => UserResource::collection($users),
-                        'current_page' => $users->currentPage(),
-                        'next_page' => $users->nextPageUrl(),
-                        'previous_page' => $users->previousPageUrl(),
-                        'total_pages' => $users->lastPage(),
-                    ];
-                    return $this->returnData('data', $data, 'success');
+                    $data['users'] = UserResource::collection($users);
+                    return $this->PaginateData($data, $users);
                 } else {
-                    return $this->returnData('user', 'No results found');
+                    return $this->returnSuccessMessage('No results found');
                 }
             }
         } catch (Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -353,20 +342,14 @@ class UserController extends Controller
             $perPage = request()->input('perPage', 10);
             if ($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)) {
                 if ($pageNumber <= $users->lastPage() && $pageNumber >= 1 && $perPage >= 1) {
-                    $data = [
-                        'users' => UserResource::collection($users),
-                        'current_page' => $users->currentPage(),
-                        'next_page' => $users->nextPageUrl(),
-                        'previous_page' => $users->previousPageUrl(),
-                        'total_pages' => $users->lastPage(),
-                    ];
-                    return $this->returnData('data', $data, 'success');
+                    $data['users'] = UserResource::collection($users);
+                    return $this->PaginateData($data, $users);
                 } else {
-                    return $this->returnData('user', 'Invalid page number');
+                    return $this->badRequest('Invalid page number');
                 }
-            } else return $this->badRequest('No results found');
+            } else return $this->returnSuccessMessage('No results found');
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -393,7 +376,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -409,11 +392,12 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             $image = $this->uploadImagePublic($request, $request->type);
+
             DB::commit();
-            return $this->returnData('data', $image, 'Image Uploaded');
-        } catch (\Exception $ex) {
+            return $this->returnData($image, 'Image Uploaded');
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -434,7 +418,7 @@ class UserController extends Controller
         try {
             $user = auth()->user();
             if (Carbon::now()->lessThan($user->otp_expires_at) || $user->otp_verified == true) {
-                return $this->returnData('error', 'OTP Not expired');
+                return $this->badRequest('OTP Not expired');
             }
             $otp = $user->otp_code = rand(100000, 999999);
             $user->otp_expires_at = Carbon::now()->addMinutes(5);
@@ -445,9 +429,9 @@ class UserController extends Controller
             if ($phone) {
                 return $this->returnSuccessMessage('OTP send successfully');
             }
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -474,9 +458,9 @@ class UserController extends Controller
             $user->save();
             DB::commit();
             $this->returnSuccessMessage('OTP verified successfully');
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -487,6 +471,6 @@ class UserController extends Controller
             'user' => UserResource::make($user),
             'roles' => $user->role,
         ];
-        return $this->returnData('user', $data);
+        return $this->returnData($data);
     }
 }

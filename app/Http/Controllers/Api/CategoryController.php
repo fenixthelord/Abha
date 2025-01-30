@@ -57,15 +57,14 @@ class CategoryController extends Controller
                 }
             }
 
-            $data = CategoryResource::collection($categories);
+            $data["categories"] = CategoryResource::collection($categories);
 
             return $this->PaginateData(
                 data: $data,
                 object: $categories,
-                key: "categories"
             );
         } catch (\Throwable $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -94,9 +93,9 @@ class CategoryController extends Controller
                 $data['categories'] =  CategoryResource::collection($categories);
             }
 
-            return $this->returnData('data', $data);
+            return $this->returnData($data);
         } catch (\Throwable $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -112,7 +111,7 @@ class CategoryController extends Controller
             return $this->returnSuccessMessage("Category and all related sup-categories deleted successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -123,9 +122,9 @@ class CategoryController extends Controller
             $department = Department::where('uuid', $department_uuid)->firstOrFail();
             $data["department"] = DepartmentResource::make($department->load("categories"));
 
-            return $this->returnData("data", $data);
+            return $this->returnData($data);
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -215,6 +214,5 @@ class CategoryController extends Controller
                 );
             }
         }
-
     }
 }

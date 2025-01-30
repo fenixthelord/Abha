@@ -33,7 +33,8 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
             $roles = Role::where('name', '!=', 'Master')->get();
 
-        return $this->returnData('role', RolesResource::collection($roles));
+        $data['role'] = RolesResource::collection($roles);
+        return $this->returnData($data);
     }
 
     public function store(Request $request)
@@ -76,7 +77,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                     if($permission->is_admin == 1){
 
 
-                      return  $this->Forbidden("this is a Master permission you can not assign it to this role");
+                        return  $this->Forbidden("this is a Master permission you can not assign it to this role");
                     }
                 }
                 $role->syncPermissions($request->permission);
@@ -86,7 +87,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             return $this->returnSuccessMessage('Role created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -129,11 +130,11 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
                 $role->givePermissionTo($request->permission);
 
-
-                return $this->returnData('role', RolesResource::make($role));
+                $data['role'] = RolesResource::make($role);
+                return $this->returnData($data);
             }
-        } catch (\Exception $exception) {
-            return $this->returnError($exception->getMessage());
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
     }
 
@@ -165,16 +166,16 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             $user->syncRoles($request->role);
 
             return $this->returnSuccessMessage('the role has been assigned successfully');
-
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
     }
 
     public function assignPermission(Request $request)
-    {      if(!auth()->user()->hasPermissionTo("user.update")){
-        return $this->Forbidden("You are not authorized to do this action");
-    }
+    {
+        if (!auth()->user()->hasPermissionTo("user.update")) {
+            return $this->Forbidden("You are not authorized to do this action");
+        }
         $validatedData = Validator::make($request->all(), [
             'user_uuid' => 'required|exists:users,uuid',
             'permissions' => 'nullable'
@@ -199,7 +200,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 if ($single_permission->is_admin == true) {
 
                     if (!$user->hasRole('Master')) {
-//                                $user->givePermissionTo($permission);
+                        //                                $user->givePermissionTo($permission);
                         return $this->Forbidden('this is master permission you can not assign it to this user');
 
 
@@ -221,7 +222,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
-        if(!auth()->user()->hasPermissionTo("user.update")){
+        if (!auth()->user()->hasPermissionTo("user.update")) {
             return $this->Forbidden("you don't have permission to access this page");
         }
         $validator = Validator::make($request->all(), [
@@ -253,8 +254,6 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
                 return $this->returnSuccessMessage('the role has been removed successfully');
             }
-
-
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -289,9 +288,10 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 $role->revokePermissionTo($permission);
             }
 
-            DB::commit();
+            $data['role'] = RolesResource::make($role);
 
-            return $this->returnData('role', RolesResource::make($role));
+            DB::commit();
+            return $this->returnData($data);
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -334,13 +334,13 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                     $failedPermissions[] = $permission;
                 }
             }
-
-            DB::commit();
-
-            return $this->returnData('result', [
+            $data['result'] = [
                 'removed_permissions' => $removedPermissions,
                 'failed_permissions' => $failedPermissions,
-            ]);
+            ];
+
+            DB::commit();
+            return $this->returnData($data);
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -374,8 +374,9 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 'group' => $request->group,
                 'is_admin' => $request->is_admin,
             ]);
+            $data['permission'] =  Permissionsresource::make($permission);
             DB::commit();
-            return $this->returnData('permission', Permissionsresource::make($permission));
+            return $this->returnData($data);
         } catch (\Exception $exception) {
             DB::rollBack();
             abort(400, $exception->getMessage());
@@ -393,10 +394,11 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             } else {
                 $permission['directed'] = $user->getDirectPermissions();
                 $permission['roll'] = $user->getPermissionsViaRoles();
-                return $this->returnData('permission', [
+                $data['permission'] =  [
                     'directed' => PermissionsResource::collection($permission['directed']),
                     'roll' => PermissionsResource::collection($permission['roll'])
-                ]);
+                ];
+                return $this->returnData($data);
             }
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
@@ -404,9 +406,10 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     }
 
     public function SyncPermission(Request $request)
-    {  if(!auth()->user()->hasPermissionTo("role.update")){
-        return $this->Forbidden("you don't have permission to access this page");
-    }
+    {
+        if (!auth()->user()->hasPermissionTo("role.update")) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
@@ -421,17 +424,18 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
         try {
             // Prevent Master Role Updates
-            if ( $request->roleName === "Master") {
+            if ($request->roleName === "Master") {
                 return $this->returnError('You cannot update the Master role ');
             }
 
             DB::beginTransaction();
 
             // Retrieve the role
-            if($this->isMasterRole($request->roleName)) {
-                if(!auth()->user()->hasRole("Master")){
-                return $this->Forbidden("you are not allowed to update this role");
-            }}
+            if ($this->isMasterRole($request->roleName)) {
+                if (!auth()->user()->hasRole("Master")) {
+                    return $this->Forbidden("you are not allowed to update this role");
+                }
+            }
             $role = Role::findByName($request->roleName);
 
             if (!$role) {
@@ -439,9 +443,9 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 return $this->NotFound('Role not found');
             }
 
-            $role->displaying= $request->displayName? $request->displayName:$role->displaying;
-            $role->description= $request->description? $request->description:$role->description;
-           $role->save();
+            $role->displaying = $request->displayName ? $request->displayName : $role->displaying;
+            $role->description = $request->description ? $request->description : $role->description;
+            $role->save();
 
             // Sync permissions
             foreach ($request->permission as $permissionName) {
@@ -454,10 +458,10 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 }
             }
             $role->syncPermissions($request->permission);
-
+            $data['role'] = RolesResource::make($role);
             DB::commit();
 
-            return $this->returnData('role', RolesResource::make($role));
+            return $this->returnData($data);
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());
@@ -467,7 +471,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     public function GetAllPermissions()
     {
         try {
-            if(!auth()->user()->hasPermissionTo("permission.show")){
+            if (!auth()->user()->hasPermissionTo("permission.show")) {
                 return $this->Forbidden("you don't have permission to access this page");
             }
 
@@ -475,18 +479,18 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
 
             $resource = new NewPermissionsResource($permission);
-
-            return $this->returnData('permission', $resource);
+            $data['permission'] = $resource;
+            return $this->returnData($data);
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
-
     }
 
     public function DeleteRole(Request $request)
-    {   if(!auth()->user()->hasPermissionTo("role.delete")){
-        return $this->Forbidden("you don't have permission to access this page");
-    }
+    {
+        if (!auth()->user()->hasPermissionTo("role.delete")) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
@@ -519,8 +523,6 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             }
             DB::commit();
             return $this->returnSuccessMessage('the role deleted successfully');
-
-
         } catch (\Exception $exception) {
             DB::rollBack();
             return $this->returnError($exception->getMessage());

@@ -10,6 +10,16 @@ use Illuminate\Http\Response;
 trait ResponseTrait
 {
 
+
+    public function apiResponse($data, $status, $message, $statusCode)
+    {
+        return response()->json([
+            'status' => $status,
+            'code' => $statusCode,
+            'message' => $message,
+            'data' => $data
+        ], $statusCode);
+    }
     /**
      * Return Error function
      *
@@ -18,11 +28,7 @@ trait ResponseTrait
      */
     public function returnError($msg)
     {
-        return response()->json([
-            'status' => false,
-            'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            'msg' => $msg,
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->apiResponse(null, false, $msg, Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -33,11 +39,14 @@ trait ResponseTrait
      */
     public function returnSuccessMessage($msg = '')
     {
-        return response()->json([
-            'status' => true,
-            'code' => Response::HTTP_OK,
-            'msg' => $msg,
-        ], Response::HTTP_OK);
+        return $this->apiResponse(null, true, $msg, Response::HTTP_OK);
+
+
+        // return response()->json([
+        //     'status' => true,
+        //     'code' => Response::HTTP_OK,
+        //     'msg' => $msg,
+        // ], Response::HTTP_OK);
     }
 
     /**
@@ -48,14 +57,9 @@ trait ResponseTrait
      * @param string $msg
      * @return Response
      */
-    public function returnData($key, $value, $msg = '')
+    public function returnData($data, $msg = '')
     {
-        return response()->json([
-            'status' => true,
-            'code' => Response::HTTP_OK,
-            'msg' => $msg,
-            $key => $value,
-        ], Response::HTTP_OK);
+        return $this->apiResponse($data, true, $msg, Response::HTTP_OK);
     }
 
     /**
@@ -66,16 +70,7 @@ trait ResponseTrait
      */
     public function returnValidationError($validator, $code = 400,)
     {
-        // if ($code == null) {
-        //     $code = $this->returnCodeAccordingToInput($validator);
-        // }
-
-        return response()->json([
-            'status' => false,
-            'code' => $code,
-            'msg' => __('Please check the following errors'),
-            'errors' => $validator->errors()->first(),
-        ], $code);
+        return $this->apiResponse(null, false, $validator->errors()->first(), $code);
     }
 
     public function returnCodeAccordingToInput($validator)
@@ -189,57 +184,34 @@ trait ResponseTrait
     */
     public function badRequest($msg = '')
     {
-        return response()->json([
-            'status' => false,
-            'code' => Response::HTTP_BAD_REQUEST,
-            'msg' => $msg,
-        ], Response::HTTP_BAD_REQUEST);
+        return $this->apiResponse(null, false, $msg, Response::HTTP_BAD_REQUEST);
     }
     /*
     * 403
     */
     public function Forbidden($msg = '')
     {
-        return response()->json([
-            'status' => false,
-            'code' => Response::HTTP_FORBIDDEN,
-            'msg' => $msg,
-        ], Response::HTTP_FORBIDDEN);
+        return $this->apiResponse(null, false, $msg, Response::HTTP_FORBIDDEN);
     }
     /**
      * 401
      */
     public function Unauthorized($msg = '')
     {
-        return response()->json([
-            'status' => false,
-            'code' => Response::HTTP_UNAUTHORIZED,
-            'msg' => $msg,
-        ], Response::HTTP_UNAUTHORIZED);
+        return $this->apiResponse(null, false, $msg, Response::HTTP_UNAUTHORIZED);
     }
     public function NotFound($msg = '')
     {
-        return response()->json([
-            'status' => false,
-            'code' => Response::HTTP_NOT_FOUND,
-            'msg' => $msg,
-        ], Response::HTTP_NOT_FOUND);
+        return $this->apiResponse(null, false, $msg, Response::HTTP_NOT_FOUND);
     }
 
-    public function PaginateData($key, $data, $object)
+    public function PaginateData(array $data, $object)
     {
-        return response()->json([
-            'status' => true,
-            'code' => Response::HTTP_OK,
-            'msg' => null,
-            "data" => [
-                $key => $data,
-                'current_page' => $object->currentPage(),
-                'next_page' => $object->nextPageUrl(),
-                'previous_page' => $object->previousPageUrl(),
-                'total_pages' => $object->lastPage(),
-            ]
-        ], Response::HTTP_OK);
+        $data['current_page'] = $object->currentPage();        // $data[] = 
+        $data['next_page'] = $object->nextPageUrl();
+        $data['previous_page'] = $object->previousPageUrl();
+        $data['total_pages'] = $object->lastPage();
+        return $this->returnData($data);
     }
 
 
@@ -278,7 +250,7 @@ trait ResponseTrait
 
             case 1452: // Cannot add or update a child row due to foreign key constraint
                 return $this->badRequest("Foreign key constraint violation.");
-            case 1644 :
+            case 1644:
                 return $this->badRequest("A category cannot be its own parent");
 
             default:
