@@ -10,6 +10,7 @@ use App\Http\Requests\FilterRequest;
 use App\Http\Requests\IndexCategoryRequest;
 use App\Http\Requests\SaveCategoriesRequest;
 use App\Http\Requests\ShowCategoriesRequest;
+use App\Http\Requests\ShowCategoryRequest;
 use App\Http\Requests\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DepartmentResource;
@@ -67,6 +68,32 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
+
+    public function showCategory(Request $request)
+    {
+        try {
+
+            $perPage = $request->input('per_page', $this->per_page);
+            $pageNumber = $request->input('page', $this->pageNumber);
+
+            $query = Category::query()
+                ->where("parent_id", null)
+                ->whereNotNull("department_id")
+                ->when($request->has("search"),  function ($q) use ($request) {
+                    $q->where("name", "like", "%" . $request->search . "%");
+                });
+
+            $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            $data["categories"] = CategoryResource::collection(
+                $category->load("children")
+            )->each->withDeparted();
+
+            return $this->PaginateData($data, $category);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
 
     public function filter(FilterRequest $request)
     {
@@ -148,6 +175,29 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
+
+    private function updateCategories($department, $categories, $parentId = null)
+    {
+        foreach ($categories as $categoryData) {
+
+            $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
+          
+            $category->update([
+                'name' => $categoryData['name'],
+                "parent_id" => $parentId,
+                "department_id" => $department->id,
+            ]);
+
+            if (!empty($categoryData['chields'])) {
+                $this->updateCategories(
+                    department: $department,
+                    categories: $categoryData['chields'],
+                    parentId: $category->id
+                );
+            }
+        }
+    }
+
     public function create(CreateCategoriesRequest $request)
     {
         try {
@@ -165,33 +215,6 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
-        }
-    }
-
-    private function updateCategories($department, $categories, $parentId = null)
-    {
-        foreach ($categories as $categoryData) {
-
-            $category = Category::where("uuid", $categoryData["uuid"])->firstOrFail();
-            $category->update([
-                'name' => $categoryData['name'],
-                "parent_id" => $parentId,
-                "department_id" => $department->id,
-            ]);
-            // if ($categoryData['name'] != "hi") {
-            //     dd([
-            //         $parentId,
-            //         $categoryData['name']
-            //     ]);
-            // }
-
-            if (!empty($categoryData['chields'])) {
-                $this->updateCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
-                );
-            }
         }
     }
     private function createCategories($department, $categories, $parentId = null)
