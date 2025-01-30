@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class FilterRequest extends FormRequest
 {
@@ -26,8 +27,17 @@ class FilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-          "department_uuid" => "nullable|exists:departments,uuid",
-          "category_uuid" => "nullable|exists:categories,uuid",
+            "department_uuid" => [
+                "nullable','exists:departments,uuid",
+                Rule::exists("categories", "uuid")->where("deleted_at", null)
+
+            ],
+
+            "category_uuid" => [
+                "nullable','exists:categories,uuid",
+                Rule::exists("categories", "uuid")->where("deleted_at", null)
+
+            ],
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ShowCategoriesRequest extends FormRequest
 {
@@ -32,7 +33,10 @@ class ShowCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => "required|exists:departments,uuid"
+            "department_uuid" => [
+                "required",
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+            ]
         ];
     }
 

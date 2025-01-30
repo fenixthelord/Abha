@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class IndexCategoryRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class IndexCategoryRequest extends FormRequest
         return True;
     }
 
-    
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,13 +27,21 @@ class IndexCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => 'sometimes|exists:departments,uuid',
-            'parent_category_uuid' => 'sometimes|exists:categories,uuid',
+            'department_uuid' => [
+                'sometimes',
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+
+            ],
+            'parent_category_uuid' => [
+                'sometimes',
+                Rule::exists("categories" , "uuid")->where("deleted_at", null)
+
+            ],
             'per_page' => 'sometimes|integer|min:1|max:100',
         ];
     }
-    
-    
+
+
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
