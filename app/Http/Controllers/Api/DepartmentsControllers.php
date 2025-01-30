@@ -60,11 +60,19 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'max:255', Rule::unique('departments', 'name->en')]
+                'name' => ['required', 'array'],
+                'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
+                'name.ar' => ['required', 'max:255', Rule::unique('departments', 'name->ar')]
             ], [
                 'name.required' => 'Department name is required.',
                 'name.unique' => 'Department name already exists.',
                 'name.max' => 'Maximum 255 characters allowed.',
+                'name.en.required' => 'Department name is required.',
+                'name.ar.required' => 'Department name is required.',
+                'name.ar.max' => 'Maximum 255 characters allowed.',
+                'name.ar.unique' => 'Department arabic name already exists.',
+                'name.en.unique' => 'Department english name is exists.',
+
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -85,9 +93,10 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+
             if ($department = Department::whereuuid($uuid)->first()) {
                 $validator = Validator::make($request->all(), [
-                    'name' => ['nullable', Rule::unique('departments', 'name')->ignore($department->id), 'max:255'],
+                    'name' => ['nullable', Rule::unique('departments', 'name->'.app()->getLocale())->ignore($department->id), 'max:255'],
                 ]);
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
