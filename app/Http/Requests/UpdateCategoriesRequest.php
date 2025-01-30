@@ -33,7 +33,12 @@ class UpdateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => 'required|uuid|exists:departments,uuid',
+            'department_uuid' => [
+                'required',
+                'uuid',
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+
+            ]
         ];
     }
 
@@ -52,7 +57,11 @@ class UpdateCategoriesRequest extends FormRequest
 
             // Validate child structure
             $childValidator = Validator::make($child, [
-                'uuid' => 'required|string|exists:categories',
+                'uuid' => [
+                    'required',
+                    'uuid',
+                    Rule::exists("categories", "uuid")->where("deleted_at", null)
+                ],
                 'name' => 'required|string',
                 'name' => 'required|string',
                 'chields' => 'nullable|array',
