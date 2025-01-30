@@ -37,20 +37,25 @@ class CreateCategoriesRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
-
             ],
+            "chields" => [
+                "required",
+                "array"
+            ]
         ];
     }
 
     protected function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $this->validateChields($validator, $this->input('chields', []), 'chields');
+            $chields = $this->input('chields', []);
+            $this->validateChields($validator, $chields, 'chields');
         });
     }
 
     private function validateChields($validator, $chields, $path = 'chields')
     {
+
         $namesAR = [];
         $namesEN = [];
         foreach ($chields as $index => $child) {
