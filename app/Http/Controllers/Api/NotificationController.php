@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Validator;
 class NotificationController extends Controller
 {
     use Firebase, ResponseTrait;
-
     public function sendNotification(Request $request)
     {
+        global $status;
         DB::beginTransaction();
 
         try {
@@ -131,8 +131,8 @@ class NotificationController extends Controller
                 'previous_page' => $notifications->previousPageUrl(),
                 'total_pages' => $notifications->lastPage(),
             ];
-            return $this->($data);
-        } catch (\Exception $ex) {
+            return $this->returnData($data);
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
@@ -250,7 +250,7 @@ class NotificationController extends Controller
             } else {
                 return $this->badRequest('user not found.');
             }
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }

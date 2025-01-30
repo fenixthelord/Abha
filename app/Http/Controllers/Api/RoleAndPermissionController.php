@@ -87,7 +87,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             return $this->returnSuccessMessage('Role created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -133,8 +133,8 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 $data['role'] = RolesResource::make($role);
                 return $this->returnData($data);
             }
-        } catch (\Exception $exception) {
-            return $this->returnError($exception->getMessage());
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
     }
 

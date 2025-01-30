@@ -395,9 +395,9 @@ class UserController extends Controller
 
             DB::commit();
             return $this->returnData($image, 'Image Uploaded');
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -429,9 +429,9 @@ class UserController extends Controller
             if ($phone) {
                 return $this->returnSuccessMessage('OTP send successfully');
             }
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -458,9 +458,9 @@ class UserController extends Controller
             $user->save();
             DB::commit();
             $this->returnSuccessMessage('OTP verified successfully');
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
