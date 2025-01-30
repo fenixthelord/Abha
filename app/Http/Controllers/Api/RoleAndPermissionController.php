@@ -415,8 +415,8 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-            'displayName' => 'required|string',
-            'description' => 'required|string',
+            'displayName' => 'string',
+            'description' => 'string',
         ]);
 
         if ($validator->fails()) {
@@ -425,16 +425,17 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
         try {
             // Prevent Master Role Updates
-            if ($request->displayName === "Master" || $request->roleName === "Master") {
-                return $this->returnError('You cannot update the Master role');
+            if ( $request->roleName === "Master") {
+                return $this->returnError('You cannot update the Master role ');
             }
 
             DB::beginTransaction();
 
             // Retrieve the role
             if($this->isMasterRole($request->roleName)) {
+                if(!auth()->user()->hasRole("Master")){
                 return $this->Forbidden("you are not allowed to update this role");
-            }
+            }}
             $role = Role::findByName($request->roleName);
 
             if (!$role) {
@@ -442,11 +443,9 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 return $this->NotFound('Role not found');
             }
 
-            // Update role metadata
-            $role->update([
-                'displaying' => $request->displayName,
-                'description' => $request->description,
-            ]);
+            $role->displaying= $request->displayName? $request->displayName:$role->displaying;
+            $role->description= $request->description? $request->description:$role->description;
+           $role->save();
 
             // Sync permissions
             $role->syncPermissions($request->permission);

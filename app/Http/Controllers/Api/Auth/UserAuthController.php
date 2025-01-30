@@ -126,17 +126,18 @@ class UserAuthController extends Controller
                     if($user->hasRole('Master')){
                         $data['custom_permissions'] = [['action'=>'manage','subject'=>'all']];
                     }else{
-                        $data['custom_permissions'] = CustomPermissionResource::collection($user->getAllPermissions());
+                        $data['custom_permissions'] = CustomPermissionResource::collection( $user->getAllPermissions());
                     }
-
                     $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
                     // Generate a refresh token
                     $refreshToken = Str::random(60);
+
                     $user->update([
                         'refresh_token' => Hash::make($refreshToken),
                         'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
                     ]);
+
 
                     // Include refresh token in the response
                     $data['refresh_token'] = $refreshToken;
