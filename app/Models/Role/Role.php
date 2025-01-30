@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role as BaseRole;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
-use Spatie\Translatable\HasTranslations;
+//use Spatie\Translatable\HasTranslations;
 
 class Role extends BaseRole   implements Auditable
 {
     use AuditingTrait;
-    use HasTranslations;
+    //use HasTranslations;
     use \OwenIt\Auditing\Auditable;
     //use HasAutoPermissions;
 
@@ -24,5 +24,5 @@ class Role extends BaseRole   implements Auditable
         //static::addGlobalScope(new MasterScope());
     }
 
-    private $translatable = ['displaying'];
+  //  private $translatable = ['displaying'];
 }
