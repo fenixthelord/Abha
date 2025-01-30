@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class SaveCategoriesRequest extends FormRequest
+class UpdateCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -19,6 +19,12 @@ class SaveCategoriesRequest extends FormRequest
     {
         return true;
     }
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'department_uuid' => $this->department_uuid,
+    //     ]);
+    // }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,9 +33,7 @@ class SaveCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => 'required|uuid',
-            'department_name' => 'required|string',
-            'chields' => 'nullable|array',
+            'department_uuid' => 'required|uuid|exists:departments,uuid',
         ];
     }
 
@@ -48,6 +52,8 @@ class SaveCategoriesRequest extends FormRequest
 
             // Validate child structure
             $childValidator = Validator::make($child, [
+                'uuid' => 'required|string|exists:categories',
+                'name' => 'required|string',
                 'name' => 'required|string',
                 'chields' => 'nullable|array',
             ]);

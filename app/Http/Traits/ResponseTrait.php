@@ -2,6 +2,9 @@
 
 namespace App\Http\Traits;
 
+use Dotenv\Exception\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
 trait ResponseTrait
@@ -223,14 +226,14 @@ trait ResponseTrait
         ], Response::HTTP_NOT_FOUND);
     }
 
-    public function PaginateData($key ,$data, $object)
+    public function PaginateData($key, $data, $object)
     {
         return response()->json([
             'status' => true,
             'code' => Response::HTTP_OK,
             'msg' => null,
             "data" => [
-                $key => $data ,
+                $key => $data,
                 'current_page' => $object->currentPage(),
                 'next_page' => $object->nextPageUrl(),
                 'previous_page' => $object->previousPageUrl(),
@@ -239,4 +242,47 @@ trait ResponseTrait
         ], Response::HTTP_OK);
     }
 
+
+    public function handleException(\Exception $e)
+    {
+        if ($e instanceof ModelNotFoundException) {
+
+            $modelName = class_basename($e->getModel());
+            return $this->NotFound("$modelName not found");
+        } elseif ($e instanceof ValidationException) {
+
+            $errors = $e->validator;
+            return $this->returnValidationError($errors->first());
+        } elseif ($e instanceof HttpResponseException) {
+
+            return $e->getResponse();
+        } elseif ($e instanceof \Illuminate\Database\QueryException) {
+
+            return $this->handleQueryException($e);
+        } else {
+
+            return $this->returnError($e->getMessage());
+        }
+    }
+
+    protected function handleQueryException(\Illuminate\Database\QueryException $e)
+    {
+        $errorCode = $e->errorInfo[1]; // Error code from the database
+        // dd($e->errorInfo[1]);
+        switch ($errorCode) {
+            case 1062: // Duplicate entry Like Unique Email Twice 
+                return $this->badRequest("Duplicate entry found.");
+
+            case 1451: // Cannot delete or update due to foreign key constraint
+                return $this->badRequest("Cannot delete or update as it is referenced elsewhere.");
+
+            case 1452: // Cannot add or update a child row due to foreign key constraint
+                return $this->badRequest("Foreign key constraint violation.");
+            case 1644 :
+                return $this->badRequest("A category cannot be its own parent");
+
+            default:
+                return $this->returnError("Database error: " . $e->getMessage());
+        }
+    }
 }

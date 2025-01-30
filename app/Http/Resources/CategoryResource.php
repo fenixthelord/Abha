@@ -14,15 +14,18 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // dd($this->children);
+
         return [
             'uuid' => $this->uuid,
             'name' => $this->name,
-            'chields' => $this->when($this->showChildren, CategoryResource::collection($this->children)),
+            "parent_name" => $this->parent?->name,
+            "parent_uuid" => $this->parent?->uuid,
+            "department" => $this->department?->name,
+            "department_uuid" => $this->department?->uuid,
+            'chields' => $this->whenLoaded('children', function () {
+                return CategoryResource::collection($this->children->load('children'));
+            }),
         ];
-    }
-    public function hideChildren()
-    {
-        $this->showChildren = false;
-        return $this;
     }
 }

@@ -3,12 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Http\Traits\ResponseTrait;
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class FilterRequest extends FormRequest
+class DeleteCategoryRequest extends FormRequest
 {
-
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +26,14 @@ class FilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-          "department_uuid" => "nullable|exists:departments,uuid",
-          "category_uuid" => "nullable|exists:categories,uuid",
+            'uuid' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!Category::where('uuid', $value)->exists()) {
+                        $fail('The ' . $attribute . ' is invalid.');
+                    }
+                }
+            ]
         ];
     }
 

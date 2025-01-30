@@ -164,11 +164,10 @@ Route::group(["prefix" => "/categories"], function () {
     Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
     Route::get("/filter", [CategoryController::class, "filter"]);
 
-    /**
-     * This Route is Create , Update and Delete Categories
-     * @param department_uuid
-     */
-    Route::post("/save", [CategoryController::class, "save"]);
+    Route::post("/department/create", [CategoryController::class, "create"]);
+    Route::put("/department/update", [CategoryController::class, "update"]);
+
+    Route::delete("/delete", [CategoryController::class, "delete"]);
 });
 Route::prefix('departments')->group(function () {
     Route::get('/', [DepartmentsControllers::class, 'index']);

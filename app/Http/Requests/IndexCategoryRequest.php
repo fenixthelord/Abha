@@ -26,8 +26,8 @@ class IndexCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_name' => 'sometimes|string|max:255',
-            'parent_category_name' => 'sometimes|string|max:255',
+            'department_uuid' => 'sometimes|exists:departments,uuid',
+            'parent_category_uuid' => 'sometimes|exists:categories,uuid',
             'per_page' => 'sometimes|integer|min:1|max:100',
         ];
     }
