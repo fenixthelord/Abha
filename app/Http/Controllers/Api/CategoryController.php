@@ -69,15 +69,26 @@ class CategoryController extends Controller
         }
     }
 
-    public function showCategory(ShowCategoryRequest $request)
+    public function showCategory(Request $request)
     {
         try {
-            $category = Category::where('uuid', $request->category_uuid)->firstOrFail();
-            $categoryInfo = $category->department()->first();
-            // dd($categoryInfo->name);
-            $data["test"] = DepartmentResource::make($categoryInfo->load("categories"));
-            // dd($data);
-            return $this->returnData($data);
+
+            $perPage = $request->input('per_page', $this->per_page);
+            $pageNumber = $request->input('page', $this->pageNumber);
+
+            $query = Category::query()
+                ->where("parent_id", null)
+                ->whereNotNull("department_id")
+                ->when($request->has("search"),  function ($q) use ($request) {
+                    $q->where("name", "like", "%" . $request->search . "%");
+                });
+
+            $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            $data["categories"] = CategoryResource::collection(
+                $category->load("children")
+            )->each->withDeparted();
+
+            return $this->PaginateData($data, $category);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

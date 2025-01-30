@@ -17,15 +17,32 @@ class CategoryResource extends JsonResource
         // dd($this->children);
 
         return [
-            'uuid' => $this->uuid,
+
+            $this->mergeWhen($this->isDeparted, [
+                "department_uuid" => $this->department?->uuid,
+                "department_name" => $this->department?->name,
+            ]),
+
+            'category_uuid' => $this->uuid,
             'name' => $this->name,
-            // "parent_name" => $this->parent?->name,
-            // "parent_uuid" => $this->parent?->uuid,
-            // "department" => $this->department?->name,
-            // "department_uuid" => $this->department?->uuid,
             'chields' => $this->whenLoaded('children', function () {
                 return CategoryResource::collection($this->children->load('children'));
             }),
         ];
     }
+
+    public function withDeparted()
+    {
+        $this->isDeparted = true;
+        return $this;
+    }
+
+    // public static function collection($resource)
+    // {
+    //     return tap(parent::collection($resource), function ($collection) {
+    //         if (request()->has('with_departed')) {
+    //             $collection->each->withDeparted();
+    //         }
+    //     });
+    // }
 }

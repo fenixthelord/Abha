@@ -20,6 +20,7 @@ class DepartmentResource extends JsonResource
       'chields' => $this->whenLoaded('categories', function () {
         return CategoryResource::collection($this->categories()->where("parent_id", null)->get()->load("children"));
       }),
+
       // 'categories' => $this->whenLoaded('categories', function () {
       //   return CategoryResource::collection($this->children);
       // }),
