@@ -64,7 +64,7 @@ class CategoryController extends Controller
                 object: $categories,
             );
         } catch (\Throwable $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -95,7 +95,7 @@ class CategoryController extends Controller
 
             return $this->returnData($data);
         } catch (\Throwable $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -111,7 +111,7 @@ class CategoryController extends Controller
             return $this->returnSuccessMessage("Category and all related sup-categories deleted successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -124,7 +124,7 @@ class CategoryController extends Controller
 
             return $this->returnData($data);
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -214,6 +214,5 @@ class CategoryController extends Controller
                 );
             }
         }
-
     }
 }

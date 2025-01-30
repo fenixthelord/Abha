@@ -52,7 +52,7 @@ class UserController extends Controller
             return $this->PaginateData($data, $user);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -111,7 +111,7 @@ class UserController extends Controller
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -192,7 +192,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -231,7 +231,7 @@ class UserController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -265,7 +265,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -298,7 +298,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -325,7 +325,7 @@ class UserController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -349,7 +349,7 @@ class UserController extends Controller
                 }
             } else return $this->returnSuccessMessage('No results found');
         } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -376,7 +376,7 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 

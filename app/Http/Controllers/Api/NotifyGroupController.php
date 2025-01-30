@@ -37,11 +37,11 @@ class NotifyGroupController extends Controller
             ]);
             $this->addUsersToNotifyGroup($request, $notifyGroup->uuid);
             DB::commit();
-            $data['group'] =  GroupResource::make($notifyGroup) ;
+            $data['group'] =  GroupResource::make($notifyGroup);
             return $this->returnData($data);
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -64,7 +64,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -86,7 +86,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -120,7 +120,7 @@ class NotifyGroupController extends Controller
                     ? $this->returnSuccessMessage('Notifications sent successfully!')
                     : $this->returnError('Failed to send notifications.');
             } catch (\Exception $e) {
-                return $this->returnError($e->getMessage());
+                return $this->handleException($e);
             }
         } else {
             return $this->badRequest('Group not found');
@@ -146,7 +146,7 @@ class NotifyGroupController extends Controller
             $data['groups'] = GroupResource::collection($notifyGroups);
             return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
-            return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
+            return $this->handleException($e);
         }
     }
     public function groupDetail($groupUuid)
@@ -160,7 +160,7 @@ class NotifyGroupController extends Controller
                 return $this->badRequest('Group not found');
             }
         } catch (Exception $e) {
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
     public function editGroup(Request $request, $groupUuid)
@@ -180,7 +180,7 @@ class NotifyGroupController extends Controller
                 $group->model = $request->model ?? $group->model;
                 $group->save();
                 $group->users()->sync($request->user_uuids);
-                
+
                 $data['group'] = GroupResource::make($group);
 
                 DB::commit();

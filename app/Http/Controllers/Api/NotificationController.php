@@ -80,7 +80,7 @@ class NotificationController extends Controller
                 : $this->returnError('Failed to send notifications.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -102,7 +102,7 @@ class NotificationController extends Controller
             return $this->returnSuccessMessage('Device Token saved successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError('Failed to save device token', $e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -133,7 +133,7 @@ class NotificationController extends Controller
             ];
             return $this->($data);
         } catch (\Exception $ex) {
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -251,7 +251,7 @@ class NotificationController extends Controller
                 return $this->badRequest('user not found.');
             }
         } catch (\Exception $ex) {
-            return $this->badRequest($ex->getMessage());
+            return $this->handleException($e);
         }
     }
 }
