@@ -52,16 +52,22 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ]);
+            ],messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             if ($request->displayName == "Master" || $request->name == "Master") {
                 return $this->Forbidden("you are not allowed to create Master role");
             }
+
             $user = auth()->user();
             if ($user->HasRole('Master')) {
                 $request->roleName = "Master_" . $request->roleName;
+             $role=Role::where('name',$request->roleName);
+             if ($role->exists()) {
+                    return $this->badRequest("this role name alredy in use");
+
+                }
             }
 
             $role = Role::create([
@@ -98,7 +104,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'nullable|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string'
-        ]);
+        ],messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -150,7 +156,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'role' => 'required|exists:roles,name',
 
             'user_uuid' => 'required|exists:users,uuid',
-        ]);
+        ],messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -180,7 +186,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'user_uuid' => 'required|exists:users,uuid',
             'permissions' => 'nullable'
 
-        ]);
+        ],messageValidation());
         if ($validatedData->fails()) {
             return $this->returnValidationError($validatedData);
         }
@@ -265,7 +271,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-        ]);
+        ],messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -304,7 +310,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',
             'user_uuid' => 'required|exists:users,uuid',
-        ]);
+        ],messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -416,7 +422,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'roleName' => 'required|string|exists:roles,name',
             'displayName' => 'string',
             'description' => 'string',
-        ]);
+        ],messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -494,7 +500,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
-        ]);
+        ],messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
