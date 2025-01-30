@@ -448,6 +448,15 @@ if(!auth()->user()->hasPermissionTo("role.show")){
            $role->save();
 
             // Sync permissions
+            foreach ($request->permission as $permissionName) {
+                $permission = Permission::findByName($permissionName);
+                if (!$permission) {
+                    return $this->NotFound('Permission not found');
+                }
+                if ($permission->is_admin==true) {
+                    return $this->Forbidden("you are not allowed to add Master permission");
+                }
+            }
             $role->syncPermissions($request->permission);
 
             DB::commit();
@@ -465,13 +474,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             if(!auth()->user()->hasPermissionTo("permission.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
-            if (auth()->user()->hasrole('Master')) {
-                $permission = Permission::all();
-            } else {
-
-                $permission = Permission::where('is_admin', false)->get();
-            }
-
+            $permission = Permission::where('is_admin', false)->get();
             $resource = new NewPermissionsResource($permission);
 
             return $this->returnData('permission', $resource);
