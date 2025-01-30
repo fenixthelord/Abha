@@ -474,7 +474,10 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             if(!auth()->user()->hasPermissionTo("permission.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
-            $permission = Permission::where('is_admin', false)->get();
+
+                $permission = Permission::where('is_admin', false)->get();
+
+
             $resource = new NewPermissionsResource($permission);
 
             return $this->returnData('permission', $resource);
