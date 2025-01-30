@@ -44,7 +44,18 @@ function messageValidation()
         'image.mimes' => 'Image must be a file of type: jpeg, jpg, png.',
         'image.max' => 'Image must be less than 2MB.',
         'type.required' => 'Type is required.',
-        'roleName.unique' => 'Role name is already in use.'
+        'roleName.unique' => 'Role name is already in use.',
+        'roleName.required' => 'Role name is required.',
+        'roleName.exists' => 'this role doesnt exist.',
+        'roleName.regex' => 'Role name must be without spaces.',
+        'displayName.required.'=>'Display Name is required.',
+        'displayName.unique'=>'Display Name is already in use.',
+        'description.required' => 'Description is required.',
+        'description.string' => 'Description must be a string.',
+        'permission.required' => 'Permission is required.',
+        'role.required' => 'Role is required.',
+        'role.exists' => 'this role doesnt exist.',
+        'name.required' => 'Name is required.',
     ];
 }
 if (!function_exists('SupportedLanguages')) {
