@@ -162,10 +162,17 @@ class CategoryController extends Controller
 
             $department = Department::where('uuid', $request->department_uuid)->first();
 
+
+            $category = Category::where("uuid", $request->category_uuid)->firstOrFail();
+
+            $category->update([
+                'name' => $request->name,
+            ]);
+
             $this->updateCategories(
                 department: $department,
                 categories: $request->chields,
-                parentId: null
+                parentId: $category->id
             );
 
             DB::commit();
