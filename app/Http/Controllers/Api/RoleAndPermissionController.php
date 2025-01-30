@@ -30,13 +30,9 @@ class RoleAndPermissionController extends Controller
 if(!auth()->user()->hasPermissionTo("role.show")){
     return $this->Forbidden("you don't have permission to access this page");
 }
-        if (auth()->user()->hasRole('Master')) {
 
-            $roles = Role::all();
-
-        } else {
             $roles = Role::where('name', '!=', 'Master')->get();
-        }
+
         return $this->returnData('role', RolesResource::collection($roles));
     }
 
@@ -474,7 +470,10 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             if(!auth()->user()->hasPermissionTo("permission.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
-            $permission = Permission::where('is_admin', false)->get();
+
+                $permission = Permission::where('is_admin', false)->get();
+
+
             $resource = new NewPermissionsResource($permission);
 
             return $this->returnData('permission', $resource);
