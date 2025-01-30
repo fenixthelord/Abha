@@ -7,13 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Translatable\HasTranslations;
 
 class NotifyGroup extends Model   implements Auditable
 {
     use HasFactory;
-    use HasAutoPermissions;
+    use HasAutoPermissions, HasTranslations;
     use \OwenIt\Auditing\Auditable;
-    protected $fillable = ['uuid', 'name', 'description','model'];
+
+    private $translatable = ['name', 'description'];
+    protected $fillable = ['uuid', 'name', 'description', 'model'];
 
     // Automatically generate UUID when creating a new NotifyGroup
     protected static function boot()
@@ -30,5 +33,4 @@ class NotifyGroup extends Model   implements Auditable
     {
         return $this->belongsToMany(User::class, 'notify_group_user', 'notify_group_uuid', 'user_uuid', 'uuid', 'uuid');
     }
-
 }

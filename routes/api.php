@@ -55,7 +55,7 @@ Route::prefix('/auth')->group(function () {
 
 Route::prefix('/user')->group(function () {
     route::middleware('auth:sanctum')->group(function () {
-        Route::middleware('activeVerify')->group(function () {
+     //   Route::middleware('activeVerify')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
             Route::post('/me', [UserController::class, 'user_profile']);
             Route::get('/me', [UserController::class, 'user_profile']);
@@ -68,7 +68,8 @@ Route::prefix('/user')->group(function () {
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
         });
-        Route::middleware('activeVerify')->group(function () {
+     //   });
+       // Route::middleware('activeVerify')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
             Route::post('/me', [UserController::class, 'user_profile']);
             Route::get('/me', [UserController::class, 'user_profile']);
@@ -80,8 +81,7 @@ Route::prefix('/user')->group(function () {
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
-        });
-    });
+  //  });
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('activeVerify')->group(function () {
@@ -95,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(function () {
-    Route::middleware('activeVerify')->group(function () {
+ //   Route::middleware('activeVerify')->group(function () {
         Route::get('/', [RoleAndPermissionController::class, 'index']);
         Route::post('/create', [RoleAndPermissionController::class, 'store']);
         Route::post('/permission/create', [RoleAndPermissionController::class, 'CreatePermission']);
@@ -113,7 +113,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
             Route::post('/direct/remove', [RoleAndPermissionController::class, 'RemoveDirectPermission']);
             Route::post('/get', [RoleAndPermissionController::class, 'GetUserPermissions']);
         });
-    });
+ //   });
 });
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);
@@ -135,8 +135,8 @@ Route::post('/save-device-token', [NotificationController::class, 'saveDeviceTok
 Route::prefix('notify-groups')->group(function () {
     Route::get('/', [NotifyGroupController::class, 'allGroup']);
 
-    Route::get('/{groupUuid}', [NotifyGroupController::class, 'groupDetail']);
-    Route::post('/{groupUuid}', [NotifyGroupController::class, 'editGroup']);
+    Route::get('/{groupUuid}/show', [NotifyGroupController::class, 'groupDetail']);
+    Route::post('/{groupUuid}/edit', [NotifyGroupController::class, 'editGroup']);
 
     Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 
@@ -156,7 +156,7 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
 
 /**
  * All Departments and Categories
- * 
+ *
  */
 
 Route::group(["prefix" => "/categories"], function () {

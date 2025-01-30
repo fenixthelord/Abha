@@ -12,7 +12,7 @@ class Category extends Model implements Auditable
 {
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable ,HasTranslations;
 
-    public $translatable = ['name'];
+    private $translatable = ['name'];
 
     protected $fillable = [
         "uuid",

@@ -7,14 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Translatable\HasTranslations;
 
 class Notification extends Model   implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
+    use HasTranslations;
+
+    private $translatable = ['title', 'description'];
+
     protected $table = 'notifications';
     protected $fillable = [
-        'uuid', 'sender_id', 'title', 'description', 'image', 'url', 'schedule_at',
+        'uuid',
+        'sender_id',
+        'title',
+        'description',
+        'image',
+        'url',
+        'schedule_at',
     ];
     protected static function boot()
     {

@@ -21,53 +21,26 @@ class DepartmentsControllers extends Controller
         try {
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
-            if ($request->search) {
-                return $this->search(request());
-            }
-            $department = Department::paginate($perPage, ['*'], 'page', $pageNumber);
+            $departments = Department::query()
+                ->when($request->has('search'), function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
+            $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
+                $pageNumber = 1;
+                $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
+                $data = DepartmentResource::collection($department);
+                return $this->PaginateData("groups" , $data, $department);
             }
-            $data = [
-                'department' => DepartmentResource::collection($department),
-                'current_page' => $department->currentPage(),
-                'next_page' => $department->nextPageUrl(),
-                'previous_page' => $department->previousPageUrl(),
-                'total_pages' => $department->lastPage(),
-            ];
-            return $this->returnData('data', $data, 'success');
+
+            $data =  DepartmentResource::collection($department);
+            return $this->PaginateData("department", $data, $department);
         } catch (\Exception $e) {
             return $this->badRequest($e->getMessage());
         }
     }
 
-    public function search(Request $request)
-    {
-        try {
-            $pageNumber = request()->input('page', 1);
-            $perPage = request()->input('perPage', 10);
-            $search = $request->search;
-            if ($department = Department::where('name', $search)
-                ->paginate($perPage, ['*'], 'page', $pageNumber)) {
-                if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                    return $this->badRequest('Invalid page number');
-                }
 
-                $data = [
-                    'department' => DepartmentResource::collection($department),
-                    'current_page' => $department->currentPage(),
-                    'next_page' => $department->nextPageUrl(),
-                    'previous_page' => $department->previousPageUrl(),
-                    'total_pages' => $department->lastPage(),
-                ];
-                return $this->returnData('data', $data, 'success');
-            } else {
-                return $this->badRequest('Invalid search');
-            }
-        } catch (\Exception $e) {
-            return $this->badRequest($e->getMessage());
-        }
-    }
 
     public function show($uuid)
     {
@@ -87,7 +60,7 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|unique:departments,name|max:255',
+                'name' => ['required', 'max:255', Rule::unique('departments', 'name->en')]
             ], [
                 'name.required' => 'Department name is required.',
                 'name.unique' => 'Department name already exists.',
@@ -149,13 +122,12 @@ class DepartmentsControllers extends Controller
                 return $this->badRequest('Department already deleted.');
             } else {
                 if ($department = Department::whereuuid($uuid)->first()) {
-                    $department->name = $department->name.'-'.$department->uuid.'-deleted';
+                    $department->name = $department->name . '-' . $department->uuid . '-deleted';
                     $department->save();
                     $department->delete();
                     DB::commit();
                     return $this->returnSuccessMessage('Department deleted successfully');
-                }
-                else{
+                } else {
                     return $this->badRequest('Department not found');
                 }
             }

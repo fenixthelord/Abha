@@ -71,7 +71,9 @@ class UserAuthController extends Controller
             if (!$request->role) {
                 $user->assignRole('employee'); // Default role
             } else {
-                $user->syncRoles($request->role);
+                if($request->role!="Master"){
+                $user->syncRoles($request->role);}
+                else{ $user->assignRole('employee');}
             }
             if ($user) {
                 event(new UserRegistered($user));

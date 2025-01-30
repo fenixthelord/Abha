@@ -87,7 +87,7 @@ class PermissionSeed extends Seeder
             $permissions=Permission::all();
             if (!$permissions->isEmpty()){
 
-            $master->syncPermissions($permissions);
+            $master->givePermissionTo($permissions);
         }}
 
     }
