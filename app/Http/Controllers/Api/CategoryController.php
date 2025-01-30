@@ -175,6 +175,29 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
+
+    private function updateCategories($department, $categories, $parentId = null)
+    {
+        foreach ($categories as $categoryData) {
+
+            $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
+          
+            $category->update([
+                'name' => $categoryData['name'],
+                "parent_id" => $parentId,
+                "department_id" => $department->id,
+            ]);
+
+            if (!empty($categoryData['chields'])) {
+                $this->updateCategories(
+                    department: $department,
+                    categories: $categoryData['chields'],
+                    parentId: $category->id
+                );
+            }
+        }
+    }
+
     public function create(CreateCategoriesRequest $request)
     {
         try {
@@ -192,33 +215,6 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
-        }
-    }
-
-    private function updateCategories($department, $categories, $parentId = null)
-    {
-        foreach ($categories as $categoryData) {
-
-            $category = Category::where("uuid", $categoryData["uuid"])->firstOrFail();
-            $category->update([
-                'name' => $categoryData['name'],
-                "parent_id" => $parentId,
-                "department_id" => $department->id,
-            ]);
-            // if ($categoryData['name'] != "hi") {
-            //     dd([
-            //         $parentId,
-            //         $categoryData['name']
-            //     ]);
-            // }
-
-            if (!empty($categoryData['chields'])) {
-                $this->updateCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
-                );
-            }
         }
     }
     private function createCategories($department, $categories, $parentId = null)
