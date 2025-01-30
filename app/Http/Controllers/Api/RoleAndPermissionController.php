@@ -463,7 +463,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     public function GetAllPermissions()
     {
         try {
-            if(auth()->user()->hasPermissionTo("permission.show")){
+            if(!auth()->user()->hasPermissionTo("permission.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
             if (auth()->user()->hasrole('Master')) {
