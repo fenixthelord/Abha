@@ -25,7 +25,7 @@ class OwnerSeeder extends Seeder
 
         if (!$permission->isEmpty()) {
 
-            $owner->syncPermissions($permission);
+            $owner->givePermissionTo($permission);
         }}
     }
 }
