@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateCategoriesRequest;
 use App\Http\Requests\DeleteCategoryRequest;
 use App\Http\Requests\DeleteCatigoryRequest;
 use App\Http\Requests\FilterRequest;
@@ -126,14 +127,13 @@ class CategoryController extends Controller
     public function update(UpdateCategoriesRequest $request)
     {
         try {
-
             DB::beginTransaction();
 
-            $department = Department::where('uuid', $request->department_uuid)->firstOrFail();
+            $department = Department::where('uuid', $request->department_uuid)->first();
 
             $this->updateCategories(
                 department: $department,
-                categories: $request->validated('chields'),
+                categories: $request->chields,
                 parentId: null
             );
 
@@ -141,72 +141,94 @@ class CategoryController extends Controller
             return $this->returnSuccessMessage("Categories updated successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
+        }
+    }
+    public function create(CreateCategoriesRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $department = Department::where('uuid', $request->department_uuid)->first();
+
+            $this->createCategories(
+                department: $department,
+                categories: $request->chields,
+                parentId: null
+            );
+
+            DB::commit();
+            return $this->returnSuccessMessage("Categories created successfully");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
         }
     }
 
     private function updateCategories($department, $categories, $parentId = null)
     {
-        try {
-            foreach ($categories as $categoryData) {
-                $category = Category::where("uuid")->firstOrFail();
-                $category->update([
+        foreach ($categories as $categoryData) {
+
+            $category = Category::where("uuid", $categoryData["uuid"])->firstOrFail();
+            $category->update([
+                'name' => $categoryData['name'],
+                "parent_id" => $parentId,
+                "department_id" => $department->id,
+            ]);
+            // if ($categoryData['name'] != "hi") {
+            //     dd([
+            //         $parentId,
+            //         $categoryData['name']
+            //     ]);
+            // }
+
+            if (!empty($categoryData['chields'])) {
+                $this->updateCategories(
+                    department: $department,
+                    categories: $categoryData['chields'],
+                    parentId: $category->id
+                );
+            }
+        }
+    }
+    private function createCategories($department, $categories, $parentId = null)
+    {
+        foreach ($categories as $categoryData) {
+            if (!isset($categoryData['uuid'])) {
+                $category = Category::Create([
+                    'department_id' => $department->id,
+                    'parent_id' => $parentId,
                     'name' => $categoryData['name']
                 ]);
-                
-                if (!empty($categoryData['chields'])) {
-                    $this->createCategories(
-                        department: $department,
-                        categories: $categoryData['chields'],
-                        parentId: $category->id
-                    );
-                }
+            } else {
+                $category = Category::where("uuid", $categoryData)->firstOrFail();
             }
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            if (!empty($categoryData['chields'])) {
+                $this->createCategories(
+                    department: $department,
+                    categories: $categoryData['chields'],
+                    parentId: $category->id
+                );
+            }
         }
-    }
-    // private function createCategories($department, $categories, $parentId = null)
-    // {
-    //     foreach ($categories as $categoryData) {
-    //         $category = Category::updateOrCreate(
-    //             [
-    //                 "uuid" => $categoryData['uuid'] ?? null,
-    //                 'department_id' => $department->id,
-    //                 'parent_id' => $parentId,
-    //                 'name' => $categoryData['name']
-    //             ],
-    //             ['name' => $categoryData['name']]
-    //         );
 
-    //         // Recursively handle children
-    //         if (!empty($categoryData['chields'])) {
-    //             $this->createCategories(
-    //                 department: $department,
-    //                 categories: $categoryData['chields'],
-    //                 parentId: $category->id
-    //             );
-    //         }
+        // $this->pruneDeletedCategories($department, $categories, $parentId);
+    }
+
+    // private function pruneDeletedCategories(
+    //     Department $department,
+    //     array $currentCategories,
+    //     ?int $parentId = null
+    // ) {
+    //     $currentUuids = collect($currentCategories)->pluck('uuid')->filter()->toArray();
+
+    //     $obsoleteCategories = Category::where('department_id', $department->id)
+    //         ->where('parent_id', $parentId)
+    //         ->whereNotIn('uuid', $currentUuids)
+    //         ->get();
+
+    //     foreach ($obsoleteCategories as $category) {
+    //         $category->deleteWithChildren(); // Ensure this method deletes children
     //     }
-
-    //     $this->pruneDeletedCategories($department, $categories, $parentId);
     // }
-
-    private function pruneDeletedCategories(
-        Department $department,
-        array $currentCategories,
-        ?int $parentId = null
-    ) {
-        $currentUuids = collect($currentCategories)->pluck('uuid')->filter()->toArray();
-
-        $obsoleteCategories = Category::where('department_id', $department->id)
-            ->where('parent_id', $parentId)
-            ->whereNotIn('uuid', $currentUuids)
-            ->get();
-
-        foreach ($obsoleteCategories as $category) {
-            $category->deleteWithChildren(); // Ensure this method deletes children
-        }
-    }
 }

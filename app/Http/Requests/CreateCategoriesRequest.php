@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class SaveCategoriesRequest extends FormRequest
+class CreateCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -34,10 +34,6 @@ class SaveCategoriesRequest extends FormRequest
     {
         return [
             'department_uuid' => 'required|uuid|exists:departments,uuid',
-            'chields' => 'nullable|array',
-            'chields.*.name' => 'required|array',
-            'chields.*.name.en' => 'required|string',
-            'chields.*.name.ar' => 'required|string',
         ];
     }
 
@@ -56,12 +52,24 @@ class SaveCategoriesRequest extends FormRequest
             $currentPath = "{$path}.{$index}";
 
             // Validate child structure
-            $childValidator = Validator::make($child, [
-                'name' => 'required|array',
-                'name.en' => 'required|string',
-                'name.ar' => 'required|string',
-                'chields' => 'nullable|array',
-            ]);
+            if (isset($child["uuid"])) {
+                $childValidator = Validator::make($child, [
+                    'uuid' => 'sometimes|string|exists:categories',
+                ]);
+            } else {
+                $childValidator = Validator::make($child, [
+                    'name' => 'required|array',
+                    'name.en' => 'required|string|min:2|max:255',
+                    'name.ar' => 'required|string|min:2|max:255',
+                    'chields' => 'nullable|array',
+                ], [
+                    'name.required' => 'Category name is required',
+                    'name.en.required' => 'English category name is required',
+                    'name.ar.required' => 'Arabic category name is required',
+                    'name.*.min' => 'Category name must be at least 2 characters',
+                    'uuid.exists' => 'Selected category does not exist',
+                ]);
+            }
 
             if ($childValidator->fails()) {
                 foreach ($childValidator->errors()->messages() as $key => $messages) {

@@ -161,12 +161,14 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
 
 Route::group(["prefix" => "/categories"], function () {
     Route::get("/", [CategoryController::class, "index"]);
-    Route::delete("/delete", [CategoryController::class, "delete"]);
-    Route::get("/filter", [CategoryController::class, "filter"]);
     Route::get("/{department_uuid}/show", [CategoryController::class, "show"]);
-    // Route::post("/add", [CategoryController::class, "add"]);
+    Route::get("/filter", [CategoryController::class, "filter"]);
+
+    Route::post("/department/create", [CategoryController::class, "create"]);
     Route::put("/department/update", [CategoryController::class, "update"]);
     // Route::get("/{department_uuid}/update", [CategoryController::class, "showDepartmentWithChields"]);
+
+    Route::delete("/delete", [CategoryController::class, "delete"]);
 });
 Route::prefix('departments')->group(function () {
     Route::get('/', [DepartmentsControllers::class, 'index']);
