@@ -75,7 +75,7 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function showCategory(Request $request)
+    public function list(Request $request)
     {
         try {
 
