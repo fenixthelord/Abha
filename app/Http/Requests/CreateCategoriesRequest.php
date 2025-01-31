@@ -26,7 +26,6 @@ class CreateCategoriesRequest extends FormRequest
     }
     protected function prepareForValidation(): void
     {
-
         if (request()->has("department_uuid")) {
             $this->departmentId = Department::where("uuid", $this->department_uuid)->pluck("id")->first();
         }
