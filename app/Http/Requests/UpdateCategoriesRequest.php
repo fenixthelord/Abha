@@ -44,12 +44,11 @@ class UpdateCategoriesRequest extends FormRequest
                 'uuid',
                 Rule::exists("categories", "uuid")->where("deleted_at", null)
             ],
-            "name" => ["required"],
             "name" => [
                 "required",
                 "string",
                 "max:255",
-                Rule::unique("categories", "name->" . app()->getLocale())->ignore($this->category_uuid, "uuid")
+                Rule::unique("categories", "name->" .  app()->getLocale())->ignore($this->category_uuid, "uuid")
             ],
             "chields" => ["required", "array"]
         ];
@@ -79,9 +78,7 @@ class UpdateCategoriesRequest extends FormRequest
                     'uuid',
                     Rule::exists("categories", "uuid")->where("deleted_at", null)
                 ],
-                "name" => ["required", "array",],
-                "name.en" => ["required", "string", "max:255"],
-                "name.ar" => ["required", "string", "max:255"],
+                "name" => ["required"],
                 'chields' => 'nullable|array',
             ]);
 
