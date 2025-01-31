@@ -44,9 +44,13 @@ class UpdateCategoriesRequest extends FormRequest
                 'uuid',
                 Rule::exists("categories", "uuid")->where("deleted_at", null)
             ],
-            "name" => ["required", "array",],
-            "name.en" => ["required", "string", "max:255"],
-            "name.ar" => ["required", "string", "max:255"],
+            "name" => ["required"],
+            "name" => [
+                "required",
+                "string",
+                "max:255",
+                Rule::unique("categories", "name->" . app()->getLocale())->ignore($this->category_uuid, "uuid")
+            ],
             "chields" => ["required", "array"]
         ];
     }
@@ -64,8 +68,7 @@ class UpdateCategoriesRequest extends FormRequest
             $validator->errors()->add("chields", "The chields array is empty");
             throw new HttpResponseException($this->returnValidationError($validator));
         }
-        $namesAR = [];
-        $namesEN = [];
+        $names = [];
         foreach ($chields as $index => $child) {
             $currentPath = "{$path}.{$index}";
 
@@ -92,20 +95,12 @@ class UpdateCategoriesRequest extends FormRequest
 
             // Check for duplicate names in this same level
             // Check for duplicate names in this same level
-            $nameEN = $child['name']["en"] ?? null;
-            $nameAR = $child['name']["ar"] ?? null;
-            if ($nameEN !== null) {
-                if (in_array($nameEN, $namesEN)) {
-                    $validator->errors()->add("{$currentPath}.name.en", "The name '{$nameEN}' must be unique within this level.");
+            $name = $child['name'] ?? null;
+            if ($name !== null) {
+                if (in_array($name, $names)) {
+                    $validator->errors()->add("{$currentPath}.name", "The name '{$name}' must be unique within this level.");
                 } else {
-                    $namesEN[] = $nameEN;
-                }
-            }
-            if ($nameAR !== null) {
-                if (in_array($nameAR, $namesAR)) {
-                    $validator->errors()->add("{$currentPath}.name.ar", "The name '{$nameAR}' must be unique within this level.");
-                } else {
-                    $namesAR[] = $nameAR;
+                    $names[] = $name;
                 }
             }
 

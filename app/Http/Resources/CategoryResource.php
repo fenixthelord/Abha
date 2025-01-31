@@ -20,11 +20,11 @@ class CategoryResource extends JsonResource
 
             $this->mergeWhen($this->isDeparted, [
                 "department_uuid" => $this->department?->uuid,
-                "department_name" => $this->department?->getTranslations('name'),
+                "department_name" => $this->department?->name,
             ]),
 
             'category_uuid' => $this->uuid,
-            'name' => $this->getTranslations('name'),
+            'name' => $this->name,
             'chields' => $this->whenLoaded('children', function () {
                 return CategoryResource::collection($this->children->load('children'));
             }),

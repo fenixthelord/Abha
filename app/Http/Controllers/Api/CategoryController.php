@@ -161,8 +161,6 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $department = Department::where('uuid', $request->department_uuid)->first();
-
-
             $category = Category::where("uuid", $request->category_uuid)->firstOrFail();
 
             $category->update([
@@ -183,12 +181,19 @@ class CategoryController extends Controller
         }
     }
 
+    /**
+     * This function is used to update categories and sub-categories
+     * @param $departmentId
+     * @param $categories
+     * @param $parentId
+     * @return void
+     */
     private function updateCategories($department, $categories, $parentId = null)
     {
         foreach ($categories as $categoryData) {
 
             $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
-          
+
             $category->update([
                 'name' => $categoryData['name'],
                 "parent_id" => $parentId,
@@ -205,16 +210,29 @@ class CategoryController extends Controller
         }
     }
 
+    /**
+     * This function is used to create categories and sub-categories 
+     * @param CreateCategoriesRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function create(CreateCategoriesRequest $request)
     {
         try {
             DB::beginTransaction();
             $department = Department::where('uuid', $request->department_uuid)->first();
 
+
+            $category = Category::create([
+                'name' => $request->name,
+                "parent_id" => null,
+                "department_id" => $department->id,
+            ]);
+
             $this->createCategories(
-                department: $department,
+                departmentId: $department->id,
                 categories: $request->chields,
-                parentId: null
+                parentId: $category->id
             );
 
             DB::commit();
@@ -224,25 +242,35 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
-    private function createCategories($department, $categories, $parentId = null)
+
+    /**
+     * @param $departmentId
+     * @param $categories
+     * @param $parentId
+     * @return void
+     */
+    private function createCategories($departmentId, $categories, $parentId = null)
     {
-        foreach ($categories as $categoryData) {
-            if (!isset($categoryData['uuid'])) {
+        try {
+            foreach ($categories as $categoryData) {
+
                 $category = Category::Create([
-                    'department_id' => $department->id,
+                    'department_id' => $departmentId,
                     'parent_id' => $parentId,
                     'name' => $categoryData['name']
                 ]);
-            } else {
-                $category = Category::where("uuid", $categoryData)->firstOrFail();
+
+                if (!empty($categoryData['chields'])) {
+                    $this->createCategories(
+                        departmentId: $departmentId,
+                        categories: $categoryData['chields'],
+                        parentId: $category->id
+                    );
+                }
             }
-            if (!empty($categoryData['chields'])) {
-                $this->createCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
-                );
-            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
         }
     }
 }

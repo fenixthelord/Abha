@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Http\Traits\ResponseTrait;
+use App\Models\Category;
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Request;
@@ -12,6 +14,9 @@ use Illuminate\Validation\Rule;
 class CreateCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
+
+    private $departmentId ;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -19,12 +24,14 @@ class CreateCategoriesRequest extends FormRequest
     {
         return true;
     }
-    // protected function prepareForValidation(): void
-    // {
-    //     $this->merge([
-    //         'department_uuid' => $this->department_uuid,
-    //     ]);
-    // }
+    protected function prepareForValidation(): void
+    {
+
+        if (request()->has("department_uuid")) {
+            $this->departmentId = Department::where("uuid", $this->department_uuid)->pluck("id")->first();
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,21 +40,39 @@ class CreateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => [
-                'required',
-                'uuid',
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
-            ],
-            "chields" => [
+            "department_uuid" => ["required", "exists:departments,uuid"],
+            "name" => ["required", "array"],
+            "name.en" => [
                 "required",
-                "array"
-            ]
+                "string",
+                "min:2",
+                "max:255",
+                Rule::unique('categories', 'name->en')
+                    ->whereNull('parent_id')
+                    ->where("department_id", $this->departmentId)
+            ],
+            "name.ar" => [
+                "required",
+                "string",
+                "min:2",
+                "max:255",
+                Rule::unique('categories', 'name->ar')
+                    ->whereNull('parent_id')
+                    ->where("department_id", $this->departmentId)
+            ],
+            "chields" => ["required", "array"]
         ];
     }
 
     protected function withValidator($validator)
     {
         $validator->after(function ($validator) {
+
+            // $parentCategories = Category::where("department_id", $this->departmentId)->whereNull("parent_id")->pluck("name")->toArray();
+            // $
+            // if (count($parentCategories) > 0) {
+            // }
+
             $chields = $this->input('chields', []);
             $this->validateChields($validator, $chields, 'chields');
         });
@@ -55,6 +80,11 @@ class CreateCategoriesRequest extends FormRequest
 
     private function validateChields($validator, $chields, $path = 'chields')
     {
+        if (empty($chields)) {
+            $validator->errors()->add("chields", "The chields array is empty");
+            throw new HttpResponseException($this->returnValidationError($validator));
+        }
+
 
         $namesAR = [];
         $namesEN = [];
