@@ -91,7 +91,6 @@ class UpdateCategoriesRequest extends FormRequest
             }
 
             // Check for duplicate names in this same level
-            // Check for duplicate names in this same level
             $name = $child['name'] ?? null;
             if ($name !== null) {
                 if (in_array($name, $names)) {
