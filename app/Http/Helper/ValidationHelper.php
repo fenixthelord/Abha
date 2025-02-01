@@ -56,6 +56,14 @@ function messageValidation()
         'role.required' => 'Role is required.',
         'role.exists' => 'this role doesnt exist.',
         'name.required' => 'Name is required.',
+        'name.required' => 'Department name is required.',
+        'name.unique' => 'Department name already exists.',
+        'name.max' => 'Maximum 255 characters allowed.',
+        'name.en.required' => 'Department name is required.',
+        'name.ar.required' => 'Department name is required.',
+        'name.ar.max' => 'Maximum 255 characters allowed.',
+        'name.ar.unique' => 'Department arabic name already exists.',
+        'name.en.unique' => 'Department english name is exists.',
     ];
 }
 if (!function_exists('SupportedLanguages')) {
