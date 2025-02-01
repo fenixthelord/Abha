@@ -37,10 +37,11 @@ class NotifyGroupController extends Controller
             ]);
             $this->addUsersToNotifyGroup($request, $notifyGroup->uuid);
             DB::commit();
-            return $this->returnData('group', GroupResource::make($notifyGroup));
+            $data['group'] =  GroupResource::make($notifyGroup);
+            return $this->returnData($data);
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -63,7 +64,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -85,7 +86,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -95,7 +96,7 @@ class NotifyGroupController extends Controller
         if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
 
             $userIds = $notifyGroup->users()->pluck('users.id');
-            if(!$userIds){
+            if (!$userIds) {
                 return $this->badRequest('Group does not  have user');
             }
             $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
@@ -119,7 +120,7 @@ class NotifyGroupController extends Controller
                     ? $this->returnSuccessMessage('Notifications sent successfully!')
                     : $this->returnError('Failed to send notifications.');
             } catch (\Exception $e) {
-                return $this->returnError($e->getMessage());
+                return $this->handleException($e);
             }
         } else {
             return $this->badRequest('Group not found');
@@ -133,19 +134,19 @@ class NotifyGroupController extends Controller
             $perPage = request()->input('perPage', 10);
             $groups = NotifyGroup::query()
                 ->when($request->has('search'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            });
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
             $notifyGroups = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($pageNumber > $notifyGroups->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 $pageNumber = 1;
                 $notifyGroup = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
-                $data = GroupResource::collection($notifyGroup);
-                return $this->PaginateData("groups" , $data, $notifyGroup);
+                $data["groups"] = GroupResource::collection($notifyGroup);
+                return $this->PaginateData($data, $notifyGroup);
             }
-            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
-
+            $data['groups'] = GroupResource::collection($notifyGroups);
+            return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
-            return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
+            return $this->handleException($e);
         }
     }
     public function groupDetail($groupUuid)
@@ -154,41 +155,42 @@ class NotifyGroupController extends Controller
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
                 $data['members'] = UserResource::collection($group->users);
-                return $this->returnData('group', $data);
-            }else{
+                return $this->returnData($data);
+            } else {
                 return $this->badRequest('Group not found');
             }
-        }catch (Exception $e) {
-            return $this->badRequest($e->getMessage());
+        } catch (Exception $e) {
+            return $this->handleException($e);
         }
     }
     public function editGroup(Request $request, $groupUuid)
     {
         DB::beginTransaction();
         try {
-            if($group = NotifyGroup::whereuuid($groupUuid)->first()){
-            $request->validate([
-                'name' => ['nullable','string',Rule::unique('notify_groups', 'name')->ignore($group->id)],
-                'description' => 'nullable|string',
-                'model' => 'nullable|string',
-                'user_uuids' => 'nullable|array',
-           //     'user_uuids.*' => 'exists:users,uuid',
-            ]);
+            if ($group = NotifyGroup::whereuuid($groupUuid)->first()) {
+                $request->validate([
+                    'name' => ['nullable', 'string', Rule::unique('notify_groups', 'name')->ignore($group->id)],
+                    'description' => 'nullable|string',
+                    'model' => 'nullable|string',
+                    'user_uuids' => 'nullable|array',
+                    //     'user_uuids.*' => 'exists:users,uuid',
+                ]);
                 $group->name = $request->name ?? $group->name;
                 $group->description = $request->description ?? $group->description;
                 $group->model = $request->model ?? $group->model;
                 $group->save();
                 $group->users()->sync($request->user_uuids);
 
+                $data['group'] = GroupResource::make($group);
 
-            DB::commit();
-            return $this->returnData('group', GroupResource::make($group));
-            }else{
+                DB::commit();
+                return $this->returnData($data);
+            } else {
                 return $this->badRequest('Group not found');
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->badRequest($e->getMessage());
+            return $this->handleException($e);
         }
     }
 }

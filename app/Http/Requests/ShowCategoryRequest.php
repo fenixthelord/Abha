@@ -7,9 +7,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class FilterRequest extends FormRequest
+class ShowCategoryRequest extends FormRequest
 {
-
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -27,17 +26,7 @@ class FilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
-                "nullable",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
-
-            ],
-
-            "category_uuid" => [
-                "nullable",
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
-
-            ],
+            'category_uuid' => ['required', Rule::exists("categories", 'uuid')->where('deleted_at', null)],
         ];
     }
 

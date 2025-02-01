@@ -16,10 +16,10 @@ class LanguageController extends Controller
                 $locale = 'en';
             }
             app()->setLocale($locale);
-            
+
             return $this->returnSuccessMessage('Language changed successfully');
         } catch (\Exception $e) {
-            abort(400 , $e->getMessage()); 
+            return $this->handleException($e);
         }
     }
 }

@@ -15,11 +15,12 @@ class DepartmentResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      'uuid' => $this->uuid,
+      'department_uuid' => $this->uuid,
       'name' => $this->name,
       'chields' => $this->whenLoaded('categories', function () {
         return CategoryResource::collection($this->categories()->where("parent_id", null)->get()->load("children"));
       }),
+
       // 'categories' => $this->whenLoaded('categories', function () {
       //   return CategoryResource::collection($this->children);
       // }),

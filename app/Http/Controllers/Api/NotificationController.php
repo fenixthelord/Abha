@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Validator;
 class NotificationController extends Controller
 {
     use Firebase, ResponseTrait;
-
     public function sendNotification(Request $request)
     {
+        global $status;
         DB::beginTransaction();
 
         try {
@@ -80,7 +80,7 @@ class NotificationController extends Controller
                 : $this->returnError('Failed to send notifications.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError($e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -102,7 +102,7 @@ class NotificationController extends Controller
             return $this->returnSuccessMessage('Device Token saved successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError('Failed to save device token', $e->getMessage());
+            return $this->handleException($e);
         }
     }
 
@@ -131,9 +131,9 @@ class NotificationController extends Controller
                 'previous_page' => $notifications->previousPageUrl(),
                 'total_pages' => $notifications->lastPage(),
             ];
-            return $this->returnData("data", $data);
-        } catch (\Exception $ex) {
-            return $this->badRequest($ex->getMessage());
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
     }
 
@@ -245,19 +245,13 @@ class NotificationController extends Controller
                 if ($pageNumber > $notifications->lastPage() || $pageNumber < 1 || $perPage < 1) {
                     return $this->badRequest('Invalid page number');
                 }
-                $data = [
-                    'users' => NotificationResource::collection($notifications),
-                    'current_page' => $notifications->currentPage(),
-                    'next_page' => $notifications->nextPageUrl(),
-                    'previous_page' => $notifications->previousPageUrl(),
-                    'total_pages' => $notifications->lastPage(),
-                ];
-                return $this->returnData("data", $data);
+                $data['users'] = NotificationResource::collection($notifications);
+                return $this->PaginateData($data , $notifications );
             } else {
                 return $this->badRequest('user not found.');
             }
-        } catch (\Exception $ex) {
-            return $this->badRequest($ex->getMessage());
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
     }
 }

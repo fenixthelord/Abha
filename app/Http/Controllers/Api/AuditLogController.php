@@ -85,7 +85,7 @@ class AuditLogController extends Controller
             return $log;
         });
 
-        return $this->returnData('data',$auditLogs);
+        return $this->returnData($auditLogs);
     }
 
 }

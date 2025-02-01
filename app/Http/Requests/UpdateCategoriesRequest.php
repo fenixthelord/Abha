@@ -38,7 +38,16 @@ class UpdateCategoriesRequest extends FormRequest
                 'uuid',
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
 
-            ]
+            ],
+            "category_uuid" => [
+                'required',
+                'uuid',
+                Rule::exists("categories", "uuid")->where("deleted_at", null)
+            ],
+            "name" => ["required", "array",],
+            "name.en" => ["required", "string", "max:255"],
+            "name.ar" => ["required", "string", "max:255"],
+            "chields" => ["required", "array"]
         ];
     }
 
@@ -51,19 +60,25 @@ class UpdateCategoriesRequest extends FormRequest
 
     private function validateChields($validator, $chields, $path = 'chields')
     {
-        $names = [];
+        if (empty($chields)) {
+            $validator->errors()->add("chields", "The chields array is empty");
+            throw new HttpResponseException($this->returnValidationError($validator));
+        }
+        $namesAR = [];
+        $namesEN = [];
         foreach ($chields as $index => $child) {
             $currentPath = "{$path}.{$index}";
 
             // Validate child structure
             $childValidator = Validator::make($child, [
-                'uuid' => [
+                'category_uuid' => [
                     'required',
                     'uuid',
                     Rule::exists("categories", "uuid")->where("deleted_at", null)
                 ],
-                'name' => 'required|string',
-                'name' => 'required|string',
+                "name" => ["required", "array",],
+                "name.en" => ["required", "string", "max:255"],
+                "name.ar" => ["required", "string", "max:255"],
                 'chields' => 'nullable|array',
             ]);
 
@@ -76,12 +91,21 @@ class UpdateCategoriesRequest extends FormRequest
             }
 
             // Check for duplicate names in this same level
-            $name = $child['name'] ?? null;
-            if ($name !== null) {
-                if (in_array($name, $names)) {
-                    $validator->errors()->add("{$currentPath}.name", "The name '{$name}' must be unique within this level.");
+            // Check for duplicate names in this same level
+            $nameEN = $child['name']["en"] ?? null;
+            $nameAR = $child['name']["ar"] ?? null;
+            if ($nameEN !== null) {
+                if (in_array($nameEN, $namesEN)) {
+                    $validator->errors()->add("{$currentPath}.name.en", "The name '{$nameEN}' must be unique within this level.");
                 } else {
-                    $names[] = $name;
+                    $namesEN[] = $nameEN;
+                }
+            }
+            if ($nameAR !== null) {
+                if (in_array($nameAR, $namesAR)) {
+                    $validator->errors()->add("{$currentPath}.name.ar", "The name '{$nameAR}' must be unique within this level.");
+                } else {
+                    $namesAR[] = $nameAR;
                 }
             }
 
