@@ -17,6 +17,12 @@ class FormField extends Model
     ];
 
     protected $casts = [
-        'type' => FormFiledType::class
+        'type' => FormFiledType::class,
+        'options' => 'array',
     ];
+
+    public function form()
+    {
+        return $this->belongsTo(Form::class);
+    }
 }
