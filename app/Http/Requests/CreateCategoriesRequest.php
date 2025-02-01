@@ -67,11 +67,6 @@ class CreateCategoriesRequest extends FormRequest
     {
         $validator->after(function ($validator) {
 
-            // $parentCategories = Category::where("department_id", $this->departmentId)->whereNull("parent_id")->pluck("name")->toArray();
-            // $
-            // if (count($parentCategories) > 0) {
-            // }
-
             $chields = $this->input('chields', []);
             $this->validateChields($validator, $chields, 'chields');
         });
@@ -106,12 +101,6 @@ class CreateCategoriesRequest extends FormRequest
                     'name.en' => 'required|string|min:2|max:255',
                     'name.ar' => 'required|string|min:2|max:255',
                     'chields' => 'nullable|array',
-                ], [
-                    'name.required' => 'Category name is required',
-                    'name.en.required' => 'English category name is required',
-                    'name.ar.required' => 'Arabic category name is required',
-                    'name.*.min' => 'Category name must be at least 2 characters',
-                    'uuid.exists' => 'Selected category does not exist',
                 ]);
             }
 
