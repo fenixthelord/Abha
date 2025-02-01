@@ -13,6 +13,7 @@ use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class NotifyGroupController extends Controller
@@ -141,11 +142,13 @@ class NotifyGroupController extends Controller
             if ($pageNumber > $notifyGroups->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 $pageNumber = 1;
                 $notifyGroup = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
-                $data = GroupResource::collection($notifyGroup);
-                return $this->PaginateData("groups", $data, $notifyGroup);
+                $data["groups"] = GroupResource::collection($notifyGroup);
+                return $this->PaginateData($data, $notifyGroup);
             }
-            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
 
+            $data['groups'] = GroupResource::collection($notifyGroups);
+
+            return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
@@ -196,6 +199,30 @@ class NotifyGroupController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return $this->badRequest($e->getMessage());
+        }
+    }
+
+    public function deleteNotifyGroup(Request $request, $notifyGroupUuid)
+    {
+        try {
+            DB::beginTransaction();
+            $validated = Validator::make(['notifyGroupId' => $notifyGroupUuid], [
+                'notifyGroupId' => 'required|string|exists:notify_groups,uuid',
+            ]);
+            if ($validated->fails()) {
+                return $this->returnValidationError($validated);
+            }
+            if ($notifyGroup = NotifyGroup::where('uuid', $request->notifyGroupId)->first()) {
+                $notifyGroup->users()->delete();
+                $notifyGroup->delete();
+                DB::commit();
+                return $this->returnSuccessMessage('Notify group Deleted successfully');
+            } else {
+                return $this->badRequest('Group not found');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
         }
     }
 }
