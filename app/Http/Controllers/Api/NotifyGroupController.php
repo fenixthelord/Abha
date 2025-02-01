@@ -141,11 +141,13 @@ class NotifyGroupController extends Controller
             if ($pageNumber > $notifyGroups->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 $pageNumber = 1;
                 $notifyGroup = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
-                $data = GroupResource::collection($notifyGroup);
-                return $this->PaginateData("groups", $data, $notifyGroup);
+                $data["groups"] = GroupResource::collection($notifyGroup);
+                return $this->PaginateData($data, $notifyGroup);
             }
-            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
 
+            $data['groups'] = GroupResource::collection($notifyGroups);
+
+            return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
