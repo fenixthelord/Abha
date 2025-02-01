@@ -4,8 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Form extends Model
 {
-    use HasFactory;
+    use HasTranslations;
+
+    protected $fillable = ['category_id', 'name'];
+    private $translatable = ['name'];
+
+    public function fields()
+    {
+        return $this->hasMany(FormField::class);
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(FormSubmission::class);
+    }
 }
