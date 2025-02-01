@@ -539,17 +539,26 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     }
     public function ShowRole(Request $request){
         $validator = Validator::make($request->all(), [
-            'roleName' => 'required'
-        ]);
+            'roleName' => 'required|exists:roles,name'
+        ],
+           messageValidation() );
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
-        $role=Role::findByName($request->roleName);
-        if (!$role) {
+        try {
+
+
+            $roles = Role::findByName($request->roleName);
+
+        if (!$roles) {
             return $this->NotFound('Role not found');
         }
-       $data['role']=RolesResource::make($role);
+       $data['role']=RolesResource::make($roles);
+
         return $this->returnData($data);
+    }
+    catch (\Exception $exception){
+        return  $this->handleException($exception);}
     }
     public function isMasterRole($roleName)
     {
