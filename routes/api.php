@@ -126,6 +126,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
     Route::post('/role/sync', [RoleAndPermissionController::class, 'SyncPermission']);
     Route::post('roles/delete', [RoleAndPermissionController::class, 'DeleteRole']);
     Route::get('permissions/get', [RoleAndPermissionController::class, 'GetAllPermissions']);
+    Route::post('/get-role', [RoleAndPermissionController::class, 'ShowRole']);
     Route::prefix('users')->group(function () {
         Route::post('/permissions', [RoleAndPermissionController::class, 'assignPermission']);
         Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
