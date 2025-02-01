@@ -206,7 +206,7 @@ class NotifyGroupController extends Controller
     {
         try {
             DB::beginTransaction();
-            $validated = Validator::make(['notifyGroupId' => $notifyGroupUuid],[
+            $validated = Validator::make(['notifyGroupId' => $notifyGroupUuid], [
                 'notifyGroupId' => 'required|string|exists:notify_groups,uuid',
             ]);
             if ($validated->fails()) {
