@@ -9,5 +9,6 @@ enum FormFiledType: string
     case DateField = 'date';
     case Dropdownfield = 'dropdown';
     case RadioButton = 'radio';
+    case CheckboxButton = 'checkbox';
     case UploadButton = 'upload';
 }

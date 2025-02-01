@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('form_id')->constrained('forms')->onDelete('cascade');
             $table->string('label');
-            $table->string('type'); // text, email, number, checkbox, select, etc.
-            $table->json('options')->nullable(); // Store dropdown/radio options
+            $table->string('type');
+            $table->json('options')->nullable();
             $table->boolean('required')->default(false);
-            $table->integer('order')->default(0); // Field order in the form
+            $table->integer('order')->default(0);
             $table->timestamps();
         });
     }
