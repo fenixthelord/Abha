@@ -63,17 +63,7 @@ class DepartmentsControllers extends Controller
                 'name' => ['required', 'array'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
                 'name.ar' => ['required', 'max:255', Rule::unique('departments', 'name->ar')]
-            ], [
-                'name.required' => 'Department name is required.',
-                'name.unique' => 'Department name already exists.',
-                'name.max' => 'Maximum 255 characters allowed.',
-                'name.en.required' => 'Department name is required.',
-                'name.ar.required' => 'Department name is required.',
-                'name.ar.max' => 'Maximum 255 characters allowed.',
-                'name.ar.unique' => 'Department arabic name already exists.',
-                'name.en.unique' => 'Department english name is exists.',
-
-            ]);
+            ],messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -96,8 +86,10 @@ class DepartmentsControllers extends Controller
 
             if ($department = Department::whereuuid($uuid)->first()) {
                 $validator = Validator::make($request->all(), [
-                    'name' => ['nullable', Rule::unique('departments', 'name->'.app()->getLocale())->ignore($department->id), 'max:255'],
-                ]);
+                    'name' => ['nullable', 'array'],
+                    'name.en' => ['required_with:name', 'max:255', Rule::unique('departments', 'name->en')->ignore($department->id)],
+                    'name.ar' => ['required_with:name', 'max:255', Rule::unique('departments', 'name->ar')->ignore($department->id)]
+                ],messageValidation());
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
                 }
