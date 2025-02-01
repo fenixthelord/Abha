@@ -25,51 +25,57 @@ class CategoryController extends Controller
 {
     use ResponseTrait;
 
-    public function index(IndexCategoryRequest $request)
-    {
-        try {
-            $perPage = $request->input('per_page', $this->per_page);
-            $pageNumber = $request->input('page', $this->pageNumber);
+    // public function index(IndexCategoryRequest $request)
+    // {
+    //     try {
+    //         $perPage = $request->input('per_page', $this->per_page);
+    //         $pageNumber = $request->input('page', $this->pageNumber);
 
-            $categoriesQuery = Category::query()
-                ->when($request->has('department_uuid') &&  !$request->has('parent_category_uuid'), function ($q) use ($request) {
-                    $q->where(
-                        "department_id",
-                        Department::where('uuid', $request->department_uuid)
-                            ->pluck('id')->firstOrFail()
-                    );
-                })
-                ->when($request->has('parent_category_uuid'), function ($q) use ($request) {
-                    $q->where(
-                        "parent_id",
-                        Category::where('uuid', $request->parent_category_uuid)
-                            ->pluck('id')->firstOrFail()
-                    );
-                });
+    //         $categoriesQuery = Category::query()
+    //             ->when($request->has('department_uuid') &&  !$request->has('parent_category_uuid'), function ($q) use ($request) {
+    //                 $q->where(
+    //                     "department_id",
+    //                     Department::where('uuid', $request->department_uuid)
+    //                         ->pluck('id')->firstOrFail()
+    //                 );
+    //             })
+    //             ->when($request->has('parent_category_uuid'), function ($q) use ($request) {
+    //                 $q->where(
+    //                     "parent_id",
+    //                     Category::where('uuid', $request->parent_category_uuid)
+    //                         ->pluck('id')->firstOrFail()
+    //                 );
+    //             });
 
-            $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
+    //         $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
 
-            if ($request->page > $categories->lastPage()) {
-                if ($request->has("department_uuid") || $request->has("parent_category_uuid")) {
-                    $pageNumber =  1;
-                    $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
-                } else {
-                    return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
-                }
-            }
+    //         if ($request->page > $categories->lastPage()) {
+    //             if ($request->has("department_uuid") || $request->has("parent_category_uuid")) {
+    //                 $pageNumber =  1;
+    //                 $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
+    //             } else {
+    //                 return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
+    //             }
+    //         }
 
-            $data["categories"] = CategoryResource::collection($categories);
+    //         $data["categories"] = CategoryResource::collection($categories);
 
-            return $this->PaginateData(
-                data: $data,
-                object: $categories,
-            );
-        } catch (\Throwable $e) {
-            return $this->handleException($e);
-        }
-    }
+    //         return $this->PaginateData(
+    //             data: $data,
+    //             object: $categories,
+    //         );
+    //     } catch (\Throwable $e) {
+    //         return $this->handleException($e);
+    //     }
+    // }
 
-    public function showCategory(Request $request)
+    /**
+     * List of categories , All parent categories That the parentID is null
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function list(Request $request)
     {
         try {
 
@@ -94,7 +100,12 @@ class CategoryController extends Controller
         }
     }
 
-
+    /**
+     * Filters for search to category
+     * 
+     * @param  FilterRequest $request for validation 
+     * @return \Illuminate\Http\Response
+     */
     public function filter(FilterRequest $request)
     {
         try {
@@ -126,6 +137,13 @@ class CategoryController extends Controller
         }
     }
 
+
+    /**
+     * Delete category with all children
+     * 
+     * @param  DeleteCategoryRequest  $request for validation and control Roles
+     * @return \Illuminate\Http\Response
+     */
     public function delete(DeleteCategoryRequest $request)
     {
         try {
@@ -143,26 +161,29 @@ class CategoryController extends Controller
     }
 
 
-    public function show(ShowCategoriesRequest $request, $department_uuid)
-    {
-        try {
-            $department = Department::where('uuid', $department_uuid)->firstOrFail();
-            $data["department"] = DepartmentResource::make($department->load("categories"));
+    // public function show(ShowCategoriesRequest $request, $department_uuid)
+    // {
+    //     try {
+    //         $department = Department::where('uuid', $department_uuid)->firstOrFail();
+    //         $data["department"] = DepartmentResource::make($department->load("categories"));
 
-            return $this->returnData($data);
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
+    //         return $this->returnData($data);
+    //     } catch (\Exception $e) {
+    //         return $this->handleException($e);
+    //     }
+    // }
 
+    /**
+     * This function is used to update categories and sub-categories
+     * @param UpdateCategoriesRequest $request for validation and control Roles
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateCategoriesRequest $request)
     {
         try {
             DB::beginTransaction();
 
             $department = Department::where('uuid', $request->department_uuid)->first();
-
-
             $category = Category::where("uuid", $request->category_uuid)->firstOrFail();
 
             $category->update([
@@ -183,12 +204,19 @@ class CategoryController extends Controller
         }
     }
 
+    /**
+     * This function is used to update categories and sub-categories
+     * @param $departmentId
+     * @param $categories
+     * @param $parentId
+     * @return void
+     */
     private function updateCategories($department, $categories, $parentId = null)
     {
         foreach ($categories as $categoryData) {
 
             $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
-          
+
             $category->update([
                 'name' => $categoryData['name'],
                 "parent_id" => $parentId,
@@ -205,16 +233,29 @@ class CategoryController extends Controller
         }
     }
 
+    /**
+     * This function is used to create categories and sub-categories 
+     * @param CreateCategoriesRequest $request for validation and control Roles
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function create(CreateCategoriesRequest $request)
     {
         try {
             DB::beginTransaction();
             $department = Department::where('uuid', $request->department_uuid)->first();
 
+
+            $category = Category::create([
+                'name' => $request->name,
+                "parent_id" => null,
+                "department_id" => $department->id,
+            ]);
+
             $this->createCategories(
-                department: $department,
+                departmentId: $department->id,
                 categories: $request->chields,
-                parentId: null
+                parentId: $category->id
             );
 
             DB::commit();
@@ -224,25 +265,35 @@ class CategoryController extends Controller
             return $this->handleException($e);
         }
     }
-    private function createCategories($department, $categories, $parentId = null)
+
+    /**
+     * @param $departmentId
+     * @param $categories
+     * @param $parentId
+     * @return void
+     */
+    private function createCategories($departmentId, $categories, $parentId = null)
     {
-        foreach ($categories as $categoryData) {
-            if (!isset($categoryData['uuid'])) {
+        try {
+            foreach ($categories as $categoryData) {
+
                 $category = Category::Create([
-                    'department_id' => $department->id,
+                    'department_id' => $departmentId,
                     'parent_id' => $parentId,
                     'name' => $categoryData['name']
                 ]);
-            } else {
-                $category = Category::where("uuid", $categoryData)->firstOrFail();
+
+                if (!empty($categoryData['chields'])) {
+                    $this->createCategories(
+                        departmentId: $departmentId,
+                        categories: $categoryData['chields'],
+                        parentId: $category->id
+                    );
+                }
             }
-            if (!empty($categoryData['chields'])) {
-                $this->createCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
-                );
-            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
         }
     }
 }
