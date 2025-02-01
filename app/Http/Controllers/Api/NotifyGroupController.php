@@ -13,6 +13,7 @@ use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class NotifyGroupController extends Controller
@@ -205,11 +206,13 @@ class NotifyGroupController extends Controller
     {
         try {
             DB::beginTransaction();
-           /* $request->validate([
-                'group_uuid' => 'required|array',
-                'group_uuid.*' => 'exists:notify_groups,uuid',
-            ]);*/
-            if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
+            $validated = Validator::make(['notifyGroupId' => $notifyGroupUuid],[
+                'notifyGroupId' => 'required|string|exists:notify_groups,uuid',
+            ]);
+            if ($validated->fails()) {
+                return $this->returnValidationError($validated);
+            }
+            if ($notifyGroup = NotifyGroup::where('uuid', $request->notifyGroupId)->first()) {
                 $notifyGroup->users()->delete();
                 $notifyGroup->delete();
                 DB::commit();
