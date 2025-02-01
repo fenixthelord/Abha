@@ -127,8 +127,11 @@ class DepartmentsControllers extends Controller
                 return $this->badRequest('Department already deleted.');
             } else {
                 if ($department = Department::whereuuid($uuid)->first()) {
-                    $department->name = $department->name . '-' . $department->uuid . '-deleted';
+                    $name = $department->getTranslations("name");
+                    $department->name = ['en' => $name['en'] . '-' . $department->uuid . '-deleted',
+                        'ar' => $name['ar'] . '-' . $department->uuid . '-محذوف'];
                     $department->save();
+                    $department->deleteWithChildren();
                     $department->delete();
                     DB::commit();
                     return $this->returnSuccessMessage('Department deleted successfully');
