@@ -200,4 +200,26 @@ class NotifyGroupController extends Controller
             return $this->badRequest($e->getMessage());
         }
     }
+
+    public function deleteNotifyGroup(Request $request, $notifyGroupUuid)
+    {
+        try {
+            DB::beginTransaction();
+           /* $request->validate([
+                'group_uuid' => 'required|array',
+                'group_uuid.*' => 'exists:notify_groups,uuid',
+            ]);*/
+            if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
+                $notifyGroup->users()->delete();
+                $notifyGroup->delete();
+                DB::commit();
+                return $this->returnSuccessMessage('Notify group Deleted successfully');
+            } else {
+                return $this->badRequest('Group not found');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
 }
