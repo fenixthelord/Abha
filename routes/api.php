@@ -106,6 +106,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
         Route::post('/role/sync', [RoleAndPermissionController::class, 'SyncPermission']);
         Route::post('roles/delete', [RoleAndPermissionController::class, 'DeleteRole']);
         Route::get('permissions/get', [RoleAndPermissionController::class, 'GetAllPermissions']);
+        Route::post('/get-role', [RoleAndPermissionController::class, 'GetRole']);
         Route::prefix('users')->group(function () {
             Route::post('/permissions', [RoleAndPermissionController::class, 'assignPermission']);
             Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
@@ -160,7 +161,7 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
  */
 
 Route::group(["prefix" => "/categories"], function () {
-    
+
     Route::get("/show", [CategoryController::class, "list"]);
     Route::get("/filter", [CategoryController::class, "filter"]);
     Route::post("/department/create", [CategoryController::class, "create"]);

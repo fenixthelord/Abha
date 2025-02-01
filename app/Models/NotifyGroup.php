@@ -16,7 +16,12 @@ class NotifyGroup extends Model   implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     private $translatable = ['name', 'description'];
+
     protected $fillable = ['uuid', 'name', 'description', 'model'];
+    public function getTransAble()
+    {
+        return ['name', 'description']; // Example columns for translation
+    }
 
     // Automatically generate UUID when creating a new NotifyGroup
     protected static function boot()

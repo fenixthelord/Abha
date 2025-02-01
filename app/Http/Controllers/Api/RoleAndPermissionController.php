@@ -47,8 +47,11 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             }
             $validator = Validator::make($request->all(), [
                 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
-                "displayName" => "required|string|unique:roles,displaying",
-                "description" => "required|string",
+                "displayName.en"=> "required|string|unique:roles,displaying",
+                 "displayName.ar"=> "required|string|unique:roles,displaying",
+
+                "description.en" => "required|string",
+                "description.ar" => "required|string",
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
@@ -533,6 +536,20 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             DB::rollBack();
             return $this->returnError($exception->getMessage());
         }
+    }
+    public function ShowRole(Request $request){
+        $validator = Validator::make($request->all(), [
+            'roleName' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+        $role=Role::findByName($request->roleName);
+        if (!$role) {
+            return $this->NotFound('Role not found');
+        }
+       $data['role']=RolesResource::make($role);
+        return $this->returnData($data);
     }
     public function isMasterRole($roleName)
     {
