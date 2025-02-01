@@ -25,7 +25,9 @@ class NotifyGroupController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|string|unique:notify_groups,name',
+                'name' => 'required|array',
+                'name.en' => 'required|string|unique:notify_groups,name->en',
+                'name.ar' => 'required|string|unique:notify_groups,name->ar',
                 'description' => 'nullable|string',
                 'user_uuids' => 'required|array',
                 'user_uuids.*' => 'exists:users,uuid',
@@ -37,11 +39,10 @@ class NotifyGroupController extends Controller
             ]);
             $this->addUsersToNotifyGroup($request, $notifyGroup->uuid);
             DB::commit();
-            $data['group'] =  GroupResource::make($notifyGroup);
-            return $this->returnData($data);
+            return $this->returnData('group', GroupResource::make($notifyGroup));
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -64,7 +65,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -86,7 +87,7 @@ class NotifyGroupController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->badRequest($e->getMessage());
         }
     }
 
@@ -120,7 +121,7 @@ class NotifyGroupController extends Controller
                     ? $this->returnSuccessMessage('Notifications sent successfully!')
                     : $this->returnError('Failed to send notifications.');
             } catch (\Exception $e) {
-                return $this->handleException($e);
+                return $this->returnError($e->getMessage());
             }
         } else {
             return $this->badRequest('Group not found');
@@ -140,57 +141,61 @@ class NotifyGroupController extends Controller
             if ($pageNumber > $notifyGroups->lastPage() || $pageNumber < 1 || $perPage < 1) {
                 $pageNumber = 1;
                 $notifyGroup = $groups->paginate($perPage, ['*'], 'page', $pageNumber);
-                $data["groups"] = GroupResource::collection($notifyGroup);
-                return $this->PaginateData($data, $notifyGroup);
+                $data = GroupResource::collection($notifyGroup);
+                return $this->PaginateData("groups", $data, $notifyGroup);
             }
-            $data['groups'] = GroupResource::collection($notifyGroups);
-            return $this->PaginateData($data, $notifyGroups);
+            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);
+
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
     }
+
     public function groupDetail($groupUuid)
     {
         try {
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
                 $data['members'] = UserResource::collection($group->users);
-                return $this->returnData($data);
+                return $this->returnData('group', $data);
             } else {
                 return $this->badRequest('Group not found');
             }
         } catch (Exception $e) {
-            return $this->handleException($e);
+            return $this->badRequest($e->getMessage());
         }
     }
+
     public function editGroup(Request $request, $groupUuid)
     {
         DB::beginTransaction();
         try {
             if ($group = NotifyGroup::whereuuid($groupUuid)->first()) {
                 $request->validate([
-                    'name' => ['nullable', 'string', Rule::unique('notify_groups', 'name')->ignore($group->id)],
+                    'name' => 'nullable|array',
+                    'name.en' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->en')->ignore($group->id)],
+                    'name.ar' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->ar')->ignore($group->id)],
                     'description' => 'nullable|string',
                     'model' => 'nullable|string',
                     'user_uuids' => 'nullable|array',
-                    //     'user_uuids.*' => 'exists:users,uuid',
+                    'user_uuids.*' => 'exists:users,uuid',
                 ]);
                 $group->name = $request->name ?? $group->name;
                 $group->description = $request->description ?? $group->description;
                 $group->model = $request->model ?? $group->model;
                 $group->save();
-                $group->users()->sync($request->user_uuids);
-
-                $data['group'] = GroupResource::make($group);
+                if ($request->has('user_uuids')) {
+                    $group->users()->sync($request->user_uuids);
+                }
 
                 DB::commit();
-                return $this->returnData($data);
+                return $this->returnData('group', GroupResource::make($group));
             } else {
                 return $this->badRequest('Group not found');
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->badRequest($e->getMessage());
         }
     }
 }
