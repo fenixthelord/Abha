@@ -15,8 +15,6 @@ class Notification extends Model   implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasTranslations;
 
-    private $translatable = ['title', 'description'];
-
     protected $table = 'notifications';
     protected $fillable = [
         'uuid',
