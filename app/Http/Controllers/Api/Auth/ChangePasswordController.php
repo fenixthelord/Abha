@@ -53,7 +53,7 @@ class ChangePasswordController extends Controller
         }
     }
 
-    public function reset_password(Request $request)
+    public function resetPassword(Request $request)
     {
         try {
             DB::beginTransaction();
