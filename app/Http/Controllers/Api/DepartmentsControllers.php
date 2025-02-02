@@ -62,7 +62,7 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'array'],
+                'name' => ['required', 'array','max:254'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
                 'name.ar' => ['required', 'max:255', Rule::unique('departments', 'name->ar')]
             ], messageValidation());
