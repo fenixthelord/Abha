@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
 class Form extends BaseModel
 {
-    use HasTranslations;
+    use HasTranslations, SoftDeletes;
 
     protected $fillable = ['category_id', 'name'];
     private $translatable = ['name'];

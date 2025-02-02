@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class FormSubmission extends BaseModel
 {
+    use SoftDeletes;
     protected $fillable = ['form_id'];
 
     public function form()

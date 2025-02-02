@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('form_submissions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

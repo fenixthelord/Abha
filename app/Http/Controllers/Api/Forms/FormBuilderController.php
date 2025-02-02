@@ -57,7 +57,7 @@ class FormBuilderController extends Controller
                 'name.en' => 'required|string|min:2|max:255',
                 'name.ar' => 'required|string|min:2|max:255',
                 'fields' => 'required|array',
-                'fields.*.id' => 'required|string',
+                'fields.*.id' => 'nullable|string',
                 'fields.*.label.en' => 'required|string',
                 'fields.*.label.ar' => 'required|string',
                 'fields.*.placeholder.en' => 'required|string',
@@ -73,14 +73,30 @@ class FormBuilderController extends Controller
             $form->name = $request->name ?? $form->name;
             $form->category_id = $request->category_id ?? $form->category_id;
             $form->save();
+            $idsFromRequest = $request->input('fields.*.id');
+            $missingIds = array_diff($form->fields()->pluck('id')->toArray(), $idsFromRequest);
+            FormField::whereIn('id', $missingIds)->delete();
+
+            // $existed_fields = FormField::whereIn('id', $idsFromRequest);
             foreach ($request->fields as $fieldData) {
-                $child = $form->fields()->find($fieldData['id']);
-                if ($child)
+                if (array_key_exists('id', $fieldData)) {
+                    $child = $form->fields()->find($fieldData['id']);
                     $child->update($fieldData);
+                } else {
+                    FormField::create([
+                        'form_id' => $form->id,
+                        'label' => $fieldData['label'],
+                        'placeholder' => $fieldData['placeholder'],
+                        'type' => $fieldData['type'],
+                        'options' => $fieldData['options'] ?? null,
+                        'required' => $fieldData['required'] ?? false,
+                        'order' => $fieldData['order'] ?? 0,
+                    ]);
+                }
             }
+            $form = Form::with('fields')->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             DB::commit();
-            $form->refresh();
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -90,6 +106,17 @@ class FormBuilderController extends Controller
 
     public function store(Request $request)
     {
+        // dd(config('app.supported_locales'));
+        // $rules = [];
+
+        // foreach (config('app.supported_locales') as $locale) {
+        //     $rules["name.$locale"] = [
+        //         'required|string|min:2|max:255',
+        //         Rule::unique('forms', "name->$locale")
+        //     ];
+        // }
+
+        // $request->validate($rules);
         try {
             $request->validate([
                 'category_id' => 'required|numeric',
@@ -127,7 +154,9 @@ class FormBuilderController extends Controller
             }
 
             DB::commit();
-            return $this->returnSuccessMessage("Form created successfully");
+            $form = Form::with('fields')->findOrFail($form->id);
+            $data['form'] =  FormResource::make($form);
+            return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -139,10 +168,12 @@ class FormBuilderController extends Controller
         DB::beginTransaction();
         try {
             $form = Form::onlyTrashed()->find($id);
-            if (!$form) {
+            if ($form) {
                 return $this->badRequest('Form already deleted.');
             } else {
                 $form = Form::findOrFail($id);
+                $form->fields()->delete();
+                $form->submissions()->delete();
                 $form->name = $form->name . '-' . $form->id . '-deleted';
                 $form->save();
                 $form->delete();

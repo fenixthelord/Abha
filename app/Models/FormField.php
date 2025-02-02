@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\Enums\FormFiledType;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
 class FormField extends BaseModel
 {
-    use HasTranslations;
+    use HasTranslations, SoftDeletes;
 
     protected $fillable = [
         'form_id',

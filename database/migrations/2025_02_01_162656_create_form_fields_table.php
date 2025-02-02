@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('options')->nullable();
             $table->boolean('required')->default(false);
             $table->integer('order')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
