@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Enums\FormFiledType;
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
-class FormField extends Model
+class FormField extends BaseModel
 {
     use HasTranslations;
 

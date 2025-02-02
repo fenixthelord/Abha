@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FormSubmissionValue extends Model
+class FormSubmissionValue extends BaseModel
 {
     protected $fillable = ['form_submission_id', 'form_field_id', 'value'];
 

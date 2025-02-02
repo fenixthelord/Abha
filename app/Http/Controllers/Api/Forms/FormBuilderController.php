@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Forms;
 
+use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
@@ -9,6 +10,7 @@ use App\Models\Form;
 use App\Models\FormField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Enum;
 
 class FormBuilderController extends Controller
 {
@@ -32,7 +34,7 @@ class FormBuilderController extends Controller
                 'fields' => 'required|array',
                 'fields.*.label.en' => 'required|string',
                 'fields.*.label.ar' => 'required|string',
-                'fields.*.type' => 'required|string|in:',
+                'fields.*.type' => ['required', new Enum(FormFiledType::class)],
             ]);
 
             DB::beginTransaction();

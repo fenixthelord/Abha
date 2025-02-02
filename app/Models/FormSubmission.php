@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class FormSubmission extends Model
+class FormSubmission extends BaseModel
 {
     protected $fillable = ['form_id'];
 
