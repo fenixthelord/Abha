@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
-
+use App\Http\Controllers\Api\OrganizationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -166,6 +166,6 @@ Route::prefix('departments')->group(function () {
  * Organization Routes
  *
  */
-Route::groupe(["prefix" => "/org"], function () {
-    
+Route::group(["prefix" => "/org"], function () {
+    Route::get('/list' , [OrganizationController::class , "index"] );
 });

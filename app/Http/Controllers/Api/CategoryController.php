@@ -79,6 +79,16 @@ class CategoryController extends Controller
     {
         try {
 
+
+            $validator = Validator::make($request->all(), [
+                'per_page' => 'nullable|integer|min:1',
+                'page' => 'nullable|integer|min:1',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
@@ -90,6 +100,11 @@ class CategoryController extends Controller
                 });
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+
+            if ($request->page > $category->lastPage()) {
+                $category = $query->paginate($perPage, ['*'], 'page', 1);
+            }
+
             $data["categories"] = CategoryResource::collection(
                 $category->load("children")
             )->each->withDeparted();
