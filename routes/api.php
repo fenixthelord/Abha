@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DatabaseController;
 use App\Http\Controllers\Api\DepartmentsControllers;
 use App\Http\Controllers\Api\Forms\FormBuilderController;
 use App\Http\Controllers\Api\Forms\FormFieldController;
@@ -190,4 +191,9 @@ Route::group(["prefix" => "/forms"], function () {
 
     Route::get('/{form_id}/submissions', [FormSubmissionController::class, 'index']);
     Route::post('/{form_id}/submit', [FormSubmissionController::class, 'store']);
+});
+
+Route::group(["prefix" => "/db"], function () {
+    Route::get('/tables', [DatabaseController::class, 'getTables']);
+    Route::get('/columns/{table}', [DatabaseController::class, 'getColumns']);
 });

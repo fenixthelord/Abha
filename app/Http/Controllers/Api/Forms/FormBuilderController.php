@@ -6,13 +6,10 @@ use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
-use App\Models\Category;
 use App\Models\Form;
 use App\Models\FormField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class FormBuilderController extends Controller
@@ -77,7 +74,6 @@ class FormBuilderController extends Controller
             $missingIds = array_diff($form->fields()->pluck('id')->toArray(), $idsFromRequest);
             FormField::whereIn('id', $missingIds)->delete();
 
-            // $existed_fields = FormField::whereIn('id', $idsFromRequest);
             foreach ($request->fields as $fieldData) {
                 if (array_key_exists('id', $fieldData)) {
                     $child = $form->fields()->find($fieldData['id']);

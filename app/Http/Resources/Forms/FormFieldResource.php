@@ -14,7 +14,7 @@ class FormFieldResource extends JsonResource
             'label' => $this->label,
             'placeholder' => $this->placeholder,
             'type' => $this->type,
-            'options' => json_decode($this->options, true),
+            'options' => $this->options,
             'required' => $this->required,
             'order' => $this->order,
         ];

@@ -19,7 +19,7 @@ class Form extends BaseModel
 
     public function fields()
     {
-        return $this->hasMany(FormField::class);
+        return $this->hasMany(FormField::class)->orderBy('order', 'asc');
     }
 
     public function submissions()
