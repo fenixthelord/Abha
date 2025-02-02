@@ -40,7 +40,9 @@ class OrganizationController extends Controller
                         }
                     },
                 )
-                ;
+                ->when($request->has("search"), function ($q) use ($request) {
+                    $q->withSearch($request->search);
+                });
             $organization = $query->paginate($perPage, ['*'], 'page', $pageNumber);
 
             if ($request->page > $organization->lastPage()) {

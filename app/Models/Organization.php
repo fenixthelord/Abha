@@ -46,4 +46,22 @@ class Organization extends Model  implements Auditable
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
+
+    public function scopeWithSearch($query, $value)
+    {
+        return $query
+            ->where('id', 'like', '%' . $value . '%')
+            ->orWhere('position', 'like', '%' . $value . '%')
+            ->orWhereHas('department', function ($query) use ($value) {
+                $query->where('name', 'like', '%' . $value . '%');
+            })
+            ->orWhereHas('manger', function ($query) use ($value) {
+                $query->where('first_name', 'like', '%' . $value . '%')
+                    ->orWhere('last_name', 'like', '%' . $value . '%');
+            })
+            ->orWhereHas('employee', function ($query) use ($value) {
+                $query->where('first_name', 'like', '%' . $value . '%')
+                    ->orWhere('last_name', 'like', '%' . $value . '%');
+            });
+    }
 }
