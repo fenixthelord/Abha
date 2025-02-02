@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('form_submission_values', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('form_submission_id')->constrained()->onDelete('cascade');
-            $table->foreignId('form_field_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('form_submission_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('form_field_id')->constrained()->onDelete('cascade');
             $table->text('value'); // Store user input            
             $table->timestamps();
         });

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('form_fields', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('form_id')->constrained('forms')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
             $table->string('label');
             $table->string('type');
             $table->json('options')->nullable();
