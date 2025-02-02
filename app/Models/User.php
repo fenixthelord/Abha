@@ -46,6 +46,7 @@ class User extends Authenticatable  implements Auditable
         'otp_expires_at',
         'refresh_token',
         'refresh_token_expires_at',
+        "department_id"
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -113,5 +114,9 @@ class User extends Authenticatable  implements Auditable
     public function deviceTokens()
     {
         return $this->hasMany(DeviceToken::class);
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }
