@@ -44,9 +44,25 @@ class UpdateCategoriesRequest extends FormRequest
                 'uuid',
                 Rule::exists("categories", "uuid")->where("deleted_at", null)
             ],
-            "name" => ["required", "array",],
-            "name.en" => ["required", "string", "max:255"],
-            "name.ar" => ["required", "string", "max:255"],
+            "name" => ["required", "array"],
+            "name.en" => [
+                "required",
+                "string",
+                "min:2",
+                "max:255",
+                Rule::unique('categories', 'name->en')
+                    ->whereNull('parent_id')
+                    ->where("department_id", $this->departmentId)
+            ],
+            "name.ar" => [
+                "required",
+                "string",
+                "min:2",
+                "max:255",
+                Rule::unique('categories', 'name->ar')
+                    ->whereNull('parent_id')
+                    ->where("department_id", $this->departmentId),
+            ],
             "chields" => ["required", "array"]
         ];
     }
@@ -76,9 +92,9 @@ class UpdateCategoriesRequest extends FormRequest
                     'uuid',
                     Rule::exists("categories", "uuid")->where("deleted_at", null)
                 ],
-                "name" => ["required", "array",],
-                "name.en" => ["required", "string", "max:255"],
-                "name.ar" => ["required", "string", "max:255"],
+                'name' => 'required|array',
+                'name.en' => 'required|string|min:2|max:255',
+                'name.ar' => 'required|string|min:2|max:255',
                 'chields' => 'nullable|array',
             ]);
 
@@ -86,11 +102,15 @@ class UpdateCategoriesRequest extends FormRequest
                 foreach ($childValidator->errors()->messages() as $key => $messages) {
                     foreach ($messages as $message) {
                         $validator->errors()->add("{$currentPath}.{$key}", $message);
+                        // For Arabic
+                        $arabicMessage = __('validation.custom.' . $key, [], 'ar');
+                        if ($arabicMessage !== 'validation.custom.' . $key) {
+                            $validator->errors()->add("{$currentPath}.{$key}", $arabicMessage);
+                        }
                     }
                 }
             }
 
-            // Check for duplicate names in this same level
             // Check for duplicate names in this same level
             $nameEN = $child['name']["en"] ?? null;
             $nameAR = $child['name']["ar"] ?? null;
