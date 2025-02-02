@@ -17,7 +17,7 @@ class DepartmentResource extends JsonResource
     return [
       'department_uuid' => $this->uuid,
       'name' =>[
-          'name' => $this->getTranslations("name"),
+          $this->getTranslations("name"),
       ],
       'chields' => $this->whenLoaded('categories', function () {
         return CategoryResource::collection($this->categories()->where("parent_id", null)->get()->load("children"));
