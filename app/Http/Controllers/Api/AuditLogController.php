@@ -14,6 +14,11 @@ class AuditLogController extends Controller
 {
     use ResponseTrait;
 
+    public function __construct()
+    {
+        return $this->middleware('auth:sanctum');
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
