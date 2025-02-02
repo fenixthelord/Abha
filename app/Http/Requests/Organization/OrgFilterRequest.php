@@ -32,6 +32,11 @@ class OrgFilterRequest extends FormRequest
                 "nullable",
                 "uuid",
                 Rule::exists('departments', 'uuid')->where("deleted_at", null)
+            ],
+            "manger_uuid" => [
+                "nullable",
+                "uuid",
+                Rule::exists('users', 'uuid')->where("deleted_at", null)
             ]
         ];
 
