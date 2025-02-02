@@ -166,4 +166,6 @@ Route::prefix('departments')->group(function () {
  * Organization Routes
  *
  */
-Route::groupe("org", function () {});
+Route::groupe(["prefix" => "/org"], function () {
+    
+});
