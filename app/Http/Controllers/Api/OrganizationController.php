@@ -3,31 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use PhpParser\Node\Expr\Cast\Object_;
 
 class OrganizationController extends Controller
 {
     use ResponseTrait;
-    public function index(Request $request)
+    public function index(OrgFilterRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'per_page' => 'nullable|integer|min:1',
-                'page' => 'nullable|integer|min:1',
-            ]);
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
-            if ($validator->fails()) {
-                return $this->returnValidationError($validator);
-            }
-
-            $organization = Organization::paginate($perPage, ['*'], 'page', $pageNumber);
+            $query  = Organization::query()
+                ->when($request->has("department_uuid"), function ($q) use ($request) {
+                    $q->where("department_id", Department::where('uuid', $request->department_uuid)->pluck('id')->first());
+                });
+            $organization = $query->paginate($perPage, ['*'], 'page', $pageNumber);
 
             if ($request->page > $organization->lastPage()) {
                 $organization = Organization::paginate($perPage, ['*'], 'page', $pageNumber);
@@ -40,5 +40,40 @@ class OrganizationController extends Controller
             return $this->handleException($e);
         }
     }
-}
 
+    public function filter(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'per_page' => 'nullable|integer|min:1',
+                'page' => 'nullable|integer|min:1',
+
+            ]);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validator = Validator::make($request->all(), [
+                'uuid' => ['required', 'uuid', Rule::exists('organizations', 'uuid')->where("deleted_at", null)],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $org = Organization::where('uuid', $request->uuid)->first();
+            $org->delete();
+            return $this->returnSuccessMessage('Organization deleted successfully');
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+}

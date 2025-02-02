@@ -15,6 +15,7 @@ class OrganizationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            "uuid" => $this->uuid,
             "department_name" => $this->department?->getTranslations("name"),
             "manger_first_name" => $this->manger?->first_name,
             "manger_last_name" => $this->manger?->last_name,

@@ -168,4 +168,6 @@ Route::prefix('departments')->group(function () {
  */
 Route::group(["prefix" => "/org"], function () {
     Route::get('/list' , [OrganizationController::class , "index"] );
+    Route::get("/list/filter" , [OrganizationController::class , "filter"]);
+    Route::delete('/delete', [OrganizationController::class, "delete"]);
 });

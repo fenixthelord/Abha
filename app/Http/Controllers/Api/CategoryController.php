@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateCategoriesRequest;
-use App\Http\Requests\DeleteCategoryRequest;
-use App\Http\Requests\DeleteCatigoryRequest;
-use App\Http\Requests\FilterRequest;
-use App\Http\Requests\IndexCategoryRequest;
-use App\Http\Requests\SaveCategoriesRequest;
-use App\Http\Requests\ShowCategoriesRequest;
-use App\Http\Requests\ShowCategoryRequest;
-use App\Http\Requests\UpdateCategoriesRequest;
+use App\Http\Requests\Categories\CreateCategoriesRequest;
+use App\Http\Requests\Categories\DeleteCategoryRequest;
+use App\Http\Requests\Categories\DeleteCatgoryRequest;
+use App\Http\Requests\Categories\FilterRequest;
+use App\Http\Requests\Categories\IndexCategoryRequest;
+use App\Http\Requests\Categories\SaveCategoriesRequest;
+use App\Http\Requests\Categories\ShowCategoriesRequest;
+use App\Http\Requests\Categories\ShowCategoryRequest;
+use App\Http\Requests\Categories\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Traits\ResponseTrait;

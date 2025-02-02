@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class IndexCategoryRequest extends FormRequest
+class ShowCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -15,9 +15,15 @@ class IndexCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return True;
+        return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'department_uuid' => $this->department_uuid,
+        ]);
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -27,20 +33,12 @@ class IndexCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => [
-                'sometimes',
+            "department_uuid" => [
+                "required",
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
-
-            ],
-            'parent_category_uuid' => [
-                'sometimes',
-                Rule::exists("categories" , "uuid")->where("deleted_at", null)
-
-            ],
-            'per_page' => 'sometimes|integer|min:1|max:100',
+            ]
         ];
     }
-
 
     public function failedValidation($validator)
     {

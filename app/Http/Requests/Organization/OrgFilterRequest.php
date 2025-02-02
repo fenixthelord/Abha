@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Organization;
 
 use App\Http\Traits\ResponseTrait;
-use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class DeleteCategoryRequest extends FormRequest
+class OrgFilterRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -26,16 +25,17 @@ class DeleteCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd($this->parent_category_uuid);
         return [
-            'uuid' => [
-                'required',
-                // 'exists:categories,uuid',
-                Rule::exists("categories" , "uuid")->where("deleted_at", null)
+            'per_page' => 'nullable|integer|min:1',
+            'page' => 'nullable|integer|min:1',
+            "department_uuid" => [
+                "nullable",
+                "uuid",
+                Rule::exists('departments', 'uuid')->where("deleted_at", null)
             ]
         ];
-    }
 
+    }
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
