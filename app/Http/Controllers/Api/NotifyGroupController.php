@@ -146,7 +146,7 @@ class NotifyGroupController extends Controller
                 return $this->PaginateData($data, $notifyGroup);
             }
             return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);*/
-            $fildes = ['name'];
+            $fildes = ['name->ar','name->en'];
             $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request);
             $data['group'] = GroupResource::collection($group);
             return $this->PaginateData($data, $group);
