@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
             $table->string('label');
             $table->string('placeholder')->nullable();
-            $table->string('type');
+            $table->enum('type', ['text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'file']);
             $table->json('options')->nullable();
             $table->boolean('required')->default(false);
             $table->integer('order')->default(0);

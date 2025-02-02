@@ -10,5 +10,5 @@ enum FormFiledType: string
     case Dropdownfield = 'dropdown';
     case RadioButton = 'radio';
     case CheckboxButton = 'checkbox';
-    case UploadButton = 'upload';
+    case FileButton = 'file';
 }
