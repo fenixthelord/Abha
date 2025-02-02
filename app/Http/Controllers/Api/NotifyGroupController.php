@@ -29,7 +29,9 @@ class NotifyGroupController extends Controller
                 'name' => 'required|array',
                 'name.en' => 'required|string|unique:notify_groups,name->en',
                 'name.ar' => 'required|string|unique:notify_groups,name->ar',
-                'description' => 'nullable|string',
+                'description' => 'nullable|array',
+                'description.en' => 'nullable|string',
+                'description.ar' => 'nullable|string',
                 'user_uuids' => 'required|array',
                 'user_uuids.*' => 'exists:users,uuid',
             ]);
@@ -164,8 +166,8 @@ class NotifyGroupController extends Controller
         try {
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
-                $data['members'] = UserResource::collection($group->users);
-                return $this->returnData('group', $data);
+  //              $data['members'] = UserResource::collection($group->users);
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('Group not found');
             }
@@ -183,7 +185,9 @@ class NotifyGroupController extends Controller
                     'name' => 'nullable|array',
                     'name.en' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->en')->ignore($group->id)],
                     'name.ar' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->ar')->ignore($group->id)],
-                    'description' => 'nullable|string',
+                    'description' => 'nullable|array',
+                    'description.en' => 'nullable|string',
+                    'description.ar' => 'nullable|string',
                     'model' => 'nullable|string',
                     'user_uuids' => 'nullable|array',
                     'user_uuids.*' => 'exists:users,uuid',
