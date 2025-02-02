@@ -131,9 +131,9 @@ class NotifyGroupController extends Controller
     public function allGroup(Request $request)
     {
         try {
-            $perPage = request()->input('perPage', 10);
+            /*$perPage = request()->input('perPage', 10);
             $pageNumber = request()->input('page', 1);
-            /*$groups = NotifyGroup::query()
+            $groups = NotifyGroup::query()
                 ->when($request->has('search'), function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%');
                 });
@@ -146,7 +146,7 @@ class NotifyGroupController extends Controller
             }
             return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);*/
             $fildes = ['name'];
-            $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request->get('search', null), $perPage, $pageNumber);
+            $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request);
             $data['group'] = GroupResource::collection($group);
             return $this->PaginateData($data, $group);
 
