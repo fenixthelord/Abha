@@ -20,19 +20,23 @@ class UserResource extends JsonResource
             'name' => $this->first_name . ' ' . $this->last_name,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'gender' => $this->gender,
-            'image' => $this->image,
-            'alt' => $this->alt,
-            'job' => $this->job,
-            'job_id' => $this->job_id,
-            'active' => $this->active,
-            'role' => $this->role,
-            "user_role"=>$this->getRoleNames(),
-            "permission"=>new NewPermissionsResource($this->getAllPermissions())
-
-
+            $this->mergeWhen(!$this->merge, [
+                'email' => $this->email,
+                'phone' => $this->phone,
+                'gender' => $this->gender,
+                'image' => $this->image,
+                'alt' => $this->alt,
+                'job' => $this->job,
+                'job_id' => $this->job_id,
+                'active' => $this->active,
+                'role' => $this->role,
+                "user_role" => $this->getRoleNames(),
+                "permission" => new NewPermissionsResource($this->getAllPermissions())
+            ]),
         ];
+    }
+    public function onlyName() {
+        $this->merge = true;
+        return $this;
     }
 }

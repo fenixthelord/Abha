@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\OrganizationResource;
+use App\Http\Resources\UserResource;
 use App\Http\Traits\Paginate;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Department;
@@ -62,10 +63,21 @@ class OrganizationController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'per_page' => 'nullable|integer|min:1',
-                'page' => 'nullable|integer|min:1',
-
+                "department_uuid" => [
+                    "required",
+                    "uuid",
+                    Rule::exists('departments', 'uuid')->where("deleted_at", null)
+                ]
             ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $departmentId = Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail();
+            $mangers = User::query()
+                ->MangersInDepartment($departmentId)->get();
+
+            $data["mangers"] = UserResource::collection($mangers)->each->onlyName();
+            return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
