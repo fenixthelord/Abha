@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Forms;
 
 use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
 use App\Models\Form;
@@ -16,7 +17,22 @@ class FormBuilderController extends Controller
 {
     use ResponseTrait;
 
-    public function index() {}
+    public function list(Request $request)
+    {
+        try {
+            $pageNumber = $request->input('page', 1);
+            $perPage = $request->input('perPage', 10);
+            $forms = Form::orderByAll($request->sortBy, $request->sortType)
+                ->filter($request->only('search'))
+                ->with(['fields']);
+            $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
+
+            $data['forms'] =  FormResource::collection($form);
+            return $this->PaginateData($data, $form);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 
     public function show() {}
 
@@ -34,11 +50,12 @@ class FormBuilderController extends Controller
                 'fields' => 'required|array',
                 'fields.*.label.en' => 'required|string',
                 'fields.*.label.ar' => 'required|string',
+                'fields.*.placeholder.en' => 'required|string',
+                'fields.*.placeholder.ar' => 'required|string',
                 'fields.*.type' => ['required', new Enum(FormFiledType::class)],
             ]);
 
             DB::beginTransaction();
-            // $category = Category::where('id', $request->category_id)->first();
 
             $form = Form::create([
                 'category_id' => $request->category_id,
@@ -49,6 +66,7 @@ class FormBuilderController extends Controller
                 FormField::create([
                     'form_id' => $form->id,
                     'label' => $field['label'],
+                    'placeholder' => $field['placeholder'],
                     'type' => $field['type'],
                     'options' => $field['options'] ?? null,
                     'required' => $field['required'] ?? false,

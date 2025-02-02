@@ -12,13 +12,13 @@ class FormField extends BaseModel
     protected $fillable = [
         'form_id',
         'label',
-        'palceholder',
+        'placeholder',
         'type',
         'options',
         'required',
         'order'
     ];
-    private $translatable = ['label'];
+    private $translatable = ['label', 'placeholder'];
 
     protected $casts = [
         'type' => FormFiledType::class,

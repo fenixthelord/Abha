@@ -25,4 +25,23 @@ class Form extends BaseModel
     {
         return $this->hasMany(FormSubmission::class);
     }
+
+    public function scopeOrderByAll($query, $sortBy, $sortType)
+    {
+        if ($sortBy == 'name' && $sortType)
+            $query->orderBy($sortBy, $sortType);
+        else
+            $query->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })->orWhereHas('category', function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            });;
+        });
+    }
 }

@@ -179,7 +179,7 @@ Route::prefix('departments')->group(function () {
 });
 
 Route::group(["prefix" => "/forms"], function () {
-    Route::get('/', [FormBuilderController::class, 'index'])->name('forms.index');
+    Route::get('/', [FormBuilderController::class, 'list'])->name('forms.list');
     Route::post('/', [FormBuilderController::class, 'store'])->name('forms.store');
     Route::get('/{form}', [FormBuilderController::class, 'show'])->name('forms.show');
     Route::put('/{form}', [FormBuilderController::class, 'update'])->name('forms.update');
