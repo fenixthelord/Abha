@@ -8,6 +8,7 @@ trait Paginate
     {
         $page = is_int($request->page) ? $request->page : 1;
         $perPage = is_int($request->per_page) ? $request->per_page : 10;
+        $fields = is_array($fields) ? $fields : [];
         $search = request()->input('search', null);
         $data = $items->query()
             ->when($search, function ($query) use ($search,$fields) {
