@@ -102,7 +102,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
     //   });
 });
 
-Route::get('/audit-logs', [AuditLogController::class, 'index']);
+Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('auth:sanctum');
 
 
 
