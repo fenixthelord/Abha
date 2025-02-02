@@ -15,7 +15,10 @@ class GroupResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        return ['uuid' => $this->uuid, 'name' => $this->getTranslations("name"), $this->getTranslations("description"),
+        return [
+            'uuid' => $this->uuid,
+            'name' => $this->getTranslations("name"),
+            'description' => $this->getTranslations("description"),
             'user' => GroupUser::collection($this->users()->get())
 
             ];
