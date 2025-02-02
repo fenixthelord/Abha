@@ -166,4 +166,6 @@ Route::prefix('departments')->group(function () {
  * Organization Routes
  *
  */
-Route::groupe("org", function () {});
+Route::prefix('org')->group (function () {
+Route::post('/department/employee',[\App\Http\Controllers\Api\OrganizationController::class,'getDepartmentEmployees']);
+});

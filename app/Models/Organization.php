@@ -16,10 +16,11 @@ class Organization extends Model  implements Auditable
 
     private $translatable = ['position'];
 
-    private $fillable = [
+  protected $fillable = [
         "department_id",
         "manger_id",
-        "employee_id"
+        "employee_id",
+      "position"
     ];
 
     protected static function boot()

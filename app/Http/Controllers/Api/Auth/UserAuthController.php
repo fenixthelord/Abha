@@ -8,6 +8,7 @@ use App\Http\Resources\CustomPermissionResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 
 class UserAuthController extends Controller
@@ -47,10 +49,14 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
+                'department_uuid'=>["required","string",Rule::exists('departments','uuid')->where("deleted_at",null)],
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+            $department=Department::where("uuid",$request->department_uuid)->firstorFail();
+
+
 
             $user = User::create([
                 'uuid' => Str::orderedUuid(),
@@ -66,8 +72,10 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
+                'department_id'=>$department->id,
 
             ]);
+
             if (!$request->role) {
                 $user->assignRole('employee'); // Default role
             } else {
