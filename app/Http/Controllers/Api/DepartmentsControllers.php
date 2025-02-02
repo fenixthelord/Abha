@@ -20,9 +20,9 @@ class DepartmentsControllers extends Controller
     public function index(Request $request)
     {
         try {
-            $pageNumber = request()->input('page', 1);
+            /*$pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
-            /*           $departments = Department::query()
+                       $departments = Department::query()
                            ->when($request->has('search'), function ($q) use ($request) {
                                $q->where('name', 'like', '%' . $request->search . '%');
                            });
@@ -34,7 +34,7 @@ class DepartmentsControllers extends Controller
                            return $this->PaginateData($data, $department);
                        }*/
             $fields = ['name'];
-            $department = $this->allWithSearch(new Department(), $fields, $request->get('search', null), $perPage, $pageNumber);
+            $department = $this->allWithSearch(new Department(), $fields, $request);
             $data['department'] = DepartmentResource::collection($department);
             return $this->PaginateData($data, $department);
         } catch (\Exception $e) {
