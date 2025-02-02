@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Http\Traits\Paginate;
 
 
 class UserController extends Controller
@@ -24,6 +25,7 @@ class UserController extends Controller
 
     use FileUploader;
     use ResponseTrait;
+    use Paginate;
 
     public function index(Request $request)
     {
@@ -31,27 +33,24 @@ class UserController extends Controller
         if (!$user->hasPermissionTo('user.show')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
-
-        DB::beginTransaction();
         try {
-            $pageNumber = request()->input('page', 1);
-            $perPage = request()->input('perPage', 10);
-            if ($request->search) {
-                return $this->oldSearch(request());
-            }
-            $users = User::whereDoesntHave('roles', function ($query) {
-                $query->where('name', 'Master');
-            })->paginate($perPage, ['*'], 'page', $pageNumber);
-            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
-            }
 
-            $data['users'] =  UserResource::collection($users);
-
-            DB::commit();
+           /* $perPage = request()->input('perPage', 10);
+             $pageNumber = request()->input('page', 1);*/
+           /*  if ($request->search) {
+                 return $this->oldSearch(request());
+             }
+             $users = User::whereDoesntHave('roles', function ($query) {
+                 $query->where('name', 'Master');
+             })->paginate($perPage, ['*'], 'page', $pageNumber);
+             if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                 return $this->badRequest('Invalid page number');
+             }*/
+            $fields = ['phone', 'email', 'last_name', 'first_name'];
+            $users = $this->allWithSearch(new User(), $fields, $request);
+            $data['users'] = UserResource::collection($users);
             return $this->PaginateData($data, $users);
         } catch (\Exception $e) {
-            DB::rollBack();
             return $this->handleException($e);
         }
     }
@@ -72,7 +71,7 @@ class UserController extends Controller
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], messageValidation());
             if ($validator->fails()) {
@@ -144,7 +143,7 @@ class UserController extends Controller
                     'job_id' => 'nullable|string',
                     'image' => 'nullable|string',
                     'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                        'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'old_password' => 'nullable|required_with:password|string',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",
@@ -184,7 +183,7 @@ class UserController extends Controller
                     $user->syncRoles($request->role);
                 }
 
-                $data['data'] =  UserResource::make($user);
+                $data['data'] = UserResource::make($user);
                 DB::commit();
                 return $this->returnData($data);
             } else {
