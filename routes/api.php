@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DepartmentsControllers;
+use App\Http\Controllers\Api\Forms\FormBuilderController;
+use App\Http\Controllers\Api\Forms\FormFieldController;
+use App\Http\Controllers\Api\Forms\FormSubmissionController;
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
@@ -13,7 +16,6 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -174,4 +176,18 @@ Route::prefix('departments')->group(function () {
     Route::post('/create', [DepartmentsControllers::class, 'store']);
     Route::put('/{uuid}/update', [DepartmentsControllers::class, 'update']);
     Route::delete('/{uuid}/destroy', [DepartmentsControllers::class, 'destroy']);
+});
+
+Route::group(["prefix" => "/forms"], function () {
+    Route::get('/', [FormBuilderController::class, 'index'])->name('forms.index');
+    Route::post('/', [FormBuilderController::class, 'store'])->name('forms.store');
+    Route::get('/{form}', [FormBuilderController::class, 'show'])->name('forms.show');
+    Route::put('/{form}', [FormBuilderController::class, 'update'])->name('forms.update');
+    Route::delete('/{form}', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
+
+    Route::post('/forms/{form_id}/fields', [FormFieldController::class, 'store']);
+    Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
+
+    Route::get('/forms/{form_id}/submissions', [FormSubmissionController::class, 'index']);
+    Route::post('/forms/{form_id}/submit', [FormSubmissionController::class, 'store']);
 });

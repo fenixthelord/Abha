@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Enums\FormFiledType;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class FormField extends Model
 {
+    use HasTranslations;
+
     protected $fillable = [
         'form_id',
         'label',
@@ -15,6 +18,7 @@ class FormField extends Model
         'required',
         'order'
     ];
+    private $translatable = ['label'];
 
     protected $casts = [
         'type' => FormFiledType::class,
