@@ -47,7 +47,7 @@ class UserController extends Controller
                  return $this->badRequest('Invalid page number');
              }*/
             $fields = ['phone', 'email', 'last_name', 'first_name'];
-            $users = $this->allWithSearch(new User(), $fields, $request, $perPage, $pageNumber);
+            $users = $this->allWithSearch(new User(), $fields, $request);
             $data['users'] = UserResource::collection($users);
             return $this->PaginateData($data, $users);
         } catch (\Exception $e) {
