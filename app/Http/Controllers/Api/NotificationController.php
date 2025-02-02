@@ -110,10 +110,10 @@ class NotificationController extends Controller
     public function allNotification(Request $request)
     {
         try {
-            $pageNumber = $request->input('page', 1);
+/*            $pageNumber = $request->input('page', 1);
             $perPage = $request->input("perPage", 10);
 
-/*            $validator = Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 "perPage" => 'nullable|integer|min:9'
             ]);
             if ($validator->fails()) {
@@ -133,8 +133,9 @@ class NotificationController extends Controller
                 'total_pages' => $notifications->lastPage(),
             ];*/
             $fields = ['title','description'];
-            $group = $this->allWithSearch(new Notification(), $fields, $pageNumber, $perPage);
-            return $this->returnData($data);
+            $notification = $this->allWithSearch(new Notification(), $fields, $request);
+            $data['notification'] = NotificationResource::collection($notification);
+            return $this->PaginateData($data,$notification);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
