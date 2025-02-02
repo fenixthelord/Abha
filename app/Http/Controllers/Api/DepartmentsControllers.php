@@ -10,30 +10,32 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Http\Traits\Paginate;
 
 
 class DepartmentsControllers extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, Paginate;
 
     public function index(Request $request)
     {
         try {
-            $pageNumber = request()->input('page', 1);
+            /*$pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
-            $departments = Department::query()
-                ->when($request->has('search'), function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%');
-                });
-            $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
-            if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                $pageNumber = 1;
-                $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
-                $data["groups"] = DepartmentResource::collection($department);
-                return $this->PaginateData($data, $department);
-            }
-
-            $data['department'] =  DepartmentResource::collection($department);
+                       $departments = Department::query()
+                           ->when($request->has('search'), function ($q) use ($request) {
+                               $q->where('name', 'like', '%' . $request->search . '%');
+                           });
+                       $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
+                       if ($pageNumber > $department->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                           $pageNumber = 1;
+                           $department = $departments->paginate($perPage, ['*'], 'page', $pageNumber);
+                           $data["groups"] = DepartmentResource::collection($department);
+                           return $this->PaginateData($data, $department);
+                       }*/
+            $fields = ['name'];
+            $department = $this->allWithSearch(new Department(), $fields, $request);
+            $data['department'] = DepartmentResource::collection($department);
             return $this->PaginateData($data, $department);
         } catch (\Exception $e) {
             return $this->handleException($e);
@@ -41,12 +43,11 @@ class DepartmentsControllers extends Controller
     }
 
 
-
     public function show($uuid)
     {
         try {
             if ($department = Department::whereuuid($uuid)->first()) {
-                $data['department'] =  DepartmentResource::make($department);
+                $data['department'] = DepartmentResource::make($department);
                 return $this->returnData($data);
             } else {
                 return $this->badRequest('Department not found');
@@ -64,7 +65,7 @@ class DepartmentsControllers extends Controller
                 'name' => ['required', 'array'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
                 'name.ar' => ['required', 'max:255', Rule::unique('departments', 'name->ar')]
-            ],messageValidation());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -92,13 +93,13 @@ class DepartmentsControllers extends Controller
                     'name' => ['nullable', 'array'],
                     'name.en' => ['required_with:name', 'max:255', Rule::unique('departments', 'name->en')->ignore($department->id)],
                     'name.ar' => ['required_with:name', 'max:255', Rule::unique('departments', 'name->ar')->ignore($department->id)]
-                ],messageValidation());
+                ], messageValidation());
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
                 }
                 $department->name = $request->name ?? $department->name;
                 $department->save();
-                $data['department'] =  DepartmentResource::make($department);
+                $data['department'] = DepartmentResource::make($department);
                 DB::commit();
                 return $this->returnData($data);
             } else {

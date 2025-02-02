@@ -56,7 +56,6 @@ function messageValidation()
         'role.required' => 'Role is required.',
         'role.exists' => 'this role doesnt exist.',
         'name.required' => 'Name is required.',
-        'name.required' => 'Department name is required.',
         'name.unique' => 'Department name already exists.',
         'name.max' => 'Maximum 255 characters allowed.',
         'name.en.required' => 'Department name is required.',

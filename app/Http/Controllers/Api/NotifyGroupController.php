@@ -15,10 +15,10 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-
+use App\Http\Traits\Paginate;
 class NotifyGroupController extends Controller
 {
-    use Firebase, ResponseTrait;
+    use Firebase, ResponseTrait, Paginate;
 
     // Create a new notify group
     public function createNotifyGroup(Request $request)
@@ -132,8 +132,8 @@ class NotifyGroupController extends Controller
     public function allGroup(Request $request)
     {
         try {
+            /*$perPage = request()->input('perPage', 10);
             $pageNumber = request()->input('page', 1);
-            $perPage = request()->input('perPage', 10);
             $groups = NotifyGroup::query()
                 ->when($request->has('search'), function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%');
@@ -145,10 +145,15 @@ class NotifyGroupController extends Controller
                 $data["groups"] = GroupResource::collection($notifyGroup);
                 return $this->PaginateData($data, $notifyGroup);
             }
+            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);*/
+            $fildes = ['name'];
+            $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request);
+            $data['group'] = GroupResource::collection($group);
+            return $this->PaginateData($data, $group);
 
-            $data['groups'] = GroupResource::collection($notifyGroups);
+         //   $data['groups'] = GroupResource::collection($notifyGroups);
 
-            return $this->PaginateData($data, $notifyGroups);
+   //         return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
