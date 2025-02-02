@@ -33,7 +33,7 @@ class DepartmentsControllers extends Controller
                            $data["groups"] = DepartmentResource::collection($department);
                            return $this->PaginateData($data, $department);
                        }*/
-            $fields = ['name'];
+            $fields = ['name->ar','name->en'];
             $department = $this->allWithSearch(new Department(), $fields, $request);
             $data['department'] = DepartmentResource::collection($department);
             return $this->PaginateData($data, $department);

@@ -111,6 +111,7 @@ Route::get('/audit-logs', [AuditLogController::class, 'index']);
 Route::prefix('notification')->group(function () {
 
     Route::post('/send', [NotificationController::class, 'sendNotification']);
+    Route::post('/all', [NotificationController::class, 'allNotification']);
 });
 // Send Notifications
 //Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
