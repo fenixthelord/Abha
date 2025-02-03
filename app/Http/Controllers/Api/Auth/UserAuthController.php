@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Department;
+use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

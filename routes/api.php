@@ -168,4 +168,8 @@ Route::prefix('departments')->group(function () {
  */
 Route::prefix('org')->group (function () {
 Route::post('/department/employee',[\App\Http\Controllers\Api\OrganizationController::class,'getDepartmentEmployees']);
+Route::post('/employee/add',[\App\Http\Controllers\Api\OrganizationController::class,'AddEmployee']);
+Route::post('/employee/update',[\App\Http\Controllers\Api\OrganizationController::class,'UpdateEmployee']);
+Route::post('/manger/employee',[\App\Http\Controllers\Api\OrganizationController::class,'getDepartmentMangers']);
+
 });
