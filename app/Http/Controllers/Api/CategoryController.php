@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Categories\ListOfCategoriesRequest;
-use App\Http\Requests\CreateCategoriesRequest;
-use App\Http\Requests\DeleteCategoryRequest;
-use App\Http\Requests\FilterRequest;
-use App\Http\Requests\UpdateCategoriesRequest;
+use App\Http\Requests\Categories\CreateCategoriesRequest;
+use App\Http\Requests\Categories\DeleteCategoryRequest;
+use App\Http\Requests\Categories\FilterRequest;
+use App\Http\Requests\Categories\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
