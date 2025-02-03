@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 
 class DatabaseController extends Controller
 {
@@ -40,7 +42,11 @@ class DatabaseController extends Controller
                 $search = strtolower($request->search);
                 $columnNames = array_filter($columnNames, fn($table) => str_contains(strtolower($table), $search));
             }
-            $data["names"] = array_values($columnNames);
+
+            $filtered = collect($columnNames)->filter(function ($value) {
+                return !in_array($value, ['id', 'uuid', Str::contains($value, "_id"), 'created_at', 'updated_at', 'deleted_at']);
+            })->toArray();
+            $data["names"] = array_values($filtered);
             return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);
