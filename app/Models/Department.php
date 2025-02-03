@@ -44,4 +44,8 @@ class Department extends Model implements Auditable
             $category->deleteWithChildren();
         });
     }
+    public function employees()
+    {
+        return $this->hasMany(User::class, "department_id");
+    }
 }

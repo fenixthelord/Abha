@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Organization;
 
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ShowCategoriesRequest extends FormRequest
+class AddOrgRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -18,13 +18,6 @@ class ShowCategoriesRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'department_uuid' => $this->department_uuid,
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,13 +26,14 @@ class ShowCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
-                "required",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
-            ]
+            'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where('deleted_at', null)],
+            'manager_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
+            'user_uuid' => [ 'required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
+            'position' => 'required|array',
+            'position.en' => 'required|string',
+            'position.ar' => 'required|string',
         ];
     }
-
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
