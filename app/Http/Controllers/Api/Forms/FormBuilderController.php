@@ -77,7 +77,8 @@ class FormBuilderController extends Controller
             foreach ($request->fields as $fieldData) {
                 if (array_key_exists('id', $fieldData)) {
                     $child = $form->fields()->find($fieldData['id']);
-                    $child->update($fieldData);
+                    if ($child)
+                        $child->update($fieldData);
                 } else {
                     FormField::create([
                         'form_id' => $form->id,
