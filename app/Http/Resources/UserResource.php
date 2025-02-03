@@ -37,6 +37,7 @@ class UserResource extends JsonResource
     }
     public function onlyName() {
         $this->merge = true;
+
         return $this;
     }
 }

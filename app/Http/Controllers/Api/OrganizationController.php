@@ -13,10 +13,10 @@ use App\Models\Department;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+
 
 class OrganizationController extends Controller
 {
@@ -36,7 +36,7 @@ class OrganizationController extends Controller
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
             $user = User::where('department_id', $department)->whereNotin('id',$employee)->get();
-            $data['employees'] = UserResource::collection($user)->onlyName();
+            $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
 
         } catch (\Exception $exception) {
@@ -61,7 +61,7 @@ class OrganizationController extends Controller
 
 
             $user = User::where("department_id", $department)->get();
-            $data['employees'] = UserResource::collection($user)->onlyName();
+            $data['employees'] = UserResource::collection($user)->each->onlyName();
 
 
             return $this->returnData($data);
