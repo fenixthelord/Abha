@@ -88,7 +88,7 @@ class UpdateCategoriesRequest extends FormRequest
             // Validate child structure
             $childValidator = Validator::make($child, [
                 'category_uuid' => [
-                    'required',
+                    'sometimes',
                     'uuid',
                     Rule::exists("categories", "uuid")->where("deleted_at", null)
                 ],

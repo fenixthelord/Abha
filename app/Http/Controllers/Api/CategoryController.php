@@ -14,6 +14,8 @@ use App\Models\Category;
 use App\Models\Department;
 use \Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Testing\Constraints\CountInDatabase;
 
 class CategoryController extends Controller
 {
@@ -47,10 +49,12 @@ class CategoryController extends Controller
                             ->orWhere("uuid", $request->categories_uuid);
                     }
                 )
-                ->when(!$request->has("department_uuid") && $request->has("categories_uuid"),
+                ->when(
+                    !$request->has("department_uuid") && $request->has("categories_uuid"),
                     function ($q) use ($request) {
                         $q->Where("uuid", $request->categories_uuid);
-                    });
+                    }
+                );
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             $data["categories"] = CategoryResource::collection(
@@ -152,6 +156,16 @@ class CategoryController extends Controller
     {
         foreach ($categories as $categoryData) {
 
+            if (!isset($categoryData["category_uuid"])) {
+                $this->createCategories(
+                    departmentId: $department->id,
+                    categories: [$categoryData],
+                    parentId: $parentId,
+                    status: 'update'
+                );
+                continue;
+            }
+
             $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
 
             $category->update([
@@ -166,6 +180,8 @@ class CategoryController extends Controller
                     categories: $categoryData['chields'],
                     parentId: $category->id
                 );
+            } else {
+                $category->children->each->deleteWithChildren();
             }
         }
     }
@@ -209,10 +225,21 @@ class CategoryController extends Controller
      * @param $parentId
      * @return void
      */
-    private function createCategories($departmentId, $categories, $parentId = null)
+    private function createCategories($departmentId, $categories, $parentId = null, $status = 'create')
     {
         try {
             foreach ($categories as $categoryData) {
+                // dd($categories);
+                // log::info($categoryData['category_uuid']);
+                // continue;
+                if ($status == "update") {
+                    if (isset($categoryData["category_uuid"])) {
+                        $isCategoryExists = Category::where("uuid", $categoryData["category_uuid"])->first();
+                        if ($isCategoryExists->exists()) {
+                            continue;
+                        }
+                    }
+                }
 
                 $category = Category::Create([
                     'department_id' => $departmentId,
@@ -224,7 +251,8 @@ class CategoryController extends Controller
                     $this->createCategories(
                         departmentId: $departmentId,
                         categories: $categoryData['chields'],
-                        parentId: $category->id
+                        parentId: $category->id,
+                        status: $status
                     );
                 }
             }
