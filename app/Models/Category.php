@@ -56,4 +56,8 @@ class Category extends Model implements Auditable
 
         $this->delete();
     }
+
+    public function scopeSearch($query , $val) {
+        return $query->
+    }
 }

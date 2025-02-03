@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class FilterRequest extends FormRequest
+class ListOfCategoriesRequest extends FormRequest
 {
-
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -28,19 +28,15 @@ class FilterRequest extends FormRequest
     {
         return [
             "department_uuid" => [
-                "required",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
-
-            ],
-
-            "category_uuid" => [
                 "nullable",
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
-
+                Rule::exists("departments", "uuid")->whereNull("deleted_at")
             ],
+            "categories_uuid" => [
+                "nullable",
+                Rule::exists("categories", "uuid")->whereNull("deleted_at")
+            ]
         ];
     }
-
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
