@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_fields', function (Blueprint $table) {
+        Schema::create('form_field_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
+            $table->foreignUuid('form_field_id')->constrained('form_fields')->onDelete('cascade');
             $table->string('label');
-            $table->string('placeholder');
-            $table->enum('type', ['text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'file']);
-            // $table->json('options')->nullable();
-            $table->boolean('required')->default(false);
+            $table->boolean('selected')->default(false);
             $table->integer('order')->default(0);
             $table->softDeletes();
             $table->timestamps();
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('form_fields');
+        Schema::dropIfExists('form_field_options');
     }
 };

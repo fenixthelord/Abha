@@ -8,6 +8,7 @@ use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Form;
 use App\Models\FormField;
+use App\Models\FormFieldOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Enum;
@@ -60,7 +61,7 @@ class FormBuilderController extends Controller
                 'fields.*.placeholder.en' => 'required|string',
                 'fields.*.placeholder.ar' => 'required|string',
                 'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-                'fields.*.options' => 'nullable|array',
+                // 'fields.*.options' => 'nullable|array',
                 'fields.*.required' => 'nullable|boolean',
                 'fields.*.order' => 'nullable|numeric',
             ]);
@@ -80,12 +81,12 @@ class FormBuilderController extends Controller
                     if ($child)
                         $child->update($fieldData);
                 } else {
-                    FormField::create([
+                    $form_field = FormField::create([
                         'form_id' => $form->id,
                         'label' => $fieldData['label'],
                         'placeholder' => $fieldData['placeholder'],
                         'type' => $fieldData['type'],
-                        'options' => $fieldData['options'] ?? null,
+                        // 'options' => $fieldData['options'] ?? null,
                         'required' => $fieldData['required'] ?? false,
                         'order' => $fieldData['order'] ?? 0,
                     ]);
@@ -126,9 +127,9 @@ class FormBuilderController extends Controller
                 'fields.*.placeholder.en' => 'required|string',
                 'fields.*.placeholder.ar' => 'required|string',
                 'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-                'fields.*.options' => 'nullable|array',
                 'fields.*.required' => 'nullable|boolean',
                 'fields.*.order' => 'nullable|numeric',
+                // 'fields.*.options' => 'required|array',
             ]);
 
             DB::beginTransaction();
@@ -139,19 +140,27 @@ class FormBuilderController extends Controller
             ]);
 
             foreach ($request->fields as $field) {
-                FormField::create([
+                $formField = FormField::create([
                     'form_id' => $form->id,
                     'label' => $field['label'],
                     'placeholder' => $field['placeholder'],
                     'type' => $field['type'],
-                    'options' => $field['options'] ?? null,
+                    // 'options' => $field['options'] ?? null,
                     'required' => $field['required'] ?? false,
                     'order' => $field['order'] ?? 0,
                 ]);
+                foreach ($field['options'] as $option) {
+                    FormFieldOption::create([
+                        'form_field_id' => $formField->id,
+                        'label' => $option['label'],
+                        'selected' => $option['selected'] ?? false,
+                        'order' => $option['order'] ?? 0,
+                    ]);
+                }
             }
 
             DB::commit();
-            $form = Form::with('fields')->findOrFail($form->id);
+            $form = Form::with('fields.options')->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {

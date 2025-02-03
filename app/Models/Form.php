@@ -11,6 +11,7 @@ class Form extends BaseModel
 
     protected $fillable = ['category_id', 'name'];
     private $translatable = ['name'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function category()
     {
