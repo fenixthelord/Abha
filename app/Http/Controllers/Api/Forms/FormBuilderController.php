@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Forms;
 
-use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Forms\CreateFormBuilderRequest;
 use App\Http\Requests\Forms\UpdateFormBuilderRequest;
@@ -13,7 +12,6 @@ use App\Models\Forms\FormField;
 use App\Models\Forms\FormFieldOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rules\Enum;
 
 class FormBuilderController extends Controller
 {
@@ -77,7 +75,6 @@ class FormBuilderController extends Controller
         DB::beginTransaction();
         try {
             $form = Form::with('fields.options')->findOrFail($id);
-
             $form->update(['category_id' => $request->category_id, 'name' => $request->name]);
 
             $field_ids = $request->input('fields.*.id');
@@ -94,21 +91,13 @@ class FormBuilderController extends Controller
                     if ($existed_field)
                         $existed_field->update($field_data);
                 } else {
-                    $form_field = FormField::create([
-                        'form_id' => $form->id,
-                        'label' => $field_data['label'],
-                        'placeholder' => $field_data['placeholder'],
-                        'type' => $field_data['type'],
-                        'required' => $field_data['required'] ?? false,
-                        'order' => $field_data['order'] ?? 0,
-                    ]);
-                    foreach ($field_data['options'] as $option) {
-                        FormFieldOption::create([
-                            'form_field_id' => $form_field->id,
-                            'label' => $option['label'],
-                            'selected' => $option['selected'] ?? false,
-                            'order' => $option['order'] ?? 0,
-                        ]);
+                    $form_field = $form->fields()->create($field_data);
+                    foreach ($field_data['options'] as $option_data) {
+                        if (array_key_exists('id', $option_data)) {
+                            $existed_option = $form->fields()->find($option_data['id']);
+                            if ($existed_option)
+                                $existed_option->update($option_data);
+                        } else $form_field->options()->create($option_data);
                     }
                 }
             }
