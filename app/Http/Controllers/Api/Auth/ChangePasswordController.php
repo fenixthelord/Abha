@@ -41,7 +41,6 @@ class ChangePasswordController extends Controller
                 $user->verify_code = $verificationCode;
                 $user->otp_expires_at = Carbon::now()->addMinutes(5);
                 $user->save();
-                DB::commit();
                 Mail::to($user->email)->send(new OtpMail($verificationCode));
                 return $this->returnSuccessMessage('Verification code sent!');
             } else {
@@ -54,7 +53,7 @@ class ChangePasswordController extends Controller
         }
     }
 
-    public function reset_password(Request $request)
+    public function resetPassword(Request $request)
     {
         try {
             DB::beginTransaction();

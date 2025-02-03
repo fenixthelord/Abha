@@ -26,12 +26,12 @@ class NotifyGroupController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|array',
+                'name' => 'required|array|max:255',
                 'name.en' => 'required|string|unique:notify_groups,name->en',
                 'name.ar' => 'required|string|unique:notify_groups,name->ar',
-                'description' => 'nullable|array',
-                'description.en' => 'nullable|string',
-                'description.ar' => 'nullable|string',
+                'description' => 'required|array',
+                'description.en' => 'required|string',
+                'description.ar' => 'required|string',
                 'user_uuids' => 'required|array',
                 'user_uuids.*' => 'exists:users,uuid',
             ]);

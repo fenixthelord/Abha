@@ -41,7 +41,7 @@ Route::prefix('/auth')->group(function () {
     Route::post('register', [UserAuthController::class, 'register'])->middleware('auth:sanctum');
     Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePasswordController::class, 'forgotPassword']);
-    Route::post('/reset-password', [ChangePasswordController::class, 'reset_password']);
+    Route::post('/reset-password', [ChangePasswordController::class, 'resetPassword']);
     Route::post('refresh-token', [UserAuthController::class, 'refreshToken']);
     Route::middleware('auth:sanctum')->group(function () {
         // Link Social Account Route (Requires Authentication)
