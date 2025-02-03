@@ -32,12 +32,6 @@ class FilterRequest extends FormRequest
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
 
             ],
-
-            "category_uuid" => [
-                "nullable",
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
-
-            ],
         ];
     }
 

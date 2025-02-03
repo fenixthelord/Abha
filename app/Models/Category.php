@@ -10,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Category extends Model implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable ,HasTranslations;
+    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
 
     private $translatable = ['name'];
 
@@ -56,8 +56,16 @@ class Category extends Model implements Auditable
 
         $this->delete();
     }
-
-    public function scopeSearch($query , $val) {
-        return $query->
+    public function scopeWithSearch($query, $value)
+    {
+        return $query
+            ->where('id', 'like', '%' . $value . '%')
+            ->orWhere('name', 'like', '%' . $value . '%')
+            ->orWhereHas('department', function ($query) use ($value) {
+                $query->where('name', 'like', '%' . $value . '%');
+            })
+            ->orWhereHas('parent', function ($query) use ($value) {
+                $query->where('name', 'like', '%' . $value . '%');
+            })  ;
     }
 }

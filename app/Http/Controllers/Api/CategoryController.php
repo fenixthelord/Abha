@@ -12,6 +12,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
 use App\Models\Department;
+use \Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
@@ -33,11 +34,19 @@ class CategoryController extends Controller
             $pageNumber = $request->input('page', $this->pageNumber);
 
             $query = Category::query()
-                ->where("parent_id", null)
-                
                 ->when($request->has("search"),  function ($q) use ($request) {
-                    $q->where("name", "like", "%" . $request->search . "%");
-                });
+                    $q->WithSearch($request->search);
+                })
+                ->where("parent_id", null)
+                ->when(
+                    $request->has("department_uuid") || $request->has("categories_uuid"),
+                    function ($q) use ($request) {
+                        $department = Department::where("uuid", $request->department_uuid)->firstOrFail();
+                        $q
+                            ->where("department_id", $department->id)
+                            ->orWhere("uuid", $request->categories_uuid);
+                    }
+                );
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             $data["categories"] = CategoryResource::collection(
