@@ -39,14 +39,18 @@ class CategoryController extends Controller
                 })
                 ->where("parent_id", null)
                 ->when(
-                    $request->has("department_uuid") || $request->has("categories_uuid"),
+                    $request->has("department_uuid") && $request->has("categories_uuid"),
                     function ($q) use ($request) {
                         $department = Department::where("uuid", $request->department_uuid)->firstOrFail();
                         $q
                             ->where("department_id", $department->id)
                             ->orWhere("uuid", $request->categories_uuid);
                     }
-                );
+                )
+                ->when(!$request->has("department_uuid") && $request->has("categories_uuid"),
+                    function ($q) use ($request) {
+                        $q->Where("uuid", $request->categories_uuid);
+                    });
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             $data["categories"] = CategoryResource::collection(
@@ -61,8 +65,8 @@ class CategoryController extends Controller
 
     /**
      * Filters for search to category
-     * 
-     * @param  FilterRequest $request for validation 
+     *
+     * @param  FilterRequest $request for validation
      * @return \Illuminate\Http\Response
      */
     public function filter(FilterRequest $request)
@@ -85,7 +89,7 @@ class CategoryController extends Controller
 
     /**
      * Delete category with all children
-     * 
+     *
      * @param  DeleteCategoryRequest  $request for validation and control Roles
      * @return \Illuminate\Http\Response
      */
@@ -167,7 +171,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * This function is used to create categories and sub-categories 
+     * This function is used to create categories and sub-categories
      * @param CreateCategoriesRequest $request for validation and control Roles
      * @return \Illuminate\Http\JsonResponse
      */
