@@ -11,12 +11,12 @@ class FormFieldResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'order' => $this->order,
             'label' => $this->label,
             'placeholder' => $this->placeholder,
             'type' => $this->type,
-            'options' => FormFieldOptionResource::collection($this->whenLoaded('options')),
             'required' => $this->required,
-            'order' => $this->order,
+            'options' => FormFieldOptionResource::collection($this->whenLoaded('options')),
         ];
     }
 }

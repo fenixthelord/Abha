@@ -16,10 +16,9 @@ class FormFieldOptionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'form_field_id' => $this->form_field_id,
+            'order' => $this->order,
             'label' => $this->label,
             'selected' => $this->selected,
-            'order' => $this->order,
         ];
     }
 }

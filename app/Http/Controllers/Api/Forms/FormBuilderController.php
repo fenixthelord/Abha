@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Forms;
 use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Forms\CreateFormBuilderRequest;
+use App\Http\Requests\Forms\UpdateFormBuilderRequest;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\Form;
@@ -46,121 +47,75 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function store(CreateFormBuilderRequest $request)
     {
-        DB::beginTransaction();
         try {
-            $request->validate([
-                'category_id' => 'required|numeric',
-                'name' => 'required|array',
-                'name.en' => 'required|string|min:2|max:255',
-                'name.ar' => 'required|string|min:2|max:255',
-                'fields' => 'required|array',
-                'fields.*.id' => 'nullable|string',
-                'fields.*.label.en' => 'required|string',
-                'fields.*.label.ar' => 'required|string',
-                'fields.*.placeholder.en' => 'required|string',
-                'fields.*.placeholder.ar' => 'required|string',
-                'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-                'fields.*.required' => 'nullable|boolean',
-                'fields.*.order' => 'nullable|numeric',
+            DB::beginTransaction();
+            $form = Form::create([
+                'category_id' => $request->category_id,
+                'name' => $request->name,
             ]);
 
-            $form = Form::with('fields')->findOrFail($id);
-
-            $form->name = $request->name ?? $form->name;
-            $form->category_id = $request->category_id ?? $form->category_id;
-            $form->save();
-            $idsFromRequest = $request->input('fields.*.id');
-            $missingIds = array_diff($form->fields()->pluck('id')->toArray(), $idsFromRequest);
-            FormField::whereIn('id', $missingIds)->delete();
-
-            foreach ($request->fields as $fieldData) {
-                if (array_key_exists('id', $fieldData)) {
-                    $child = $form->fields()->find($fieldData['id']);
-                    if ($child)
-                        $child->update($fieldData);
-                } else {
-                    $form_field = FormField::create([
-                        'form_id' => $form->id,
-                        'label' => $fieldData['label'],
-                        'placeholder' => $fieldData['placeholder'],
-                        'type' => $fieldData['type'],
-                        'required' => $fieldData['required'] ?? false,
-                        'order' => $fieldData['order'] ?? 0,
-                    ]);
+            foreach ($request['fields'] as $field_data) {
+                $form_field = $form->fields()->create($field_data);
+                foreach ($field_data['options'] as $option_data) {
+                    $form_field->options()->create($option_data);
                 }
             }
-            $form = Form::with('fields')->findOrFail($id);
-            $data['form'] =  FormResource::make($form);
             DB::commit();
-            return $this->returnData($data);
+            $form = Form::with('fields.options')->findOrFail($form->id);
+            $data['form'] =  FormResource::make($form);
+            return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
     }
 
-    public function store(CreateFormBuilderRequest $request)
+    public function update(UpdateFormBuilderRequest $request, $id)
     {
-        // dd(config('app.supported_locales'));
-        // $rules = [];
-
-        // foreach (config('app.supported_locales') as $locale) {
-        //     $rules["name.$locale"] = [
-        //         'required|string|min:2|max:255',
-        //         Rule::unique('forms', "name->$locale")
-        //     ];
-        // }
-
-        // $request->validate($rules);
+        DB::beginTransaction();
         try {
-            // $request->validate([
-            //     'category_id' => 'required|numeric',
-            //     'name' => 'required|array',
-            //     'name.en' => 'required|string|min:2|max:255',
-            //     'name.ar' => 'required|string|min:2|max:255',
-            //     'fields' => 'required|array',
-            //     'fields.*.label.en' => 'required|string',
-            //     'fields.*.label.ar' => 'required|string',
-            //     'fields.*.placeholder.en' => 'required|string',
-            //     'fields.*.placeholder.ar' => 'required|string',
-            //     'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-            //     'fields.*.required' => 'nullable|boolean',
-            //     'fields.*.order' => 'nullable|numeric',
-            // ]);
-            $request->validated();
-            DB::beginTransaction();
+            $form = Form::with('fields.options')->findOrFail($id);
 
-            $form = Form::create([
-                'category_id' => $request->category_id,
-                'name' => $request->name,
-            ]);
+            $form->update(['category_id' => $request->category_id, 'name' => $request->name]);
 
-            foreach ($request->fields as $field) {
-                $formField = FormField::create([
-                    'form_id' => $form->id,
-                    'label' => $field['label'],
-                    'placeholder' => $field['placeholder'],
-                    'type' => $field['type'],
-                    // 'options' => $field['options'] ?? null,
-                    'required' => $field['required'] ?? false,
-                    'order' => $field['order'] ?? 0,
-                ]);
-                foreach ($field['options'] as $option) {
-                    FormFieldOption::create([
-                        'form_field_id' => $formField->id,
-                        'label' => $option['label'],
-                        'selected' => $option['selected'] ?? false,
-                        'order' => $option['order'] ?? 0,
+            $field_ids = $request->input('fields.*.id');
+            $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);
+            FormField::whereIn('id', $missing_field_ids)->delete();
+
+            $option_ids = $request->input('fields.*.options.*.id');
+            $missing_option_ids = array_diff($form->fields()->pluck('id')->toArray(), $option_ids);
+            FormFieldOption::whereIn('id', $missing_option_ids)->delete();
+
+            foreach ($request->fields as $field_data) {
+                if (array_key_exists('id', $field_data)) {
+                    $existed_field = $form->fields()->find($field_data['id']);
+                    if ($existed_field)
+                        $existed_field->update($field_data);
+                } else {
+                    $form_field = FormField::create([
+                        'form_id' => $form->id,
+                        'label' => $field_data['label'],
+                        'placeholder' => $field_data['placeholder'],
+                        'type' => $field_data['type'],
+                        'required' => $field_data['required'] ?? false,
+                        'order' => $field_data['order'] ?? 0,
                     ]);
+                    foreach ($field_data['options'] as $option) {
+                        FormFieldOption::create([
+                            'form_field_id' => $form_field->id,
+                            'label' => $option['label'],
+                            'selected' => $option['selected'] ?? false,
+                            'order' => $option['order'] ?? 0,
+                        ]);
+                    }
                 }
             }
-
-            DB::commit();
-            $form = Form::with('fields.options')->findOrFail($form->id);
+            $form = Form::with('fields.options')->findOrFail($id);
             $data['form'] =  FormResource::make($form);
-            return $this->returnData($data, "Form created successfully");
+            DB::commit();
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -176,11 +131,9 @@ class FormBuilderController extends Controller
                 return $this->badRequest('Form already deleted.');
             } else {
                 $form = Form::findOrFail($id);
-                $form->fields()->delete();
-                $form->submissions()->delete();
                 $form->name = $form->name . '-' . $form->id . '-deleted';
                 $form->save();
-                $form->delete();
+                $form->forceDelete();
                 DB::commit();
                 return $this->returnSuccessMessage('Form deleted successfully');
             }

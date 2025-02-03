@@ -28,4 +28,12 @@ class FormField extends BaseModel
     {
         return $this->hasMany(FormFieldOption::class)->orderBy('order', 'asc');
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($form_field) {
+            $form_field->options()->delete();
+        });
+    }
 }

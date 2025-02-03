@@ -48,4 +48,13 @@ class Form extends BaseModel
             });;
         });
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($form) {
+            $form->fields()->delete();
+            $form->submissions()->delete();
+        });
+    }
 }

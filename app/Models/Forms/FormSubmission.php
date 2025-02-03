@@ -20,4 +20,12 @@ class FormSubmission extends BaseModel
     {
         return $this->hasMany(FormSubmissionValue::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($form_submission) {
+            $form_submission->values()->delete();
+        });
+    }
 }

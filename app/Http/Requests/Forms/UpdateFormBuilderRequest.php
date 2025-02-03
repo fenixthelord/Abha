@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class CreateFormBuilderRequest extends FormRequest
+class UpdateFormBuilderRequest extends FormRequest
 {
     use ResponseTrait;
     public function authorize(): bool
@@ -18,7 +18,7 @@ class CreateFormBuilderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => 'required|numeric',
+            'category_id' => ['required', 'numeric', Rule::exists('categories', 'id')->whereNull('deleted_at')],
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
@@ -26,6 +26,7 @@ class CreateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->en')
+                    ->ignore($this->route('form'))
                     ->where("category_id", $this->category_id)
             ],
             'name.ar' => [
@@ -34,6 +35,7 @@ class CreateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->ar')
+                    ->ignore($this->route('form'))
                     ->where("category_id", $this->category_id)
             ],
 
