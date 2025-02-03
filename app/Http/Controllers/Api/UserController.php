@@ -236,27 +236,26 @@ class UserController extends Controller
 
     public function deleteUser(Request $request)
     {
-        $user = auth()->user();
-        if (!$user->hasPermissionTo('user.delete')) {
+        $current_user = auth()->user();
+        if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
 
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users',
+                'uuid' => 'required|string|exists:users,uuid',
             ], messageValidation());
+
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->first()) {
-                if (!$user) {
-                    return $this->NotFound('User not found');
-                }
-                if ($user->hasRole("Master")) {
+            $selected_user = User::whereuuid($request->uuid)->first();
+            if ($selected_user){
+                if ($selected_user->hasRole("Master") || $selected_user->id == 1) {
                     return $this->Forbidden('This user is Master and can not be deleted');
                 }
-                $user->delete();
+                $selected_user->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('User deleted successfully');
             } else {

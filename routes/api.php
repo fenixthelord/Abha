@@ -41,7 +41,7 @@ Route::prefix('/auth')->group(function () {
     Route::post('register', [UserAuthController::class, 'register'])->middleware('auth:sanctum');
     Route::post('login', [UserAuthController::class, 'login']);
     Route::post('/forgot-password', [ChangePasswordController::class, 'forgotPassword']);
-    Route::post('/reset-password', [ChangePasswordController::class, 'reset_password']);
+    Route::post('/reset-password', [ChangePasswordController::class, 'resetPassword']);
     Route::post('refresh-token', [UserAuthController::class, 'refreshToken']);
     Route::middleware('auth:sanctum')->group(function () {
         // Link Social Account Route (Requires Authentication)
@@ -102,7 +102,7 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
     //   });
 });
 
-Route::get('/audit-logs', [AuditLogController::class, 'index']);
+Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('auth:sanctum');
 
 
 
@@ -111,6 +111,7 @@ Route::get('/audit-logs', [AuditLogController::class, 'index']);
 Route::prefix('notification')->group(function () {
 
     Route::post('/send', [NotificationController::class, 'sendNotification']);
+    Route::post('/all', [NotificationController::class, 'allNotification']);
 });
 // Send Notifications
 //Route::post('/send-notification', [NotificationController::class, 'sendNotification']);

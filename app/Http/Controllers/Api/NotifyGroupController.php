@@ -26,10 +26,12 @@ class NotifyGroupController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|array',
+                'name' => 'required|array|max:255',
                 'name.en' => 'required|string|unique:notify_groups,name->en',
                 'name.ar' => 'required|string|unique:notify_groups,name->ar',
-                'description' => 'nullable|string',
+                'description' => 'required|array',
+                'description.en' => 'required|string',
+                'description.ar' => 'required|string',
                 'user_uuids' => 'required|array',
                 'user_uuids.*' => 'exists:users,uuid',
             ]);
@@ -146,7 +148,7 @@ class NotifyGroupController extends Controller
                 return $this->PaginateData($data, $notifyGroup);
             }
             return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);*/
-            $fildes = ['name'];
+            $fildes = ['name->ar','name->en'];
             $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request);
             $data['group'] = GroupResource::collection($group);
             return $this->PaginateData($data, $group);
@@ -164,8 +166,8 @@ class NotifyGroupController extends Controller
         try {
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
-                $data['members'] = UserResource::collection($group->users);
-                return $this->returnData('group', $data);
+  //              $data['members'] = UserResource::collection($group->users);
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('Group not found');
             }
@@ -183,7 +185,9 @@ class NotifyGroupController extends Controller
                     'name' => 'nullable|array',
                     'name.en' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->en')->ignore($group->id)],
                     'name.ar' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->ar')->ignore($group->id)],
-                    'description' => 'nullable|string',
+                    'description' => 'nullable|array',
+                    'description.en' => 'nullable|string',
+                    'description.ar' => 'nullable|string',
                     'model' => 'nullable|string',
                     'user_uuids' => 'nullable|array',
                     'user_uuids.*' => 'exists:users,uuid',
