@@ -5,7 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\AddOrgRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
+use App\Http\Requests\Organization\OrgFilterRequest;
+use App\Http\Resources\OrganizationResource;
+use App\Http\Resources\UserResource;
+use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
+use App\Models\Organization;
+use App\Models\User;
+use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Expr\Cast\Object_;
 
 class OrganizationController extends Controller
@@ -26,7 +36,7 @@ class OrganizationController extends Controller
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
             $user = User::where('department_id', $department)->whereNotin('id',$employee)->get();
-            $data['employees'] = UserResource::collection($user);
+            $data['employees'] = UserResource::collection($user)->onlyName();
             return $this->returnData($data);
 
         } catch (\Exception $exception) {
@@ -51,7 +61,7 @@ class OrganizationController extends Controller
 
 
             $user = User::where("department_id", $department)->get();
-            $data['employees'] = UserResource::collection($user);
+            $data['employees'] = UserResource::collection($user)->onlyName();
 
 
             return $this->returnData($data);
@@ -68,24 +78,7 @@ class OrganizationController extends Controller
         try {
 
 
-           /* $validation = Validator::make($request->all(), [
-                'department_uuids' => 'boolean',
-                'manager_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
-                'user_uuid' => [ 'required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
-                'position.en' => 'required|string',
-                'position.ar' => 'required|string',
-                'position' => 'required|array',
-            ]);*/
 
-         /*   $validation = $request->validate([
-
-
-            ]);
-
-
-            if ($validation->fails()) {
-                $this->returnValidationError($validation);
-            }*/
             if ($request->user_uuid == $request->manager_uuid) {
                 return $this->badRequest('manger and employee must not be the same');
             }
