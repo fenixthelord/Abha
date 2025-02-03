@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DatabaseController;
 use App\Http\Controllers\Api\DepartmentsControllers;
+use App\Http\Controllers\Api\ExcelController;
 use App\Http\Controllers\Api\Forms\FormBuilderController;
 use App\Http\Controllers\Api\Forms\FormFieldController;
 use App\Http\Controllers\Api\Forms\FormSubmissionController;
@@ -197,3 +198,5 @@ Route::group(["prefix" => "/db"], function () {
     Route::get('/tables', [DatabaseController::class, 'getTables']);
     Route::get('/columns/{table}', [DatabaseController::class, 'getColumns']);
 });
+
+Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
