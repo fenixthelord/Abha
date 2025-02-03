@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateCategoriesRequest;
-use App\Http\Requests\DeleteCategoryRequest;
-use App\Http\Requests\DeleteCatigoryRequest;
-use App\Http\Requests\FilterRequest;
-use App\Http\Requests\IndexCategoryRequest;
-use App\Http\Requests\SaveCategoriesRequest;
-use App\Http\Requests\ShowCategoriesRequest;
-use App\Http\Requests\ShowCategoryRequest;
-use App\Http\Requests\UpdateCategoriesRequest;
+use App\Http\Requests\Categories\CreateCategoriesRequest;
+use App\Http\Requests\Categories\DeleteCategoryRequest;
+use App\Http\Requests\Categories\DeleteCatgoryRequest;
+use App\Http\Requests\Categories\FilterRequest;
+use App\Http\Requests\Categories\IndexCategoryRequest;
+use App\Http\Requests\Categories\SaveCategoriesRequest;
+use App\Http\Requests\Categories\ShowCategoriesRequest;
+use App\Http\Requests\Categories\ShowCategoryRequest;
+use App\Http\Requests\Categories\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Traits\ResponseTrait;
@@ -79,6 +79,16 @@ class CategoryController extends Controller
     {
         try {
 
+
+            $validator = Validator::make($request->all(), [
+                'per_page' => 'nullable|integer|min:1',
+                'page' => 'nullable|integer|min:1',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
@@ -90,6 +100,11 @@ class CategoryController extends Controller
                 });
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+
+            if ($request->page > $category->lastPage()) {
+                $category = $query->paginate($perPage, ['*'], 'page', 1);
+            }
+
             $data["categories"] = CategoryResource::collection(
                 $category->load("children")
             )->each->withDeparted();

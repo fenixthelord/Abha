@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class FilterRequest extends FormRequest
+class ShowCategoriesRequest extends FormRequest
 {
-
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -17,6 +16,13 @@ class FilterRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'department_uuid' => $this->department_uuid,
+        ]);
     }
 
     /**
@@ -28,16 +34,9 @@ class FilterRequest extends FormRequest
     {
         return [
             "department_uuid" => [
-                "nullable",
+                "required",
                 Rule::exists("departments", "uuid")->where("deleted_at", null)
-
-            ],
-
-            "category_uuid" => [
-                "nullable",
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
-
-            ],
+            ]
         ];
     }
 

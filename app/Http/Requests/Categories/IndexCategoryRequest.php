@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
-use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class DeleteCategoryRequest extends FormRequest
+class IndexCategoryRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -16,8 +15,9 @@ class DeleteCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return True;
     }
+
 
     /**
      * Get the validation rules that apply to the request.
@@ -26,15 +26,21 @@ class DeleteCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd($this->parent_category_uuid);
         return [
-            'uuid' => [
-                'required',
-                // 'exists:categories,uuid',
-                Rule::exists("categories" , "uuid")->where("deleted_at", null)
-            ]
+            'department_uuid' => [
+                'sometimes',
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+
+            ],
+            'parent_category_uuid' => [
+                'sometimes',
+                Rule::exists("categories", "uuid")->where("deleted_at", null)
+
+            ],
+            'per_page' => 'sometimes|integer|min:1|max:100',
         ];
     }
+
 
     public function failedValidation($validator)
     {
