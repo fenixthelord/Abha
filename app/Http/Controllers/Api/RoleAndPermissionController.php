@@ -55,7 +55,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ],messageValidation());
+            ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -426,12 +426,11 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-            'displaying.en' => 'string',
-            'displaying.ar' => 'string',
-            'description.ar' => 'string',
-
-            'description.en' => 'string',
-        ],messageValidation());
+            'displaying.en' => 'required|string',
+            'displaying.ar' => 'required|string',
+            'description.ar' => 'required|string',
+            'description.en' => 'required|string',
+        ]);
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);

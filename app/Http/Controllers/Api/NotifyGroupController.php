@@ -33,7 +33,7 @@ class NotifyGroupController extends Controller
                 'description.en' => 'required|string',
                 'description.ar' => 'required|string',
                 'user_uuids' => 'required|array',
-                'user_uuids.*' => 'exists:users,uuid',
+       //         'user_uuids.*' => 'exists:users,uuid',
             ]);
             $notifyGroup = NotifyGroup::create([
                 'name' => $request->input('name'),
@@ -56,7 +56,7 @@ class NotifyGroupController extends Controller
             DB::beginTransaction();
             $request->validate([
                 'user_uuids' => 'required|array',
-                'user_uuids.*' => 'exists:users,uuid',
+     //           'user_uuids.*' => 'exists:users,uuid',
             ]);
 
             if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
