@@ -122,6 +122,26 @@ return [
             'required' => 'Role is required.',
             'exists' => 'This role does not exist.',
         ],
+        'forget_password' => [
+            'sent_code' => 'otp send successfully.',
+            'error' => 'try again later.',
+            'expired' => 'otp not expired.',
+            'done' => 'change password successfully and logout from all devices.',
+            'not_done' => 'the verification code is not valid.',
+        ],
+        'auth' => [
+            'permission' => 'you are not allowed to access this page.',
+            'failed' => 'email or password is wrong.',
+            'deleted' => 'this account is deleted.',
+            'logout' => 'loged out.',
+        ],
+        'department' => [
+            'notfound' => 'department not found.',
+            'try' => 'try again.',
+            'done' => 'department added successfully.',
+            'deleted' =>'department already deleted.',
+            'delete' => 'department deleted successfully.',
+        ],
     ],
 
     'attributes' => [
