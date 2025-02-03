@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Forms;
 
 use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Forms\CreateFormBuilderRequest;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\Form;
@@ -24,7 +25,7 @@ class FormBuilderController extends Controller
             $perPage = $request->input('perPage', 10);
             $forms = Form::orderByAll($request->sortBy, $request->sortType)
                 ->filter($request->only('search'))
-                ->with(['fields']);
+                ->with(['fields.options']);
             $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
 
             $data['forms'] =  FormResource::collection($form);
@@ -37,7 +38,7 @@ class FormBuilderController extends Controller
     public function show($id)
     {
         try {
-            $form = Form::with('fields')->findOrFail($id);
+            $form = Form::with('fields.options')->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -100,7 +101,7 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(CreateFormBuilderRequest $request)
     {
         // dd(config('app.supported_locales'));
         // $rules = [];
@@ -114,21 +115,21 @@ class FormBuilderController extends Controller
 
         // $request->validate($rules);
         try {
-            $request->validate([
-                'category_id' => 'required|numeric',
-                'name' => 'required|array',
-                'name.en' => 'required|string|min:2|max:255',
-                'name.ar' => 'required|string|min:2|max:255',
-                'fields' => 'required|array',
-                'fields.*.label.en' => 'required|string',
-                'fields.*.label.ar' => 'required|string',
-                'fields.*.placeholder.en' => 'required|string',
-                'fields.*.placeholder.ar' => 'required|string',
-                'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-                'fields.*.required' => 'nullable|boolean',
-                'fields.*.order' => 'nullable|numeric',
-            ]);
-
+            // $request->validate([
+            //     'category_id' => 'required|numeric',
+            //     'name' => 'required|array',
+            //     'name.en' => 'required|string|min:2|max:255',
+            //     'name.ar' => 'required|string|min:2|max:255',
+            //     'fields' => 'required|array',
+            //     'fields.*.label.en' => 'required|string',
+            //     'fields.*.label.ar' => 'required|string',
+            //     'fields.*.placeholder.en' => 'required|string',
+            //     'fields.*.placeholder.ar' => 'required|string',
+            //     'fields.*.type' => ['required', new Enum(FormFiledType::class)],
+            //     'fields.*.required' => 'nullable|boolean',
+            //     'fields.*.order' => 'nullable|numeric',
+            // ]);
+            $request->validated();
             DB::beginTransaction();
 
             $form = Form::create([

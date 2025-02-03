@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('placeholder');
             $table->enum('type', ['text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'file']);
             $table->boolean('required')->default(false);
-            $table->integer('order')->default(0);
+            $table->integer('order');
             $table->softDeletes();
             $table->timestamps();
         });

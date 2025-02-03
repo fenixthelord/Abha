@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('form_field_id')->constrained('form_fields')->onDelete('cascade');
             $table->string('label');
             $table->boolean('selected')->default(false);
-            $table->integer('order')->default(0);
+            $table->integer('order');
             $table->softDeletes();
             $table->timestamps();
         });
