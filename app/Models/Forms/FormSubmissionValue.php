@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FormSubmissionValue extends BaseModel

@@ -6,9 +6,9 @@ use App\Enums\FormFiledType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
-use App\Models\Form;
-use App\Models\FormField;
-use App\Models\FormFieldOption;
+use App\Models\Forms\Form;
+use App\Models\Forms\FormField;
+use App\Models\Forms\FormFieldOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Enum;
@@ -61,7 +61,6 @@ class FormBuilderController extends Controller
                 'fields.*.placeholder.en' => 'required|string',
                 'fields.*.placeholder.ar' => 'required|string',
                 'fields.*.type' => ['required', new Enum(FormFiledType::class)],
-                // 'fields.*.options' => 'nullable|array',
                 'fields.*.required' => 'nullable|boolean',
                 'fields.*.order' => 'nullable|numeric',
             ]);
@@ -86,7 +85,6 @@ class FormBuilderController extends Controller
                         'label' => $fieldData['label'],
                         'placeholder' => $fieldData['placeholder'],
                         'type' => $fieldData['type'],
-                        // 'options' => $fieldData['options'] ?? null,
                         'required' => $fieldData['required'] ?? false,
                         'order' => $fieldData['order'] ?? 0,
                     ]);
@@ -129,7 +127,6 @@ class FormBuilderController extends Controller
                 'fields.*.type' => ['required', new Enum(FormFiledType::class)],
                 'fields.*.required' => 'nullable|boolean',
                 'fields.*.order' => 'nullable|numeric',
-                // 'fields.*.options' => 'required|array',
             ]);
 
             DB::beginTransaction();

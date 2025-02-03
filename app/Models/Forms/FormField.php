@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms;
 
 use App\Enums\FormFiledType;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -16,7 +17,6 @@ class FormField extends BaseModel
 
     protected $casts = [
         'type' => FormFiledType::class,
-        // 'options' => 'array',
     ];
 
     public function form()

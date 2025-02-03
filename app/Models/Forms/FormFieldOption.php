@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms;
 
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 

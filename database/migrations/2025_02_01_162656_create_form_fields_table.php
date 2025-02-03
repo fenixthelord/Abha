@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('label');
             $table->string('placeholder');
             $table->enum('type', ['text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'file']);
-            // $table->json('options')->nullable();
             $table->boolean('required')->default(false);
             $table->integer('order')->default(0);
             $table->softDeletes();
