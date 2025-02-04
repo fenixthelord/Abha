@@ -1,22 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
-use App\Models\Category;
-use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CreateCategoriesRequest extends FormRequest
+class UpdateCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
-
-    private $departmentId ;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -24,13 +19,12 @@ class CreateCategoriesRequest extends FormRequest
     {
         return true;
     }
-    protected function prepareForValidation(): void
-    {
-        if (request()->has("department_uuid")) {
-            $this->departmentId = Department::where("uuid", $this->department_uuid)->pluck("id")->first();
-        }
-    }
-
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'department_uuid' => $this->department_uuid,
+    //     ]);
+    // }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -39,7 +33,17 @@ class CreateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => ["required", "exists:departments,uuid"],
+            'department_uuid' => [
+                'required',
+                'uuid',
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+
+            ],
+            "category_uuid" => [
+                'required',
+                'uuid',
+                Rule::exists("categories", "uuid")->where("deleted_at", null)
+            ],
             "name" => ["required", "array"],
             "name.en" => [
                 "required",
@@ -57,7 +61,7 @@ class CreateCategoriesRequest extends FormRequest
                 "max:255",
                 Rule::unique('categories', 'name->ar')
                     ->whereNull('parent_id')
-                    ->where("department_id", $this->departmentId)
+                    ->where("department_id", $this->departmentId),
             ],
             "chields" => ["required", "array"]
         ];
@@ -66,9 +70,7 @@ class CreateCategoriesRequest extends FormRequest
     protected function withValidator($validator)
     {
         $validator->after(function ($validator) {
-
-            $chields = $this->input('chields', []);
-            $this->validateChields($validator, $chields, 'chields');
+            $this->validateChields($validator, $this->input('chields', []), 'chields');
         });
     }
 
@@ -78,36 +80,33 @@ class CreateCategoriesRequest extends FormRequest
             $validator->errors()->add("chields", "The chields array is empty");
             throw new HttpResponseException($this->returnValidationError($validator));
         }
-
-
         $namesAR = [];
         $namesEN = [];
         foreach ($chields as $index => $child) {
             $currentPath = "{$path}.{$index}";
 
             // Validate child structure
-            if (isset($child["uuid"])) {
-                $childValidator = Validator::make($child, [
-                    'uuid' => [
-                        'sometimes',
-                        'string',
-                        Rule::exists("categories", "uuid")->where("deleted_at", null)
-
-                    ],
-                ]);
-            } else {
-                $childValidator = Validator::make($child, [
-                    'name' => 'required|array',
-                    'name.en' => 'required|string|min:2|max:255',
-                    'name.ar' => 'required|string|min:2|max:255',
-                    'chields' => 'nullable|array',
-                ]);
-            }
+            $childValidator = Validator::make($child, [
+                'category_uuid' => [
+                    'required',
+                    'uuid',
+                    Rule::exists("categories", "uuid")->where("deleted_at", null)
+                ],
+                'name' => 'required|array',
+                'name.en' => 'required|string|min:2|max:255',
+                'name.ar' => 'required|string|min:2|max:255',
+                'chields' => 'nullable|array',
+            ]);
 
             if ($childValidator->fails()) {
                 foreach ($childValidator->errors()->messages() as $key => $messages) {
                     foreach ($messages as $message) {
                         $validator->errors()->add("{$currentPath}.{$key}", $message);
+                        // For Arabic
+                        $arabicMessage = __('validation.custom.' . $key, [], 'ar');
+                        if ($arabicMessage !== 'validation.custom.' . $key) {
+                            $validator->errors()->add("{$currentPath}.{$key}", $arabicMessage);
+                        }
                     }
                 }
             }

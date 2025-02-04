@@ -35,9 +35,9 @@ class UserController extends Controller
         }
         try {
 
-           /* $perPage = request()->input('perPage', 10);
+            /* $perPage = request()->input('perPage', 10);
              $pageNumber = request()->input('page', 1);*/
-           /*  if ($request->search) {
+            /*  if ($request->search) {
                  return $this->oldSearch(request());
              }
              $users = User::whereDoesntHave('roles', function ($query) {
@@ -71,7 +71,7 @@ class UserController extends Controller
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], messageValidation());
             if ($validator->fails()) {
@@ -143,7 +143,7 @@ class UserController extends Controller
                     'job_id' => 'nullable|string',
                     'image' => 'nullable|string',
                     'password' =>
-                        'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'old_password' => 'nullable|required_with:password|string',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",

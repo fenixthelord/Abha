@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notify_groups', function (Blueprint $table) {
-            $table->json("name")->change();
-            $table->json("description")->change();
-        }); 
+        // Schema::table('notify_groups', function (Blueprint $table) {
+        //     $table->json("name")->change();
+        //     $table->json("description")->change();
+        // }); 
     }
 
     /**
@@ -23,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notify_groups', function (Blueprint $table) {
-            $table->string("name")->change();
-        });
+        // Schema::table('notify_groups', function (Blueprint $table) {
+        //     $table->string("name")->change();
+        // });
     }
 };
