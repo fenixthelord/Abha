@@ -28,7 +28,7 @@ class AuditLogController extends Controller
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',
-            'user_id' => 'nullable|string',
+
             'event' => 'nullable|in:created,updated,deleted,restored', // Add event validation
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -42,7 +42,7 @@ class AuditLogController extends Controller
         $filters = [
             'model_type' => 'auditable_type',
             'user_type' => 'user_type',
-            'user_id' => 'user_id',
+
             'event' => 'event',
         ];
 
@@ -50,6 +50,13 @@ class AuditLogController extends Controller
             if ($request->filled($filterKey)) {
                 $query->where($dbColumn, $request->input($filterKey));
             }
+        }
+
+        if ($request->filled('user_uuid')) {
+
+
+                $query->where('user_uuid', $request->input('user_uuid'));
+
         }
 
         // Optional: Date range filter
