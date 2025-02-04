@@ -3,10 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\Role\Permission;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use App\Models\Role\Role;
+use Illuminate\Support\Facades\Hash;
 
 class PermissionSeed extends Seeder
 {
@@ -27,7 +30,8 @@ class PermissionSeed extends Seeder
         }
 
         $this->command->info('Permissions seeded successfully!');
-        $this->MasterPermission();
+        $this->MasterRole();
+        $this->OwnerRole();
     }
 
     /**
@@ -67,6 +71,7 @@ class PermissionSeed extends Seeder
      */
     protected function createPermissionsForModel($model)
     {
+
         $modelName = class_basename($model);
 
         foreach ($this->actions as $action) {
@@ -80,15 +85,100 @@ class PermissionSeed extends Seeder
         }
 
     }
-    protected function MasterPermission()
+    public function MasterRole(){
+        {
+            DB::beginTransaction();
+            try {
+                // Create Master Role
+                $masterRole = Role::firstOrCreate(['name' => 'Master', "displaying"=>"Master","description" => "Master in the system"]);
+
+                // Define permissions
+                $permissions = ['master.create', 'master.assign', 'mas
+            ter.remove'];
+
+                foreach ($permissions as $permissionName) {
+                    // Create each permission
+                    $permission = Permission::firstOrCreate(['name' => $permissionName, "displaying" => $permissionName,
+                        "guard_name" => "sanctum", "group" => "master", "is_admin" => true]);
+
+                    // Assign permission to Master role
+                    $masterRole->givePermissionTo($permission);
+                }
+
+                // Create Master User
+                $masterUser = User::firstOrCreate(
+                    ['email' => "masteracount@gmail.com",
+                        'password' => Hash::make('master123'),
+                        'first_name' => "master",
+                        'last_name' => "master",
+                        'phone' => "0592257835",
+
+                        'gender' => "male",
+                        'uuid' => \Str::uuid(),
+                        // Update password as needed
+                    ]
+                );
+                $permissions=Permission::all();
+                if (!$permissions->isEmpty()){
+
+                    $masterRole->givePermissionTo($permissions);}
+
+                // Assign Master role to the Master user
+                $masterUser->assignRole($masterRole);
+
+                DB::commit();
+
+                echo "Master role, account, and permissions created successfully.\n";
+            } catch (\Exception $e) {
+                DB::rollBack();
+                echo "Error: " . $e->getMessage() . "\n";
+            }
+        }
+    }
+
+    protected function OwnerRole()
     {
-        $master=Role::where('name','Master')->first();
-        if($master){
-            $permissions=Permission::all();
-            if (!$permissions->isEmpty()){
 
-            $master->givePermissionTo($permissions);
-        }}
+        {
+            DB::beginTransaction();
+            try {
+                // Create Master Role
 
+                $owner = Role::firstOrCreate(['name' => 'Master_Owner', "displaying"=>"owner","description" => "owner of the system"]);
+
+                // Define permissions
+
+
+
+
+                // Create Master User
+                $OwnerUser = User::firstOrCreate(
+                    ['email' => "owneracount@gmail.com",
+                        'password' => Hash::make('owner123'),
+                        'first_name' => "owner",
+                        'last_name' => "Owner",
+                        'phone' => "0592257836",
+
+                        'gender' => "male",
+                        'uuid' => \Str::uuid(),
+                        // Update password as needed
+                    ]
+                );
+                $permissions=Permission::where('is_admin',false)->get();
+                if (!$permissions->isEmpty()){
+
+                    $owner->givePermissionTo($permissions);}
+
+                // Assign Master role to the Master user
+                $OwnerUser->assignRole($owner);
+
+                DB::commit();
+
+                echo "Owner role, account, and permissions created successfully.\n";
+            } catch (\Exception $e) {
+                DB::rollBack();
+                echo "Error: " . $e->getMessage() . "\n";
+            }
+        }
     }
 }
