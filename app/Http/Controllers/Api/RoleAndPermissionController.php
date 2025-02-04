@@ -533,7 +533,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                       }*/
                     return $this->forbidden('You cannot delete the Master role');
                 }
-                if ($role == "Master") {
+                if ($role == "Master"||$roles->id==1) {
                     return $this->Forbidden('you cannot delete  Master');
                 }
                 $roles->delete();
