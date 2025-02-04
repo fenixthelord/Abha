@@ -76,12 +76,19 @@ class PermissionSeed extends Seeder
 
         foreach ($this->actions as $action) {
             $permissionName = strtolower("{$modelName}.{$action}");
-            Permission::firstOrCreate([
-                'name' => $permissionName,
-                'displaying' => $permissionName,
-                'group' => strtolower($modelName),
-                'is_admin' => 0,
-            ]);
+            $permission = Permission::where('name', $permissionName)
+                ->where('guard_name', 'sanctum')
+                ->first();
+
+            if (!$permission) {
+                $permission = Permission::create([
+                    'name' => $permissionName,
+                    'displaying' => $permissionName,
+                    'guard_name' => 'sanctum',
+                    'group' => strtolower($modelName),
+                    'is_admin' => 0,
+                ]);
+            }
         }
 
     }
@@ -90,23 +97,33 @@ class PermissionSeed extends Seeder
             DB::beginTransaction();
             try {
                 // Create Master Role
-                $masterRole = Role::firstOrCreate(['name' => 'Master', "displaying"=>"Master","description" => "Master in the system"]);
+                $masterRole = Role::where('name' ,'Master')->where('guard_name', 'sanctum')->first();
+                if(!$masterRole){
+                    $masterRole = Role::Create(['name' => 'Master', "displaying"=>"Master","description" => "Master in the system"]);
+
+                }
 
                 // Define permissions
                 $permissions = ['master.create', 'master.assign', 'mas
             ter.remove'];
 
                 foreach ($permissions as $permissionName) {
+
                     // Create each permission
-                    $permission = Permission::firstOrCreate(['name' => $permissionName, "displaying" => $permissionName,
-                        "guard_name" => "sanctum", "group" => "master", "is_admin" => true]);
+                    $permission = Permission::where('name', $permissionName)
+                        ->where('guard_name', 'sanctum')
+                        ->first();
+                    if(!$permission){
+                    $permission = Permission::Create(['name' => $permissionName, "displaying" => $permissionName,
+                        "guard_name" => "sanctum", "group" => "master", "is_admin" => true]);}
 
                     // Assign permission to Master role
                     $masterRole->givePermissionTo($permission);
                 }
-
+$masterUser=User::where('email','masteracount@gmail.com')->first();
+                if(!$masterUser){
                 // Create Master User
-                $masterUser = User::firstOrCreate(
+                $masterUser = User::Create(
                     ['email' => "masteracount@gmail.com",
                         'password' => Hash::make('master123'),
                         'first_name' => "master",
@@ -117,7 +134,7 @@ class PermissionSeed extends Seeder
                         'uuid' => \Str::uuid(),
                         // Update password as needed
                     ]
-                );
+                );}
                 $permissions=Permission::all();
                 if (!$permissions->isEmpty()){
 
@@ -143,16 +160,18 @@ class PermissionSeed extends Seeder
             DB::beginTransaction();
             try {
                 // Create Master Role
-
-                $owner = Role::firstOrCreate(['name' => 'Master_Owner', "displaying"=>"owner","description" => "owner of the system"]);
+$owner=Role::where('name','Master_Owner')->first();
+if(!$owner){
+                $owner = Role::Create(['name' => 'Master_Owner', "displaying"=>"owner","description" => "owner of the system"]);}
 
                 // Define permissions
 
 
-
+$OwnerUser=User::where('email','owneracount@gmail.com')->first();
+if(!$OwnerUser){
 
                 // Create Master User
-                $OwnerUser = User::firstOrCreate(
+                $OwnerUser = User::Create(
                     ['email' => "owneracount@gmail.com",
                         'password' => Hash::make('owner123'),
                         'first_name' => "owner",
@@ -163,7 +182,7 @@ class PermissionSeed extends Seeder
                         'uuid' => \Str::uuid(),
                         // Update password as needed
                     ]
-                );
+                );}
                 $permissions=Permission::where('is_admin',false)->get();
                 if (!$permissions->isEmpty()){
 
