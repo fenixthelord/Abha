@@ -55,7 +55,7 @@ class CategoryController extends Controller
                 );
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-            if($category->lastPage() < $pageNumber) {
+            if ($category->lastPage() < $pageNumber) {
                 $category = $query->paginate($perPage, ['*'], 'page', 1);
             }
             $data["categories"] = CategoryResource::collection(
@@ -155,6 +155,17 @@ class CategoryController extends Controller
      */
     private function updateCategories($department, $categories, $parentId = null)
     {
+
+        $currentUuids = collect($categories)->pluck('category_uuid')->filter()->toArray();
+
+        // Delete existing children not present in the current request
+        Category::where('parent_id', $parentId)
+            ->where('department_id', $department->id)
+            ->whereNotIn('uuid', $currentUuids)
+            ->each(function ($category) {
+                $category->deleteWithChildren(); // Ensure this deletes recursively
+            });
+
         foreach ($categories as $categoryData) {
 
             if (!isset($categoryData["category_uuid"])) {
@@ -175,15 +186,15 @@ class CategoryController extends Controller
                 "department_id" => $department->id,
             ]);
 
-            if (!empty($categoryData['chields'])) {
+            // if (!empty($categoryData['chields'])) {
                 $this->updateCategories(
                     department: $department,
                     categories: $categoryData['chields'],
                     parentId: $category->id
                 );
-            } else {
-                $category->children->each->deleteWithChildren();
-            }
+            // } else {
+                // $category->children->each->deleteWithChildren();
+            // }
         }
     }
 
