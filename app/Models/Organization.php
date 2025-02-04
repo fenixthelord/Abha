@@ -67,7 +67,7 @@ class Organization extends Model  implements Auditable
                 $query->where('first_name', 'like', '%' . $value . '%')
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             })
-            ->orWhereHas('employee', function ($query) use ($value) {
+            ->orWhereHas('user', function ($query) use ($value) {
                 $query->where('first_name', 'like', '%' . $value . '%')
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             });
