@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Chart;
 
 use App\Models\User;
 use Illuminate\Http\Request;
