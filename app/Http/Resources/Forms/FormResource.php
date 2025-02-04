@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Forms;
 
+use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,7 +14,9 @@ class FormResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'category_name' => $this->category->name,
+            'category_name' => $this->whenLoaded('category', fn() => [
+                'name' => $this->category->name,
+            ]),
             'fields' => FormFieldResource::collection($this->whenLoaded('fields')),
         ];
     }

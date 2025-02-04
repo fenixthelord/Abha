@@ -61,7 +61,7 @@ class FormBuilderController extends Controller
                 }
             }
             DB::commit();
-            $form = Form::with('fields.options')->findOrFail($form->id);
+            $form = Form::with(['category', 'fields.options'])->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
