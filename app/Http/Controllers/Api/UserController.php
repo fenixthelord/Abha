@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Http\Traits\Paginate;
 
 
 class UserController extends Controller
@@ -24,6 +25,7 @@ class UserController extends Controller
 
     use FileUploader;
     use ResponseTrait;
+    use Paginate;
 
     public function index(Request $request)
     {
@@ -31,27 +33,24 @@ class UserController extends Controller
         if (!$user->hasPermissionTo('user.show')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
-
-        DB::beginTransaction();
         try {
-            $pageNumber = request()->input('page', 1);
-            $perPage = request()->input('perPage', 10);
-            if ($request->search) {
-                return $this->oldSearch(request());
-            }
-            $users = User::whereDoesntHave('roles', function ($query) {
-                $query->where('name', 'Master');
-            })->paginate($perPage, ['*'], 'page', $pageNumber);
-            if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                return $this->badRequest('Invalid page number');
-            }
 
-            $data['users'] =  UserResource::collection($users);
-
-            DB::commit();
+            /* $perPage = request()->input('perPage', 10);
+             $pageNumber = request()->input('page', 1);*/
+            /*  if ($request->search) {
+                 return $this->oldSearch(request());
+             }
+             $users = User::whereDoesntHave('roles', function ($query) {
+                 $query->where('name', 'Master');
+             })->paginate($perPage, ['*'], 'page', $pageNumber);
+             if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
+                 return $this->badRequest('Invalid page number');
+             }*/
+            $fields = ['phone', 'email', 'last_name', 'first_name'];
+            $users = $this->allWithSearch(new User(), $fields, $request);
+            $data['users'] = UserResource::collection($users);
             return $this->PaginateData($data, $users);
         } catch (\Exception $e) {
-            DB::rollBack();
             return $this->handleException($e);
         }
     }
@@ -184,7 +183,7 @@ class UserController extends Controller
                     $user->syncRoles($request->role);
                 }
 
-                $data['data'] =  UserResource::make($user);
+                $data['data'] = UserResource::make($user);
                 DB::commit();
                 return $this->returnData($data);
             } else {
@@ -237,27 +236,26 @@ class UserController extends Controller
 
     public function deleteUser(Request $request)
     {
-        $user = auth()->user();
-        if (!$user->hasPermissionTo('user.delete')) {
+        $current_user = auth()->user();
+        if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
             return $this->Forbidden("you don't have permission to access this page");
         }
 
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users',
+                'uuid' => 'required|string|exists:users,uuid',
             ], messageValidation());
+
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->first()) {
-                if (!$user) {
-                    return $this->NotFound('User not found');
-                }
-                if ($user->hasRole("Master")) {
+            $selected_user = User::whereuuid($request->uuid)->first();
+            if ($selected_user){
+                if ($selected_user->hasRole("Master") || $selected_user->id == 1) {
                     return $this->Forbidden('This user is Master and can not be deleted');
                 }
-                $user->delete();
+                $selected_user->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('User deleted successfully');
             } else {

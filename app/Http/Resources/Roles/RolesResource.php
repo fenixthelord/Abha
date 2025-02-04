@@ -14,15 +14,19 @@ class RolesResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray($request): array
-    { if ($this->name == 'Master') {
+    {
+
+        if ($this->name == 'Master') {
         return [];
     }
+
         return [
+
 
             'id' => $this->id,
             'name' => $this->name,
-            'displaying'=>$this->displaying,
-            'description'=>$this->description,
+            'displaying'=>$this->trans?$this->getTranslations("displaying"):$this->displaying,
+            'description'=>$this->trans?$this->getTranslations("description"):$this->description,
             'permissions' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
                 return [
                     'group' => $group,
@@ -36,5 +40,14 @@ class RolesResource extends JsonResource
                 ];
             })->values(), // Reset numeric keys for a clean array
         ];
+    }
+    public function withTranslate() {
+        $this->trans = true;
+        return $this;
+    }
+
+    public function withoutTranslate() {
+        $this->trans = false;
+        return $this;
     }
 }

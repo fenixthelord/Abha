@@ -3,71 +3,22 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateCategoriesRequest;
-use App\Http\Requests\DeleteCategoryRequest;
-use App\Http\Requests\DeleteCatigoryRequest;
-use App\Http\Requests\FilterRequest;
-use App\Http\Requests\IndexCategoryRequest;
-use App\Http\Requests\SaveCategoriesRequest;
-use App\Http\Requests\ShowCategoriesRequest;
-use App\Http\Requests\ShowCategoryRequest;
-use App\Http\Requests\UpdateCategoriesRequest;
+use App\Http\Requests\Categories\ListOfCategoriesRequest;
+use App\Http\Requests\Categories\CreateCategoriesRequest;
+use App\Http\Requests\Categories\DeleteCategoryRequest;
+use App\Http\Requests\Categories\FilterRequest;
+use App\Http\Requests\Categories\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
-use App\Http\Resources\DepartmentResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
 use App\Models\Department;
-use Illuminate\Http\Request;
+use \Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
     use ResponseTrait;
 
-    // public function index(IndexCategoryRequest $request)
-    // {
-    //     try {
-    //         $perPage = $request->input('per_page', $this->per_page);
-    //         $pageNumber = $request->input('page', $this->pageNumber);
-
-    //         $categoriesQuery = Category::query()
-    //             ->when($request->has('department_uuid') &&  !$request->has('parent_category_uuid'), function ($q) use ($request) {
-    //                 $q->where(
-    //                     "department_id",
-    //                     Department::where('uuid', $request->department_uuid)
-    //                         ->pluck('id')->firstOrFail()
-    //                 );
-    //             })
-    //             ->when($request->has('parent_category_uuid'), function ($q) use ($request) {
-    //                 $q->where(
-    //                     "parent_id",
-    //                     Category::where('uuid', $request->parent_category_uuid)
-    //                         ->pluck('id')->firstOrFail()
-    //                 );
-    //             });
-
-    //         $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
-
-    //         if ($request->page > $categories->lastPage()) {
-    //             if ($request->has("department_uuid") || $request->has("parent_category_uuid")) {
-    //                 $pageNumber =  1;
-    //                 $categories = $categoriesQuery->paginate($perPage, ['*'], 'page', $pageNumber);
-    //             } else {
-    //                 return $this->badRequest("Wrong page . total pages is " . $categories->lastPage() . " you sent " . $pageNumber);
-    //             }
-    //         }
-
-    //         $data["categories"] = CategoryResource::collection($categories);
-
-    //         return $this->PaginateData(
-    //             data: $data,
-    //             object: $categories,
-    //         );
-    //     } catch (\Throwable $e) {
-    //         return $this->handleException($e);
-    //     }
-    // }
 
     /**
      * List of categories , All parent categories That the parentID is null
@@ -75,7 +26,7 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function list(Request $request)
+    public function list(ListOfCategoriesRequest $request)
     {
         try {
 
@@ -83,11 +34,23 @@ class CategoryController extends Controller
             $pageNumber = $request->input('page', $this->pageNumber);
 
             $query = Category::query()
-                ->where("parent_id", null)
-                ->whereNotNull("department_id")
                 ->when($request->has("search"),  function ($q) use ($request) {
-                    $q->where("name", "like", "%" . $request->search . "%");
-                });
+                    $q->WithSearch($request->search);
+                })
+                ->where("parent_id", null)
+                ->when(
+                    $request->has("department_uuid") && $request->has("categories_uuid"),
+                    function ($q) use ($request) {
+                        $department = Department::where("uuid", $request->department_uuid)->firstOrFail();
+                        $q
+                            ->where("department_id", $department->id)
+                            ->orWhere("uuid", $request->categories_uuid);
+                    }
+                )
+                ->when(!$request->has("department_uuid") && $request->has("categories_uuid"),
+                    function ($q) use ($request) {
+                        $q->Where("uuid", $request->categories_uuid);
+                    });
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             $data["categories"] = CategoryResource::collection(
@@ -102,35 +65,21 @@ class CategoryController extends Controller
 
     /**
      * Filters for search to category
-     * 
-     * @param  FilterRequest $request for validation 
+     *
+     * @param  FilterRequest $request for validation
      * @return \Illuminate\Http\Response
      */
     public function filter(FilterRequest $request)
     {
         try {
-            $departmentQuery = Department::query()
-                ->when($request->has("department_uuid"), function ($q) use ($request) {
-                    $q->where("uuid", $request->department_uuid);
-                });
+            $departmentQuery = Department::where("uuid", $request->department_uuid)->firstOrFail();
 
-            $departments = $departmentQuery->get();
+            $categories = Category::query()
+                ->where("department_id", $departmentQuery->id)
+                ->whereNull("parent_id")
+                ->get();
 
-            $categoryQuery = Category::query()
-                ->when($request->has("department_uuid") && !$request->has("category_uuid"),  function ($q) use ($departments) {
-                    $q->where("parent_id", null)->where("department_id", $departments->first()->id);
-                })
-                ->when($request->has("category_uuid"), function ($q) use ($request) {
-                    $q->where("uuid", $request->category_uuid);
-                });
-
-            $data['department'] = DepartmentResource::collection($departments);
-            $data['categories'] = null;
-            if ($request->has("department_uuid")) {
-                $categories = $request->has("category_uuid") ?  $categoryQuery->firstOrFail()->children : $categoryQuery->get();
-                $data['categories'] =  CategoryResource::collection($categories);
-            }
-
+            $data["categories"] = CategoryResource::collection($categories);
             return $this->returnData($data);
         } catch (\Throwable $e) {
             return $this->handleException($e);
@@ -140,7 +89,7 @@ class CategoryController extends Controller
 
     /**
      * Delete category with all children
-     * 
+     *
      * @param  DeleteCategoryRequest  $request for validation and control Roles
      * @return \Illuminate\Http\Response
      */
@@ -160,18 +109,6 @@ class CategoryController extends Controller
         }
     }
 
-
-    // public function show(ShowCategoriesRequest $request, $department_uuid)
-    // {
-    //     try {
-    //         $department = Department::where('uuid', $department_uuid)->firstOrFail();
-    //         $data["department"] = DepartmentResource::make($department->load("categories"));
-
-    //         return $this->returnData($data);
-    //     } catch (\Exception $e) {
-    //         return $this->handleException($e);
-    //     }
-    // }
 
     /**
      * This function is used to update categories and sub-categories
@@ -234,7 +171,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * This function is used to create categories and sub-categories 
+     * This function is used to create categories and sub-categories
      * @param CreateCategoriesRequest $request for validation and control Roles
      * @return \Illuminate\Http\JsonResponse
      */

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class ShowCategoryRequest extends FormRequest
+class FilterRequest extends FormRequest
 {
+
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +27,11 @@ class ShowCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_uuid' => ['required', Rule::exists("categories", 'uuid')->where('deleted_at', null)],
+            "department_uuid" => [
+                "required",
+                Rule::exists("departments", "uuid")->where("deleted_at", null)
+
+            ],
         ];
     }
 

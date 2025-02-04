@@ -8,6 +8,8 @@ use App\Http\Resources\CustomPermissionResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
+use App\Models\Organization;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 
 class UserAuthController extends Controller
@@ -30,15 +33,12 @@ class UserAuthController extends Controller
         }
         DB::beginTransaction();
         try {
-
-
-
             $validator = Validator::make($request->all(), [
                 'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'email' => 'required|email|unique:users,email|max:255',
                 'password' =>
-                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
                 'gender' => 'required|in:male,female',
                 'alt' => 'nullable|string',
@@ -47,13 +47,16 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
+                'department_uuid'=>["required","string",Rule::exists('departments','uuid')->where("deleted_at",null)],
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+            $department=Department::where("uuid",$request->department_uuid)->firstorFail();
+
+
 
             $user = User::create([
-                'uuid' => Str::orderedUuid(),
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -66,6 +69,7 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
+                'department_id'=>$department->id,
 
             ]);
             if (!$request->role) {
@@ -80,7 +84,6 @@ class UserAuthController extends Controller
             if ($user) {
                 event(new UserRegistered($user));
             }
-            DB::commit();
             //     event(new sendOtpPhone($user->otp, $user->phone));
             $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
@@ -92,7 +95,7 @@ class UserAuthController extends Controller
             ]);
             // Include refresh token in the response
             $data['refresh_token'] = $refreshToken;
-
+            DB::commit();
             return $this->returnData($data);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -147,7 +150,6 @@ class UserAuthController extends Controller
 
                     // Include refresh token in the response
                     $data['refresh_token'] = $refreshToken;
-
 
 
                     return $this->returnData($data);

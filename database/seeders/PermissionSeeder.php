@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+/*namespace Database\Seeders;
 
 use App\Models\Role\Permission;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -14,7 +14,7 @@ class PermissionSeeder extends Seeder
 
     /**
      * Run the database seeds.
-     */
+
     public function run(): void
     {
         // Get all model classes from the app/Models directory (including subfolders)
@@ -32,7 +32,7 @@ class PermissionSeeder extends Seeder
      * Get all models from the app/Models directory (including subfolders).
      *
      * @return array
-     */
+
     protected function getModels()
     {
         $models = [];
@@ -62,7 +62,7 @@ class PermissionSeeder extends Seeder
      *
      * @param string $model
      * @return void
-     */
+
     protected function createPermissionsForModel($model)
     {
         $modelName = class_basename($model);
@@ -77,4 +77,4 @@ class PermissionSeeder extends Seeder
             ]);
         }
     }
-}
+}*/

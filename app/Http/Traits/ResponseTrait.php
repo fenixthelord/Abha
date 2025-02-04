@@ -207,7 +207,7 @@ trait ResponseTrait
 
     public function PaginateData(array $data, $object)
     {
-        $data['current_page'] = $object->currentPage();        // $data[] = 
+        $data['current_page'] = $object->currentPage();        // $data[] =
         $data['next_page'] = $object->nextPageUrl();
         $data['previous_page'] = $object->previousPageUrl();
         $data['total_pages'] = $object->lastPage();
@@ -242,7 +242,7 @@ trait ResponseTrait
         $errorCode = $e->errorInfo[1]; // Error code from the database
         // dd($e->errorInfo[1]);
         switch ($errorCode) {
-            case 1062: // Duplicate entry Like Unique Email Twice 
+            case 1062: // Duplicate entry Like Unique Email Twice
                 return $this->badRequest("Duplicate entry found.");
 
             case 1451: // Cannot delete or update due to foreign key constraint

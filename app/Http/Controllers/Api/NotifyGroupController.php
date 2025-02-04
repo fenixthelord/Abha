@@ -15,10 +15,10 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-
+use App\Http\Traits\Paginate;
 class NotifyGroupController extends Controller
 {
-    use Firebase, ResponseTrait;
+    use Firebase, ResponseTrait, Paginate;
 
     // Create a new notify group
     public function createNotifyGroup(Request $request)
@@ -26,10 +26,12 @@ class NotifyGroupController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|array',
+                'name' => 'required|array|max:255',
                 'name.en' => 'required|string|unique:notify_groups,name->en',
                 'name.ar' => 'required|string|unique:notify_groups,name->ar',
-                'description' => 'nullable|string',
+                'description' => 'required|array',
+                'description.en' => 'required|string',
+                'description.ar' => 'required|string',
                 'user_uuids' => 'required|array',
                 'user_uuids.*' => 'exists:users,uuid',
             ]);
@@ -132,8 +134,8 @@ class NotifyGroupController extends Controller
     public function allGroup(Request $request)
     {
         try {
+            /*$perPage = request()->input('perPage', 10);
             $pageNumber = request()->input('page', 1);
-            $perPage = request()->input('perPage', 10);
             $groups = NotifyGroup::query()
                 ->when($request->has('search'), function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%');
@@ -145,10 +147,15 @@ class NotifyGroupController extends Controller
                 $data["groups"] = GroupResource::collection($notifyGroup);
                 return $this->PaginateData($data, $notifyGroup);
             }
+            return $this->PaginateData('groups', GroupResource::collection($notifyGroups), $notifyGroups);*/
+            $fildes = ['name->ar','name->en'];
+            $group = $this->allWithSearch(new NotifyGroup(), $fildes, $request);
+            $data['group'] = GroupResource::collection($group);
+            return $this->PaginateData($data, $group);
 
-            $data['groups'] = GroupResource::collection($notifyGroups);
+         //   $data['groups'] = GroupResource::collection($notifyGroups);
 
-            return $this->PaginateData($data, $notifyGroups);
+   //         return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
             return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
         }
@@ -159,8 +166,8 @@ class NotifyGroupController extends Controller
         try {
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
-                $data['members'] = UserResource::collection($group->users);
-                return $this->returnData('group', $data);
+  //              $data['members'] = UserResource::collection($group->users);
+                return $this->returnData($data);
             } else {
                 return $this->badRequest('Group not found');
             }
@@ -178,7 +185,9 @@ class NotifyGroupController extends Controller
                     'name' => 'nullable|array',
                     'name.en' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->en')->ignore($group->id)],
                     'name.ar' => ['required_with:name', 'string', Rule::unique('notify_groups', 'name->ar')->ignore($group->id)],
-                    'description' => 'nullable|string',
+                    'description' => 'nullable|array',
+                    'description.en' => 'nullable|string',
+                    'description.ar' => 'nullable|string',
                     'model' => 'nullable|string',
                     'user_uuids' => 'nullable|array',
                     'user_uuids.*' => 'exists:users,uuid',

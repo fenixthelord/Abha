@@ -13,10 +13,11 @@ use Illuminate\Http\Request;
 use App\Models\DeviceToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Traits\Paginate;
 
 class NotificationController extends Controller
 {
-    use Firebase, ResponseTrait;
+    use Firebase, ResponseTrait, Paginate;
     public function sendNotification(Request $request)
     {
         global $status;
@@ -109,6 +110,8 @@ class NotificationController extends Controller
     public function allNotification(Request $request)
     {
         try {
+/*            $pageNumber = $request->input('page', 1);
+            $perPage = $request->input("perPage", 10);
 
             $validator = Validator::make($request->all(), [
                 "perPage" => 'nullable|integer|min:9'
@@ -117,8 +120,6 @@ class NotificationController extends Controller
                 return $this->returnValidationError($validator);
             }
             $customer = $request->user();
-            $pageNumber = $request->input('page', 1);
-            $perPage = $request->input("perPage", 10);
             $notifications = Notification::paginate($perPage, ['*'], 'page', $pageNumber);
             if ($pageNumber > $notifications->lastPage()) {
                 return $this->badRequest('Invalid page number');
@@ -130,8 +131,11 @@ class NotificationController extends Controller
                 'next_page' => $notifications->nextPageUrl(),
                 'previous_page' => $notifications->previousPageUrl(),
                 'total_pages' => $notifications->lastPage(),
-            ];
-            return $this->returnData($data);
+            ];*/
+            $fields = ['title','description'];
+            $notification = $this->allWithSearch(new Notification(), $fields, $request);
+            $data['notification'] = NotificationResource::collection($notification);
+            return $this->PaginateData($data,$notification);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

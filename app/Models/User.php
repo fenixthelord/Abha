@@ -12,19 +12,15 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
-use Spatie\Translatable\HasTranslations;
 
 class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasAutoPermissions, HasTranslations;
+    use HasAutoPermissions;
 
 
-    private $translatable = [
-        'first_name',
-        'last_name',
-    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -50,6 +46,7 @@ class User extends Authenticatable  implements Auditable
         'otp_expires_at',
         'refresh_token',
         'refresh_token_expires_at',
+        "department_id"
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -117,5 +114,23 @@ class User extends Authenticatable  implements Auditable
     public function deviceTokens()
     {
         return $this->hasMany(DeviceToken::class);
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function mangers()
+    {
+        return $this->hasMany(Organization::class, 'manger_id');
+    }
+
+    public function scopeMangersInDepartment($query, $departmentId)
+    {
+        return $query->whereHas("mangers", function ($q) use ($departmentId) {
+            $q->whereHas('department',  function ($q) use ($departmentId) {
+                $q->where("id", $departmentId);
+            });
+        });
     }
 }

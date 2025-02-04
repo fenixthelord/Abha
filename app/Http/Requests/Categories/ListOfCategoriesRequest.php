@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class ShowCategoriesRequest extends FormRequest
+class ListOfCategoriesRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -16,13 +17,6 @@ class ShowCategoriesRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'department_uuid' => $this->department_uuid,
-        ]);
     }
 
     /**
@@ -34,12 +28,15 @@ class ShowCategoriesRequest extends FormRequest
     {
         return [
             "department_uuid" => [
-                "required",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
+                "nullable",
+                Rule::exists("departments", "uuid")->whereNull("deleted_at")
+            ],
+            "categories_uuid" => [
+                "nullable",
+                Rule::exists("categories", "uuid")->whereNull("deleted_at")
             ]
         ];
     }
-
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
