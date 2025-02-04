@@ -52,10 +52,10 @@ class AuditLogController extends Controller
             }
         }
 
-        if ($request->filled('user_uuid')) {
+        if ($request->filled('user_id')) {
 
 
-                $query->where('user_uuid', $request->input('user_uuid'));
+                $query->where('user_uuid', $request->input('user_id'));
 
         }
 
