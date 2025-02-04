@@ -163,11 +163,12 @@ class CategoryController extends Controller
             ->where('department_id', $department->id)
             ->whereNotIn('uuid', $currentUuids)
             ->each(function ($category) {
-                $category->deleteWithChildren(); // Ensure this deletes recursively
+                $category->deleteWithChildren();
             });
 
         foreach ($categories as $categoryData) {
 
+            // Create the new categories
             if (!isset($categoryData["category_uuid"])) {
                 $this->createCategories(
                     departmentId: $department->id,
@@ -180,21 +181,19 @@ class CategoryController extends Controller
 
             $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
 
+            // update the parent category
             $category->update([
                 'name' => $categoryData['name'],
                 "parent_id" => $parentId,
                 "department_id" => $department->id,
             ]);
 
-            // if (!empty($categoryData['chields'])) {
-                $this->updateCategories(
-                    department: $department,
-                    categories: $categoryData['chields'],
-                    parentId: $category->id
-                );
-            // } else {
-                // $category->children->each->deleteWithChildren();
-            // }
+            // update the chields all categories
+            $this->updateCategories(
+                department: $department,
+                categories: $categoryData['chields'],
+                parentId: $category->id
+            );
         }
     }
 
