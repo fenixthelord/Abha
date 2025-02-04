@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\AddOrgRequest;
+use App\Http\Requests\Organization\AllRequest;
 use App\Http\Requests\Organization\ChartOrgRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
+use App\Http\Requests\Organization\MangerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\Chart\HeadChartOrgResource;
 use App\Http\Resources\OrganizationResource;
@@ -24,40 +26,33 @@ class OrganizationController extends Controller
 {
     use ResponseTrait;
 
-    public function getDepartmentMangers(Request $request)
+    public function getDepartmentMangers(MangerRequest $request)
     {
         try {
-            $validation = Validator::make($request->all(), [
-                'department_uuids' => ['required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
-                'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where("deleted_at", null)]
 
-            ]);
-            if ($validation->fails()) {
-                $this->returnValidationError($validation);
-            }
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
+            $manger = User::whereuuid($request->manger_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
+            if(!in_array($manger, $employee)) {
+                $employee[] = $manger;
+            }
             $user = User::where('department_id', $department)->whereNotin('id', $employee)->get();
             $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
+
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
     }
 
 
-    public function getDepartmentEmployees(Request $request)
+    public function getDepartmentEmployees(AllRequest $request)
     {
 
         try {
-            $validation = Validator::make($request->all(), [
-                'department_uuid' => ['required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
 
 
-            ]);
-            if ($validation->fails()) {
-                $this->returnValidationError($validation);
-            }
+
             $department = Department::where('uuid', $request->get('department_uuid'))->pluck("id")->first();
 
 
@@ -77,8 +72,7 @@ class OrganizationController extends Controller
         try {
 
 
-
-            if ($request->user_uuid == $request->manager_uuid) {
+            if ($request->user_uuid == $request->manger_uuid) {
                 return $this->badRequest('manger and employee must not be the same');
             }
 
@@ -99,13 +93,13 @@ class OrganizationController extends Controller
                 return $this->badRequest("Employee Already Exists");
             }
 
-            $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();;
+            $manger = User::whereuuid($request->get('manger_uuid'))->pluck('id')->first();
             if (!$manger) {
                 return $this->badRequest("Manger  Not Found");
             }
             $user_dep = User::where('id', $user)->pluck('department_id')->first();
             $manger_dep = User::where('id', $manger)->pluck('department_id')->first();
-            if ($user_dep == null ||  $manger_dep == null) {
+            if ($user_dep == null || $manger_dep == null) {
                 return $this->badRequest("user have no department");
             }
             if ($user_dep != $manger_dep) {
@@ -123,6 +117,7 @@ class OrganizationController extends Controller
 
             $data['organization'] = new OrganizationResource($orgUser);
             return $this->returnData($data);
+
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
@@ -132,46 +127,50 @@ class OrganizationController extends Controller
     public function UpdateEmployee(EditOrgRequest $request)
     {
 
+        try {
 
 
+            if ($request->user_uuid == $request->manger_uuid) {
+                return $this->badRequest('manger and employee must no be the same');
+            }
+            $orgUser = Organization::where('uuid', $request->org_uuid)->first();
+            if (!$orgUser) {
+                return $this->badRequest("Organization  Not Found");
+            }
+            $department = Department::whereuuid($request->get('department_uuid'))->pluck('id')->first();
+            if (!$department) {
+                return $this->badRequest("Department  Not Found");
+            }
 
-        if ($request->user_uuid == $request->manager_uuid) {
-            return $this->badRequest('manger and employee must no be the same');
+            $user = User::whereuuid($request->user_uuid)->pluck('id')->first();
+
+
+            if (!$user) {
+                return $this->badRequest("User Not Found");
+            }
+
+
+            $manger = User::whereuuid($request->get('manger_uuid'))->pluck('id')->first();;
+            if (!$manger) {
+                return $this->badRequest("Manger  Not Found");
+            }
+            $user_dep = User::where('id', $user)->pluck('department_id')->first();
+            $manger_dep = User::where('id', $manger)->pluck('department_id')->first();
+            if ($user_dep != $manger_dep) {
+                return $this->badRequest("employee and the manger must be in the same Department");
+            }
+            $orgUser->position = $request->position ? $request->position : $orgUser->poition;
+            $orgUser->manger_id = $manger ? $manger : $orgUser->manger_id;
+            $orgUser->department_id = $department ? $department : $orgUser->department_id;
+            $orgUser->save();
+            $data['organization'] = new OrganizationResource($orgUser);
+            return $this->returnData($data);
+
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
         }
-        $orgUser = Organization::where('uuid', $request->org_uuid)->first();
-        if (!$orgUser) {
-            return $this->badRequest("Organization  Not Found");
-        }
-        $department = Department::whereuuid($request->get('department_uuid'))->pluck('id')->first();
-        if (!$department) {
-            return $this->badRequest("Department  Not Found");
-        }
 
-        $user = User::whereuuid($request->user_uuid)->pluck('id')->first();
-
-
-        if (!$user) {
-            return $this->badRequest("User Not Found");
-        }
-
-
-        $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();;
-        if (!$manger) {
-            return $this->badRequest("Manger  Not Found");
-        }
-        $user_dep = User::where('id', $user)->pluck('department_id')->first();
-        $manger_dep = User::where('id', $manger)->pluck('department_id')->first();
-        if ($user_dep != $manger_dep) {
-            return $this->badRequest("employee and the manger must be in the same Department");
-        }
-        $orgUser->position = $request->position ? $request->position : $orgUser->poition;
-        $orgUser->manger_id = $manger ? $manger : $orgUser->manger_id;
-        $orgUser->department_id = $department ? $department : $orgUser->department_id;
-        $orgUser->save();
-        $data['organization'] = new OrganizationResource($orgUser);
-        return $this->returnData($data);
     }
-
 
 
     public function index(OrgFilterRequest $request)
