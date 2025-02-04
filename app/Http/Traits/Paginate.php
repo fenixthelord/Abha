@@ -16,7 +16,7 @@ trait Paginate
             ->when($search, function ($query) use ($search,$fields) {
                 $query->whereAny($fields, 'like', '%' . $search . '%');
             });
-        if (isEmpty($where)) {
+        if (!$where == null) {
             $data = $data->where($where,$con,$value);
         }
         $results = $data->paginate($perPage ,['*'] ,'page' ,$page);
