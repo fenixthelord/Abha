@@ -72,7 +72,7 @@ class OrganizationController extends Controller
         try {
 
 
-            if ($request->user_uuid == $request->manager_uuid) {
+            if ($request->user_uuid == $request->manger_uuid) {
                 return $this->badRequest('manger and employee must not be the same');
             }
 
@@ -93,7 +93,7 @@ class OrganizationController extends Controller
                 return $this->badRequest("Employee Already Exists");
             }
 
-            $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();
+            $manger = User::whereuuid($request->get('manger_uuid'))->pluck('id')->first();
             if (!$manger) {
                 return $this->badRequest("Manger  Not Found");
             }
@@ -130,7 +130,7 @@ class OrganizationController extends Controller
         try {
 
 
-            if ($request->user_uuid == $request->manager_uuid) {
+            if ($request->user_uuid == $request->manger_uuid) {
                 return $this->badRequest('manger and employee must no be the same');
             }
             $orgUser = Organization::where('uuid', $request->org_uuid)->first();
@@ -150,7 +150,7 @@ class OrganizationController extends Controller
             }
 
 
-            $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();;
+            $manger = User::whereuuid($request->get('manger_uuid'))->pluck('id')->first();;
             if (!$manger) {
                 return $this->badRequest("Manger  Not Found");
             }

@@ -28,7 +28,7 @@ class EditOrgRequest extends FormRequest
         return [
                 'org_uuid' => ['required', Rule::exists('organizations', 'uuid')->where("deleted_at", null)],
                 'department_uuid' => [Rule::exists('departments', 'uuid')->where("deleted_at", null)],
-                'manager_uuid' => [Rule::exists('users', 'uuid')->where("deleted_at", null)],
+                'manger_uuid' => [Rule::exists('users', 'uuid')->where("deleted_at", null)],
                 'employee_uuid' => [Rule::exists('users', 'uuid')->where("deleted_at", null)],
                 'position.en' => 'string',
                 'position.ar' => 'string',

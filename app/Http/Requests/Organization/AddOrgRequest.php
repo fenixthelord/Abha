@@ -27,7 +27,7 @@ class AddOrgRequest extends FormRequest
     {
         return [
             'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where('deleted_at', null)],
-            'manager_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
+            'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
             'user_uuid' => [ 'required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
             'position' => 'required|array',
             'position.en' => 'required|string',
