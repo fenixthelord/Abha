@@ -37,15 +37,24 @@ class Organization extends Model  implements Auditable
         return $this->belongsTo(Department::class);
     }
 
+    // The relation with User Table , my manger
     public function manger()
     {
         return $this->belongsTo(User::class, 'manger_id');
     }
 
+    // Self Join : my Employees in Organization Table
     public function employee()
     {
-        return $this->belongsTo(User::class, 'employee_id');
+        return $this->hasMany(Organization::class, 'manger_id');
     }
+
+    public function User() {
+        return $this->belongsTo(User::class, 'employee_id');
+    
+    }
+
+    // public function 
 
     public function scopeWithSearch($query, $value)
     {
@@ -62,5 +71,19 @@ class Organization extends Model  implements Auditable
                 $query->where('first_name', 'like', '%' . $value . '%')
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             });
+    }
+    public function scopeOnlyHeadMangers($query, $departmentId)
+    {
+
+        $employeesIDs = $this->distinct()->pluck("employee_id")->toArray();
+        // dd($employeesIDs);  
+        return $query
+            ->whereHas('department', function ($q) use ($departmentId) {
+                $q->where('id', $departmentId);
+            })
+            ->distinct()
+            ->whereNotIn("manger_id", $employeesIDs)
+            ->pluck("manger_id")
+            ->toArray();
     }
 }

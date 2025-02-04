@@ -174,6 +174,7 @@ Route::prefix('departments')->group(function () {
  */
 Route::group(["prefix" => "/org"], function () {
     Route::get('/list' , [OrganizationController::class , "index"] );
+    Route::get('/list/chart' , [OrganizationController::class , "chart"] );
     Route::get("/list/filter" , [OrganizationController::class , "filter"]);
     Route::delete('/delete', [OrganizationController::class, "delete"]);
     Route::post('/department/employee',[OrganizationController::class,'getDepartmentEmployees']);

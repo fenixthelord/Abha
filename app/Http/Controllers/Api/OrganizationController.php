@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\AddOrgRequest;
+use App\Http\Requests\Organization\ChartOrgRequest;
+use App\Http\Requests\Organization\ChartOrgtRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
+use App\Http\Resources\ChartOrgResource;
+use App\Http\Resources\HeadChartOrgResource;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ResponseTrait;
@@ -35,10 +39,9 @@ class OrganizationController extends Controller
             }
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
-            $user = User::where('department_id', $department)->whereNotin('id',$employee)->get();
+            $user = User::where('department_id', $department)->whereNotin('id', $employee)->get();
             $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
-
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -68,8 +71,6 @@ class OrganizationController extends Controller
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
-
-
     }
 
 
@@ -95,8 +96,8 @@ class OrganizationController extends Controller
             if (!$user) {
                 return $this->badRequest("User Not Found");
             }
-     $us=Organization::where('employee_id', $user)->first();
-            if($us){
+            $us = Organization::where('employee_id', $user)->first();
+            if ($us) {
                 return $this->badRequest("Employee Already Exists");
             }
 
@@ -106,7 +107,7 @@ class OrganizationController extends Controller
             }
             $user_dep = User::where('id', $user)->pluck('department_id')->first();
             $manger_dep = User::where('id', $manger)->pluck('department_id')->first();
-            if($user_dep == null ||  $manger_dep == null){
+            if ($user_dep == null ||  $manger_dep == null) {
                 return $this->badRequest("user have no department");
             }
             if ($user_dep != $manger_dep) {
@@ -124,7 +125,6 @@ class OrganizationController extends Controller
 
             $data['organization'] = new OrganizationResource($orgUser);
             return $this->returnData($data);
-
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
@@ -149,7 +149,7 @@ class OrganizationController extends Controller
             return $this->badRequest("Department  Not Found");
         }
 
-        $user =User::whereuuid($request->user_uuid)->pluck('id')->first();
+        $user = User::whereuuid($request->user_uuid)->pluck('id')->first();
 
 
         if (!$user) {
@@ -172,7 +172,6 @@ class OrganizationController extends Controller
         $orgUser->save();
         $data['organization'] = new OrganizationResource($orgUser);
         return $this->returnData($data);
-
     }
 
 
@@ -258,6 +257,24 @@ class OrganizationController extends Controller
             return $this->returnSuccessMessage('Organization deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+
+    public function chart(ChartOrgRequest $request)
+    {
+        try {
+            $mangersIDs = Organization::query()->onlyHeadMangers(
+                Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail()
+            );
+
+            // dd($mangersIDs);
+            $mangers = User::whereIn("id", $mangersIDs)->get();
+            // dd($mangers);
+            $data["chart"] = HeadChartOrgResource::collection($mangers->load("employees"));
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
