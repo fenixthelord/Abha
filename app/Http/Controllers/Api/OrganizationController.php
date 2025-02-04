@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\AddOrgRequest;
+use App\Http\Requests\Organization\AllRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
+use App\Http\Requests\Organization\MangerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
@@ -22,17 +24,16 @@ class OrganizationController extends Controller
 {
     use ResponseTrait;
 
-    public function getDepartmentMangers(Request $request)
+    public function getDepartmentMangers(MangerRequest $request)
     {
         try {
-            $validation = $request->validate([
-                'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where("deleted_at", null)],
-                'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where("deleted_at", null)]
-
-            ]);
 
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
+            $manger = User::whereuuid($request->manger_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
+            if(!in_array($manger, $employee)) {
+                $employee[] = $manger;
+            }
             $user = User::where('department_id', $department)->whereNotin('id', $employee)->get();
             $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
@@ -43,11 +44,11 @@ class OrganizationController extends Controller
     }
 
 
-    public function getDepartmentEmployees(Request $request)
+    public function getDepartmentEmployees(AllRequest $request)
     {
 
         try {
-            $validation = $request->validate(['department_uuid' => ['required', Rule::exists('departments', 'uuid')->where("deleted_at", null)]]);
+
 
 
             $department = Department::where('uuid', $request->get('department_uuid'))->pluck("id")->first();
@@ -92,7 +93,7 @@ class OrganizationController extends Controller
                 return $this->badRequest("Employee Already Exists");
             }
 
-            $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();;
+            $manger = User::whereuuid($request->get('manager_uuid'))->pluck('id')->first();
             if (!$manger) {
                 return $this->badRequest("Manger  Not Found");
             }
