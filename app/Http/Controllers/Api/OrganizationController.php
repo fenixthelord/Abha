@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\AddOrgRequest;
 use App\Http\Requests\Organization\AllRequest;
+use App\Http\Requests\Organization\ChartOrgRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
 use App\Http\Requests\Organization\MangerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
+use App\Http\Resources\Chart\HeadChartOrgResource;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ResponseTrait;
@@ -62,8 +64,6 @@ class OrganizationController extends Controller
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
-
-
     }
 
 
@@ -180,16 +180,16 @@ class OrganizationController extends Controller
             $pageNumber = $request->input('page', $this->pageNumber);
             $department_uuid = $request->input('department_uuid');
             $manger_uuid = $request->input('manger_uuid');
-            $query = Organization::query()
+            $query  = Organization::query()
                 ->when(
                     $department_uuid || $manger_uuid,
                     function ($q) use ($request) {
                         if ($request->department_uuid) {
-                            $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
+                            $department =  Department::where('uuid', $request->department_uuid)->pluck('id')->first();
                             $q->where("department_id", $department);
                         }
                         if ($request->manger_uuid) {
-                            $manger = User::where('uuid', $request->manger_uuid)->pluck('id')->first();
+                            $manger =  User::where('uuid', $request->manger_uuid)->pluck('id')->first();
                             $q->where("manger_id", $manger);
                         }
                     },
@@ -254,6 +254,24 @@ class OrganizationController extends Controller
             return $this->returnSuccessMessage('Organization deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+
+    public function chart(ChartOrgRequest $request)
+    {
+        try {
+            $mangersIDs = Organization::query()->onlyHeadMangers(
+                Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail()
+            );
+
+            // dd($mangersIDs);
+            $mangers = User::whereIn("id", $mangersIDs)->get();
+            // dd($mangers);
+            $data["chart"] = HeadChartOrgResource::collection($mangers->load("employees"));
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
