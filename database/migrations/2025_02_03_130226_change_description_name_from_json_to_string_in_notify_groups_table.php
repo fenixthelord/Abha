@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('notify_groups', function (Blueprint $table) {
-            $table->json("name")->change();
-            $table->json("description")->change();
+            $table->string("name", 200)->change();
+            $table->string("description", 200)->change();
         });
     }
 };

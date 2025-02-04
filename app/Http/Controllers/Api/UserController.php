@@ -116,8 +116,9 @@ class UserController extends Controller
 
     public function updateAdmin(Request $request)
     {
-        $user = auth()->user();
-        if (!$user->hasPermissionTo('user.update')) {
+
+        $auth_user = auth()->user();
+        if (!$auth_user->hasPermissionTo('user.update')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
         DB::beginTransaction();
@@ -197,8 +198,8 @@ class UserController extends Controller
 
     public function active(Request $request)
     {
-        $user = auth()->user();
-        if (!$user->hasPermissionTo('user.restore')) {
+        $auth_user= auth()->user();
+        if (!$auth_user->hasPermissionTo('user.restore')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
 
@@ -215,7 +216,7 @@ class UserController extends Controller
                 return $this->badRequest('This user is deleted');
             } else {
                 if ($user = User::whereuuid($request->uuid)->first()) {
-                    if ($user->hasRole("Master")) {
+                    if ($user->hasRole("Master")||$user->id==1) {
                         return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
                     }
                     $user->active = $request->active;
