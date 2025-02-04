@@ -37,7 +37,20 @@ class CreateFormBuilderRequest extends FormRequest
                     ->where("category_id", $this->category_id)
             ],
 
-            'fields' => 'required|array|min:1',
+            'fields' => [
+                'required',
+                'array',
+                function ($attribute, $value, $fail) {
+                    $has_required_field = collect($value)->contains(function ($field) {
+                        return isset($field['required']) && ($field['required'] === true || $field['required'] === 1);
+                    });
+
+                    if (!$has_required_field) {
+                        $fail('At least one field must have "required" set to true.');
+                    }
+                }
+            ],
+
             'fields.*.label' => 'required|array|min:2|max:2',
             'fields.*.label.en' => 'required|string|max:255',
             'fields.*.label.ar' => 'required|string|max:255',

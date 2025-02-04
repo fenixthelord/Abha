@@ -192,6 +192,7 @@ Route::group(["prefix" => "/forms"], function () {
 
     Route::get('/{form_id}/submissions', [FormSubmissionController::class, 'index']);
     Route::post('/{form_id}/submit', [FormSubmissionController::class, 'store']);
+    Route::post('/submissions/{form}', [FormSubmissionController::class, 'store'])->name('forms.submissions.store');
 });
 
 Route::group(["prefix" => "/db"], function () {
