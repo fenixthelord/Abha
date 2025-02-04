@@ -17,6 +17,7 @@ class OrganizationResource extends JsonResource
         return [
             "uuid" => $this->uuid,
             "department_name" => $this->department?->getTranslations("name"),
+            "department_uuid" => $this->department?->uuid,
             "manger_uuid" =>$this->manger?->uuid,
             "manger_first_name" => $this->manger?->first_name,
             "manger_last_name" => $this->manger?->last_name,

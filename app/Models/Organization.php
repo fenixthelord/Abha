@@ -16,7 +16,7 @@ class Organization extends Model  implements Auditable
 
     private $translatable = ['position'];
 
-  protected $fillable = [
+    protected $fillable = [
         "department_id",
         "manger_id",
         "employee_id",
@@ -50,8 +50,7 @@ class Organization extends Model  implements Auditable
     public function scopeWithSearch($query, $value)
     {
         return $query
-            ->where('id', 'like', '%' . $value . '%')
-            ->orWhere('position', 'like', '%' . $value . '%')
+            ->Where('position', 'like', '%' . $value . '%')
             ->orWhereHas('department', function ($query) use ($value) {
                 $query->where('name', 'like', '%' . $value . '%');
             })

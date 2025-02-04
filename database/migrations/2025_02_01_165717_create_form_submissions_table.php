@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('categories', function (Blueprint $table) {
-        //     $table->json("name")->change();
-        // });
+        Schema::create('form_submissions', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
+            $table->softDeletes();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::table('categories', function (Blueprint $table) {
-        //     $table->string("name")->change();
-        // });
+        Schema::dropIfExists('form_submissions');
     }
 };

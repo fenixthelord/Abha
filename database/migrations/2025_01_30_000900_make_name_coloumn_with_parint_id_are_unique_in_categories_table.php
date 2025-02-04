@@ -18,27 +18,27 @@ return new class extends Migration
                 "parent_id",
             ]);
             // Create trigger to prevent self-referencing
-            DB::unprepared('
-                CREATE TRIGGER prevent_self_parent_insert BEFORE INSERT ON categories
-                FOR EACH ROW
-                BEGIN
-                    IF NEW.parent_id = NEW.id THEN
-                        SIGNAL SQLSTATE "45000" 
-                        SET MESSAGE_TEXT = "A category cannot be its own parent";
-                    END IF;
-                END;
-            ');
+            // DB::unprepared('
+            //     CREATE TRIGGER prevent_self_parent_insert BEFORE INSERT ON categories
+            //     FOR EACH ROW
+            //     BEGIN
+            //         IF NEW.parent_id = NEW.id THEN
+            //             SIGNAL SQLSTATE "45000" 
+            //             SET MESSAGE_TEXT = "A category cannot be its own parent";
+            //         END IF;
+            //     END;
+            // ');
 
-            DB::unprepared('
-                CREATE TRIGGER prevent_self_parent_update BEFORE UPDATE ON categories
-                FOR EACH ROW
-                BEGIN
-                    IF NEW.parent_id = NEW.id THEN
-                        SIGNAL SQLSTATE "45000" 
-                        SET MESSAGE_TEXT = "A category cannot be its own parent";
-                    END IF;
-                END;
-            ');
+            // DB::unprepared('
+            //     CREATE TRIGGER prevent_self_parent_update BEFORE UPDATE ON categories
+            //     FOR EACH ROW
+            //     BEGIN
+            //         IF NEW.parent_id = NEW.id THEN
+            //             SIGNAL SQLSTATE "45000" 
+            //             SET MESSAGE_TEXT = "A category cannot be its own parent";
+            //         END IF;
+            //     END;
+            // ');
         });
     }
 
@@ -52,7 +52,8 @@ return new class extends Migration
                 "name",
                 "parent_id",
             ]);
-            DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_insert');
-            DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_update');        });
+            // DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_insert');
+            // DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_update');
+        });
     }
 };

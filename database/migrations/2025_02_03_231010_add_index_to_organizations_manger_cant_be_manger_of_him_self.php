@@ -23,9 +23,9 @@ return new class extends Migration
     public function down()
     {
         // Remove the CHECK constraint in the down() method
-        // DB::statement('
-        //     ALTER TABLE organizations 
-        //     DROP CHECK check_employee_manger_not_equal
-        // ');
+        DB::statement('
+            ALTER TABLE organizations 
+            DROP CHECK check_employee_manger_not_equal
+        ');
     }
 };
