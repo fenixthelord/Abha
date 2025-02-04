@@ -41,22 +41,23 @@ class CategoryController extends Controller
                 })
                 ->where("parent_id", null)
                 ->when(
-                    $request->has("department_uuid") && $request->has("categories_uuid"),
+                    $request->has("department_uuid"),
                     function ($q) use ($request) {
                         $department = Department::where("uuid", $request->department_uuid)->firstOrFail();
-                        $q
-                            ->where("department_id", $department->id)
-                            ->orWhere("uuid", $request->categories_uuid);
+                        $q->where("department_id", $department->id);
                     }
                 )
                 ->when(
-                    !$request->has("department_uuid") && $request->has("categories_uuid"),
+                    $request->has("categories_uuid"),
                     function ($q) use ($request) {
                         $q->Where("uuid", $request->categories_uuid);
                     }
                 );
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            if($category->lastPage() < $pageNumber) {
+                $category = $query->paginate($perPage, ['*'], 'page', 1);
+            }
             $data["categories"] = CategoryResource::collection(
                 $category->load("children")
             )->each->withDeparted();
