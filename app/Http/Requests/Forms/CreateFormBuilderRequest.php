@@ -60,7 +60,12 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.type' => 'required|in:text,number,date,dropdown,radio,checkbox,file,map',
             'fields.*.required' => 'nullable|boolean',
             'fields.*.order' => 'required|numeric',
-            'fields.*.options'  => 'nullable|array', // For dropdown, radio, and checkbox types
+            'fields.*.options' => ['nullable', 'array', function ($attribute, $value, $fail) {
+                $type = request()->input(str_replace('options', 'type', $attribute));
+                if (($type === 'date' || $type == 'dropdown' || $type === 'radio' || $type == 'checkbox') && empty($value)) {
+                    return $fail('The options field is required for ' . $type . ' input.');
+                }
+            }],
             'fields.*.options.*.label' => 'required|array|min:2|max:2',
             'fields.*.options.*.label.en' => 'required|string|max:255',
             'fields.*.options.*.label.ar' => 'required|string|max:255',
