@@ -5,8 +5,7 @@ namespace App\Http\Traits;
 use GuzzleHttp\Client;
 use Google_Client;
 
-trait Firebase
-{
+trait Firebase {
     /**
      * Handle data and send notification through Firebase Cloud Messaging (FCM).
      *
@@ -15,8 +14,7 @@ trait Firebase
      * @return bool
      * @throws \Exception
      */
-    public function HandelDataAndSendNotify($tokens, $content, $link = 'FLUTTER_NOTIFICATION_CLICK')
-    {
+    public function HandelDataAndSendNotify($tokens, $content, $link = 'FLUTTER_NOTIFICATION_CLICK') {
         $client = new Client();
 
         try {
@@ -61,17 +59,16 @@ trait Firebase
                 ]);
 
                 if ($response->getStatusCode() !== 200) {
-                    throw new \Exception('Failed to send notification. FCM returned HTTP code: ' . $response->getStatusCode());
+                    throw new \Exception(__('validation.custom.firebase.notification_failed') . $response->getStatusCode());
                 }
             }
 
             return true;
         } catch (\Exception $e) {
-            throw new \Exception('Failed to send notification: ' . $e->getMessage());
+            throw new \Exception(__('validation.custom.firebase.failed_to_send_notification') . $e->getMessage());
         }
     }
-    function getAccessToken()
-    {
+    function getAccessToken() {
         try {
             // Path to the service account key file
             $keyFilePath = storage_path('app/firebase/service_account.json');
@@ -87,10 +84,10 @@ trait Firebase
             if (isset($accessToken['access_token'])) {
                 return $accessToken['access_token'];
             } else {
-                throw new \Exception('Failed to obtain access token');
+                throw new \Exception(__('messages.failed_to_obtain_token'));
             }
         } catch (\Exception $e) {
-            throw new \Exception('Failed to obtain access token: ' . $e->getMessage());
+            throw new \Exception(__('messages.failed_to_obtain_token') . ': ' . $e->getMessage());
         }
     }
 }

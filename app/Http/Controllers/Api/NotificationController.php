@@ -15,11 +15,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\Paginate;
 
-class NotificationController extends Controller
-{
+class NotificationController extends Controller {
     use Firebase, ResponseTrait, Paginate;
-    public function sendNotification(Request $request)
-    {
+    public function sendNotification(Request $request) {
         global $status;
         DB::beginTransaction();
 
@@ -59,8 +57,8 @@ class NotificationController extends Controller
                         }
                     });
                     return $status
-                        ? $this->returnSuccessMessage('Notifications sent successfully!')
-                        : $this->returnError('Failed to send notifications.');
+                        ? $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'))
+                        : $this->returnError(__('validation.custom.notification.notification_sent_fail'));
                 } else {
                     $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
                 }
@@ -70,23 +68,22 @@ class NotificationController extends Controller
             $this->store($request);
 
             if (empty($tokens)) {
-                return $this->badRequest('No device tokens found for the specified users or group.');
+                return $this->badRequest(__('validation.custom.notification.no_device_tokens'));
             }
             $status = $this->HandelDataAndSendNotify($tokens, $content);
 
             DB::commit();
 
             return $status
-                ? $this->returnSuccessMessage('Notifications sent successfully!')
-                : $this->returnError('Failed to send notifications.');
+                ? $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'))
+                : $this->returnError(__('validation.custom.notification.notification_sent_fail'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
     }
 
-    public function saveDeviceToken(Request $request)
-    {
+    public function saveDeviceToken(Request $request) {
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string',
@@ -100,15 +97,14 @@ class NotificationController extends Controller
                 'user_id' => $user->id,
             ]);
             DB::commit();
-            return $this->returnSuccessMessage('Device Token saved successfully');
+            return $this->returnSuccessMessage(__('validation.custom.notification.device_token_saved'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
     }
 
-    public function allNotification(Request $request)
-    {
+    public function allNotification(Request $request) {
         try {
 /*            $pageNumber = $request->input('page', 1);
             $perPage = $request->input("perPage", 10);
@@ -141,8 +137,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -191,20 +186,16 @@ class NotificationController extends Controller
             }
         }
 
-        return $this->returnSuccessMessage('Notification sent successfully.');
+        return $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'));
     }
 
-    private function processRecipient(Notification $notification, string $recipient)
-    {
+    private function processRecipient(Notification $notification, string $recipient) {
         if ($recipient == '*') {
             $notification->for_all = true;
             $notification->save();
             return true;
         }
-
-
         [$type, $uuid] = explode(':', $recipient);
-
         // التحقق من صحة الـ ID
         $model = match ($type) {
             'user' => \App\Models\User::class,
@@ -213,7 +204,7 @@ class NotificationController extends Controller
         };
 
         if (!$model || !$model::where('uuid', $uuid)->exists()) {
-            return $this->badRequest('Recipient not found.');
+            return $this->badRequest('Recipient not found.'); //??
         }
 
         $notification->recipients()->create([
@@ -221,9 +212,7 @@ class NotificationController extends Controller
             'recipient_uuid' => $uuid
         ]);
     }
-
-    public function getUserNotifications(Request $request)
-    {
+    public function getUserNotifications(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'perPage' => 'nullable|integer|min:9',
@@ -252,7 +241,7 @@ class NotificationController extends Controller
                 $data['users'] = NotificationResource::collection($notifications);
                 return $this->PaginateData($data , $notifications );
             } else {
-                return $this->badRequest('user not found.');
+                return $this->badRequest(__('validation.custom.notification.user_not_found'));
             }
         } catch (\Exception $e) {
             return $this->handleException($e);

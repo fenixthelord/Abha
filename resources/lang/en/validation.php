@@ -8,6 +8,74 @@ return [
             'unique' => 'This department already exists.',
             'uuid' => 'The UUID is invalid.',
         ],
+
+        'roleAndPerm' => [
+            'failed_to_obtain_token' => 'Failed to obtain token',
+            'role_created_successfully' => 'Role created successfully',
+            'role_not_found' => 'Role not found',
+            'user_not_found' => 'User not found',
+            'permission_not_found' => 'Permission not found',
+            'role_assigned_successfully' => 'Role assigned successfully',
+            'permission_assigned_successfully' => 'Permission assigned successfully',
+            'role_removed_successfully' => 'Role removed successfully',
+            'permission_removed_successfully' => 'Permission removed successfully',
+            'role_deleted_successfully' => 'Role deleted successfully',
+            'master_role_cannot_be_deleted' => 'Master role cannot be deleted',
+            'master_permission_cannot_be_assigned' => 'Master permission cannot be assigned',
+            'validation_error' => 'Validation error',
+            'forbidden_action' => 'You are not authorized to perform this action',
+        ],
+
+        'userController' => [
+            'user_not_found' => 'User not found',
+            'invalid_page' => 'Invalid page number',
+            'permission_denied' => "You don't have permission to access this page",
+            'user_activated' => 'User activated successfully',
+            'user_deactivated' => 'User deactivated successfully',
+            'image_uploaded' => 'Image uploaded successfully',
+            'otp_sent' => 'OTP sent successfully',
+            'otp_verified' => 'OTP verified successfully',
+            'invalid_otp' => 'Invalid OTP Or Expired',
+            'otp_expired' => 'OTP Not expired',
+            'user_restore' => 'User restore successfully',
+            'results' => 'No results found',
+            'invalid_search' => 'Invalid search',
+        ],
+
+        'firebase' => [
+            'notification_failed' => 'Failed to send notification. FCM returned HTTP code: ',
+            'failed_to_obtain_token' => 'Failed to obtain access token',
+            'failed_to_send_notification' => 'Failed to send notification: ',
+        ],
+
+        'notifyGroup' => [
+            'group_created' => 'Group created successfully',
+            'group_not_found' => 'Group not found',
+            'users_added' => 'Users added to notify group successfully',
+            'users_removed' => 'Users removed from notify group successfully',
+            'notifications_sent' => 'Notifications sent successfully',
+            'failed_to_send_notifications' => 'Failed to send notifications',
+            'group_deleted' => 'Notify group deleted successfully',
+            'failed_to_retrieve_groups' => 'Failed to retrieve notify groups: ',
+            'no_users_in_group' => 'Group does not have users',
+            'no_device_tokens' => 'No device tokens found for this notify group',
+            'validation_failed' => 'Validation failed',
+        ],
+
+        'language' => [
+            'lang_success' => 'Language changed successfully',
+        ],
+
+        'notification' => [
+            'notification_sent_success' => 'Notifications sent successfully!',
+            'notification_sent_fail' => 'Failed to send notifications.',
+            'device_token_saved' => 'Device Token saved successfully.',
+            'no_device_tokens' => 'No device tokens found for the specified users or group.',
+            'invalid_page_number' => 'Invalid page number.',
+            'user_not_found' => 'User not found.',
+            'validation_error' => 'Validation error.',
+        ],
+
         'name' => [
             'required' => 'The name field is required.',
             'array' => 'The name must be sent as an array.',
@@ -63,6 +131,13 @@ return [
             'regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
             'confirmed' => 'Password does not match.',
         ],
+
+        'category' => [
+            'category_deleted' => 'Category and all related subcategories were deleted successfully.',
+            'category_updated' => 'Categories updated successfully.',
+            'category_created' => 'Categories created successfully.',
+        ],
+
         'user' => [
             'required' => 'Email is required.',
         ],

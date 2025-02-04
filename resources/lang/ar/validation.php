@@ -8,6 +8,74 @@ return [
             "unique" => "هذا القسم موجود بالفعل.",
             "uuid" => "المعرف الفريد غير صالح.",
         ],
+
+        'roleAndPerm' => [
+            'failed_to_obtain_token' => 'فشل في الحصول على الرمز',
+            'role_created_successfully' => 'تم إنشاء الدور بنجاح',
+            'role_not_found' => 'الدور غير موجود',
+            'user_not_found' => 'المستخدم غير موجود',
+            'permission_not_found' => 'الصلاحية غير موجودة',
+            'role_assigned_successfully' => 'تم تعيين الدور بنجاح',
+            'permission_assigned_successfully' => 'تم تعيين الصلاحية بنجاح',
+            'role_removed_successfully' => 'تم إزالة الدور بنجاح',
+            'permission_removed_successfully' => 'تم إزالة الصلاحية بنجاح',
+            'role_deleted_successfully' => 'تم حذف الدور بنجاح',
+            'master_role_cannot_be_deleted' => 'لا يمكن حذف دور الماستر',
+            'master_permission_cannot_be_assigned' => 'لا يمكن تعيين صلاحية الماستر',
+            'validation_error' => 'خطأ في التحقق',
+            'forbidden_action' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+        ],
+
+        'userController' => [
+            'user_not_found' => 'المستخدم غير موجود',
+            'invalid_page' => 'رقم الصفحة غير صالح',
+            'permission_denied' => 'ليس لديك إذن للوصول إلى هذه الصفحة',
+            'user_activated' => 'تم تفعيل المستخدم بنجاح',
+            'user_deactivated' => 'تم إلغاء تفعيل المستخدم بنجاح',
+            'image_uploaded' => 'تم تحميل الصورة بنجاح',
+            'otp_sent' => 'تم إرسال OTP بنجاح',
+            'otp_verified' => 'تم التحقق من OTP بنجاح',
+            'invalid_otp' => 'رمز التحقق غير صالح أو منتهي الصلاحية',
+            'otp_expired' => 'رمز التحقق غير منتهي',
+            'user_restore' => 'تمت استعادة المستخدم بنجاح',
+            'results' => 'لم يتم العثور على نتائج',
+            'invalid_search' => 'بحث غير صالح',
+        ],
+
+        'firebase' => [
+            'notification_failed' => 'فشل في إرسال الإشعار. رمز الحالة من FCM: ',
+            'failed_to_obtain_token' => 'فشل في الحصول على رمز الوصول',
+            'failed_to_send_notification' => 'فشل في إرسال الإشعار: ',
+        ],
+
+        'notifyGroup' => [
+            'group_created' => 'تم إنشاء المجموعة بنجاح',
+            'group_not_found' => 'المجموعة غير موجودة',
+            'users_added' => 'تمت إضافة المستخدمين إلى المجموعة بنجاح',
+            'users_removed' => 'تمت إزالة المستخدمين من المجموعة بنجاح',
+            'notifications_sent' => 'تم إرسال الإشعارات بنجاح',
+            'failed_to_send_notifications' => 'فشل في إرسال الإشعارات',
+            'group_deleted' => 'تم حذف المجموعة بنجاح',
+            'failed_to_retrieve_groups' => 'فشل في استرجاع المجموعات: ',
+            'no_users_in_group' => 'المجموعة لا تحتوي على مستخدمين',
+            'no_device_tokens' => 'لم يتم العثور على رموز الأجهزة لهذه المجموعة',
+            'validation_failed' => 'فشل التحقق من البيانات',
+        ],
+
+        'language' => [
+            'lang_success' => 'تم تغيير اللغة بنجاح',
+        ],
+
+        'notification' => [
+            'notification_sent_success' => 'تم إرسال الإشعارات بنجاح!',
+            'notification_sent_fail' => 'فشل في إرسال الإشعارات.',
+            'device_token_saved' => 'تم حفظ رمز الجهاز بنجاح.',
+            'no_device_tokens' => 'لم يتم العثور على رموز أجهزة للمستخدمين أو المجموعة المحددة.',
+            'invalid_page_number' => 'رقم الصفحة غير صالح.',
+            'user_not_found' => 'المستخدم غير موجود.',
+            'validation_error' => 'خطأ في التحقق من صحة البيانات.',
+        ],
+
         'name' => [
             'required' => 'حقل الاسم مطلوب.',
             "array" => 'يجب ارسال الاسم بشكل مصفوفة ',
@@ -71,6 +139,13 @@ return [
             'regex' => 'يجب أن تحتوي على حرف صغير على الأقل، وحرف كبير، ورقم واحد.',
             'confirmed' => 'كلمة المرور غير متطابقة.',
         ],
+
+        'category' => [
+            'category_deleted' => 'تم حذف الفئة وجميع الفئات الفرعية المرتبطة بها بنجاح.',
+            'category_updated' => 'تم تحديث الفئات بنجاح.',
+            'category_created' => 'تم إنشاء الفئات بنجاح.',
+        ],
+
         'user' => [
             'required' => 'حقل البريد الإلكتروني مطلوب.',
         ],
@@ -121,10 +196,10 @@ return [
             'required' => 'حقل الوصف مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
             'array' => 'يجب ادخال الوصف بالعربية و الانكليزية'
-        ],'description.en' => [
+        ], 'description.en' => [
             'required' => 'حقل الوصف بالانكليزية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
-        ],'description.ar' => [
+        ], 'description.ar' => [
             'required' => 'حقل الوصف بالعربية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
         ],
@@ -146,13 +221,13 @@ return [
         'group_uuid' => [
             'exists' => 'المجموعة غير صالحة',
         ],
-    'forget_password' => [
-        'sent_code' => 'تم ارسال الكود',
-        'error' => 'عليك المحاولة مرة اخرى',
-        'expired' => 'لم تنتهي صلاحية الرمز بعد',
-        'done' => 'تم تغير الكلمة بنجاح و تسجيل الخروج من جميع الجلسات النشطة',
-        'not_done' => 'الرمز المرسل غير صالح',
-    ],
+        'forget_password' => [
+            'sent_code' => 'تم ارسال الكود',
+            'error' => 'عليك المحاولة مرة اخرى',
+            'expired' => 'لم تنتهي صلاحية الرمز بعد',
+            'done' => 'تم تغير الكلمة بنجاح و تسجيل الخروج من جميع الجلسات النشطة',
+            'not_done' => 'الرمز المرسل غير صالح',
+        ],
         'auth' => [
             'permission' => 'ليس لديك صلاحيات لهذا الاجراء',
             'failed' => 'اسم المستخدم او كلمة السر خاطئة',
@@ -163,7 +238,7 @@ return [
             'notfound' => 'هذا القسم غير موجود',
             'try' => 'الرجاء المحاولة لاحقا',
             'done' => 'تم انشاء القسم بنجاح',
-            'deleted' =>'القسم محذوف مسبقا',
+            'deleted' => 'القسم محذوف مسبقا',
             'delete' => 'تم حذف القسم'
         ],
     ],
