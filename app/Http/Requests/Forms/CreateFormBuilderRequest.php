@@ -105,6 +105,7 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.order.numeric' => 'Each form field must have an order as number.',
             'fields.*.options.required' => 'Each form field must have an options array.',
             'fields.*.options.array' => 'Each form field must have an options as array.',
+            'fields.*.options.*.selected.boolean' => 'Each field option must have (selected) as boolean.',
             'fields.*.options.*.label.required' => 'Each field option must have a label.',
             'fields.*.options.*.label.en.required' => 'Each field option must have an English label.',
             'fields.*.options.*.label.ar.required' => 'Each field option must have an Arabic label.',

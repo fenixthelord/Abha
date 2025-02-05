@@ -105,11 +105,18 @@ class UpdateFormBuilderRequest extends FormRequest
             'fields.*.type.in' => 'Invalid field type. Allowed types: text, number, date, dropdown, radio, checkbox, file, map.',
             'fields.*.order.required' => 'Each form field must have an order.',
             'fields.*.order.numeric' => 'Each form field must have an order as number.',
+            'fields.*.options.required' => 'Each form field must have an options array.',
+            'fields.*.options.array' => 'Each form field must have an options as array.',
+            'fields.*.options.*.selected.boolean' => 'Each field option must have (selected) as boolean.',
             'fields.*.options.*.label.required' => 'Each field option must have a label.',
             'fields.*.options.*.label.en.required' => 'Each field option must have an English label.',
             'fields.*.options.*.label.ar.required' => 'Each field option must have an Arabic label.',
             'fields.*.options.*.order.required' => 'Each field option must have an order.',
             'fields.*.options.*.order.numeric' => 'Each field option must have an order as number.',
+            'fields.*.sources.required' => 'Each form field must have an sources array.',
+            'fields.*.sources.array' => 'Each form field must have sources as array.',
+            'fields.*.sources.*.source_table.required' => 'Each form field source must have a source_table.',
+            'fields.*.sources.*.source_column.required' => 'Each form field source must have a source_column.',
         ];
     }
 
