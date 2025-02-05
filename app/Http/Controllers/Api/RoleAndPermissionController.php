@@ -31,7 +31,7 @@ class RoleAndPermissionController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->hasPermissionTo("role.show")) {
-            return $this->Forbidden("you don't have permission to access this page");
+            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
         /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
@@ -79,7 +79,7 @@ $name=implode(".",$words);
                 $role = Role::where('name', $name)->first();
             }
             if (Role::where('name', $name)->exists()) {
-                return $this->badRequest("This role name is already in use.");
+                return $this->badRequest(__('validation.custom.roleAndPerm.role_name_already_in_use'));
             }
 
             $role = new Role([

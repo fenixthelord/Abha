@@ -10,8 +10,8 @@ return [
         ],
 
         'roleAndPerm' => [
-
             'dont_have_permission' => 'ليس لديك صلاحية الوصول لهذه الصفحة',
+            'role_name_already_in_use' => 'اسم الدور هذا قيد الاستخدام بالفعل',
             'not_allowed_create_Master_role' => 'غير مسموح لك بانشاء دور رئيسي',
             'role_name_already_use' => 'اسم الدور قيد الاستخدام بالفعل',
             'master_permission' => 'هذه (صلاحية لدور رئيسي)، لا يمكنك تعيينها لهذا الدور',

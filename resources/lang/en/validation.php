@@ -11,6 +11,7 @@ return [
 
         'roleAndPerm' => [
             'dont_have_permission' => 'you dont have permission to access this page',
+            'role_name_already_in_use' => 'This role name is already in use',
             'not_allowed_create_Master_role' => 'you are not allowed to create Master role',
             'role_name_already_use' => 'this role name already in use',
             'master_permission' => 'this is a Master permission you can not assign it to this role',
