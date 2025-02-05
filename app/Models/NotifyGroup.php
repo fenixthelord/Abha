@@ -32,10 +32,23 @@ class NotifyGroup extends Model   implements Auditable
             $model->uuid = Str::uuid();
         });
     }
-
-    // Relationship with users
-    public function users()
+    public function deviceTokens()
     {
-        return $this->belongsToMany(User::class, 'notify_group_user', 'notify_group_uuid', 'user_uuid', 'uuid', 'uuid');
+        return $this->hasManyThrough(
+            DeviceToken::class,
+            NotifyGroupUser::class,
+            'notify_group_uuid',
+            'owner_uuid',
+            'uuid',
+            'user_uuid'
+        );
     }
+
+    public function notifyGroupUser()
+    {
+        return $this->belongsTo(NotifyGroupUser::class, 'owner_uuid', 'user_uuid');
+    }
+
+
+
 }

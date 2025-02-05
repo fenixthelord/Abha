@@ -33,6 +33,11 @@ class Notification extends Model   implements Auditable
             $model->uuid = Str::uuid();
         });
     }
+
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
     public function recipients(): HasMany
     {
         return $this->hasMany(NotificationDetail::class);

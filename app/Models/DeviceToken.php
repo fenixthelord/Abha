@@ -11,11 +11,14 @@ class DeviceToken extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
-    protected $fillable = ['token', 'user_id'];
+    protected $fillable = ['token', 'owner_uuid'];
 
     // Relationship with user
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'id');
-    }
+//    public function user()
+//    {
+//        return $this->belongsTo(User::class, 'user_id', 'id');
+//    }
+
+
+
 }

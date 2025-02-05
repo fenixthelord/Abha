@@ -26,13 +26,15 @@ class NotificationController extends Controller
         try {
             // Validate request
             $request->validate([
-                'title' => 'required|string',
+                'title' => 'required|string|max:255',
                 'body' => 'required|string',
                 'image' => 'nullable|string',
-                'data' => 'nullable|array',
+                'url' => 'nullable|string',
+                'schedule_at' => 'nullable|date',
                 'group_uuid' => 'nullable|exists:notify_groups,uuid',
-                'user_uuids' => 'nullable|array',
-                //'user_uuids.*' => 'exists:users,uuid',
+                'user_uuids'   => 'nullable|array',
+//                'user_uuids.*' => 'uuid',
+                'model'=>'nullable|string|in:user,customer',
             ]);
 
             // Fetch device tokens
@@ -47,26 +49,33 @@ class NotificationController extends Controller
             if ($request->has('group_uuid')) {
                 // Fetch tokens for all users in the group
                 $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
-                $userIds = $group->users()->pluck('users.id');
-                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+
+                $tokens = $group->deviceTokens()->pluck('token')->toArray();
             } elseif ($request->has('user_uuids')) {
+
+
                 if ($request->user_uuids[0] == '*') {
-                    $this->store($request);
-                    User::chunk(100, function ($users) use ($content) {
-                        foreach ($users as $user) {
-                            $tokens = $user->deviceTokens()->pluck('token');
-                            $status = $this->HandelDataAndSendNotify($tokens, $content);
-                        }
-                    });
-                    return $status
-                        ? $this->returnSuccessMessage('Notifications sent successfully!')
-                        : $this->returnError('Failed to send notifications.');
+
+                    if ($request->input('model') == 'user') {
+
+                        $tokens = DeviceToken::whereIn('owner_uuid', User::pluck('uuid'))->pluck('token')->toArray();
+
+                    } elseif ($request->input('model') == 'customer') {
+                        // If model is 'customer', fetch all device tokens not associated with users
+                        $tokens = DeviceToken::whereNotIn('owner_uuid', User::pluck('uuid'))->pluck('token')->toArray();
+                    }
                 } else {
-                    $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
+                    $tokens = DeviceToken::whereIn('owner_uuid', $request->input('user_uuids'))->pluck('token');
                 }
 
-                $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
+
             }
+            $loggedInUserUuid = auth('sanctum')->user()->uuid;
+            $tokens = array_filter($tokens, function($tokens) use ($loggedInUserUuid) {
+                return DeviceToken::where('token', $tokens)->where('owner_uuid', '!=', $loggedInUserUuid)->exists();
+            });
+
+
             $this->store($request);
 
             if (empty($tokens)) {
@@ -90,14 +99,14 @@ class NotificationController extends Controller
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string',
-            'user_uuid' => 'nullable|exists:users,uuid',
+
         ]);
 
         try {
-            $user = User::where('uuid', $request->input('user_uuid'))->first();
+
             DeviceToken::firstOrCreate([
                 'token' => $request->input('token'),
-                'user_id' => $user->id,
+                'owner_uuid' => $request->input('user_uuid'),
             ]);
             DB::commit();
             return $this->returnSuccessMessage('Device Token saved successfully');
@@ -149,6 +158,10 @@ class NotificationController extends Controller
             'image' => 'nullable|string',
             'url' => 'nullable|string',
             'schedule_at' => 'nullable|date',
+            'group_uuid' => 'nullable|exists:notify_groups,uuid',
+            'user_uuids'   => 'nullable|array',
+//            'user_uuids.*' => 'uuid',
+            'model'=>'nullable|string|in:user,customer',
         ]);
 
         if ($validator->fails()) {
@@ -158,13 +171,15 @@ class NotificationController extends Controller
         /*if (in_array('*', $data['recipients']) && count($data['recipients']) > 1) {
             return $this->badRequest('You cannot send notifications to one and more recipients.');
         }*/
+        $user=auth('sanctum')->user();
+
         $notification = Notification::create([
             'title' => $request['title'],
             'description' => $request['body'],
             'image' => $request['image'] ?? null,
             'url' => $request['url'] ?? null,
             'scheduled_at' => $request['scheduled_at'] ?? null,
-            'sender_id' => $request->user()->id,
+            'sender_id' => $user->id,
         ]);
         if ($request->has('group_uuid')) {
             if (NotifyGroup::whereuuid($request->group_uuid)) {
@@ -181,9 +196,9 @@ class NotificationController extends Controller
                 $notification->save();
             } else {
                 foreach ($request['user_uuids'] as $recipient) {
-                    if (User::whereuuid($recipient)) {
+                    if (DeviceToken::where('owner_uuid',$recipient)) {
                         $notification->recipients()->create([
-                            'recipient_type' => 'user',
+                            'recipient_type' => $request->input('model'),
                             'recipient_uuid' => $recipient
                         ]);
                     }
