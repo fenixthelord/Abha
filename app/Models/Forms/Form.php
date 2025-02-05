@@ -4,6 +4,8 @@ namespace App\Models\Forms;
 
 use App\Models\BaseModel;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -15,17 +17,17 @@ class Form extends BaseModel
     private $translatable = ['name'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function fields()
+    public function fields(): HasMany
     {
         return $this->hasMany(FormField::class)->orderBy('order', 'asc');
     }
 
-    public function submissions()
+    public function submissions(): HasMany
     {
         return $this->hasMany(FormSubmission::class);
     }
