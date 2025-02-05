@@ -8,7 +8,7 @@ Route::prefix('user')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
             Route::get('/me', [UserController::class, 'userProfile']);
             Route::post('upload', [UserController::class, 'addImage']);
-            Route::post('/update-profile', [UserController::class, 'updateProfile']);
+            Route::post('/update-profile', [UserController::class, 'update']);
             Route::post('update', [UserController::class, 'updateAdmin']);
             Route::post('delete-user', [UserController::class, 'deleteUser']);
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
