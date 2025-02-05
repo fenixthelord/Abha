@@ -3,6 +3,7 @@
 namespace App\Models\Forms;
 
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -13,7 +14,7 @@ class FormFieldOption extends BaseModel
     private $translatable = ['label'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
-    public function field()
+    public function field(): BelongsTo
     {
         return $this->belongsTo(Form::class);
     }

@@ -56,9 +56,14 @@ class FormBuilderController extends Controller
 
             foreach ($request['fields'] as $field_data) {
                 $form_field = $form->fields()->create($field_data);
-                foreach ($field_data['options'] as $option_data) {
-                    $form_field->options()->create($option_data);
-                }
+                if (isset($field_data['options']) && in_array($field_data['type'], ['date', 'dropdown', 'radio', 'checkbox']))
+                    foreach ($field_data['options'] as $option_data) {
+                        $form_field->options()->create($option_data);
+                    }
+                if (isset($field_data['sources']) && $field_data['type'] == 'dropdown')
+                    foreach ($field_data['sources'] as $data_source) {
+                        $form_field->sources()->create($data_source);
+                    }
             }
             DB::commit();
             $form = Form::with(['category', 'fields.options'])->findOrFail($form->id);
@@ -67,6 +72,7 @@ class FormBuilderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
+            // return $e;
         }
     }
 

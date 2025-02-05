@@ -64,8 +64,9 @@ class UpdateFormBuilderRequest extends FormRequest
             'fields.*.order' => 'required|numeric',
             'fields.*.options' => ['nullable', 'array', function ($attribute, $value, $fail) {
                 $type = request()->input(str_replace('options', 'type', $attribute));
-                if (($type === 'date' || $type == 'dropdown' || $type === 'radio' || $type == 'checkbox') && empty($value)) {
-                    return $fail('The options field is required for  $type input.');
+
+                if (in_array($type, ['date', 'dropdown', 'radio', 'checkbox']) && (is_null($value) || empty($value))) {
+                    return $fail('The options field is required for ' . $type . ' input.');
                 }
             }],
             'fields.*.options.*.label' => 'required|array|min:2|max:2',
@@ -73,6 +74,16 @@ class UpdateFormBuilderRequest extends FormRequest
             'fields.*.options.*.label.ar' => 'required|string|max:255',
             'fields.*.options.*.order' => 'required|numeric',
             'fields.*.options.*.selected' => 'nullable|boolean',
+            'fields.*.sources' => ['nullable', 'array', function ($attribute, $value, $fail) {
+                $type = request()->input(str_replace('sources', 'type', $attribute));
+
+                if ($type === 'dropdown' && (is_null($value) || empty($value))) {
+                    return $fail('The sources field is required when type is dropdown.');
+                }
+            }],
+
+            'fields.*.sources.*.source_table' => 'required|string|max:255',
+            'fields.*.sources.*.source_column' => 'required|string|max:255',
         ];
     }
 

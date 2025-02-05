@@ -46,7 +46,7 @@ class CreateFormBuilderRequest extends FormRequest
                     });
 
                     if (!$has_required_field) {
-                        $fail('At least one field must have "required" set to true.');
+                        $fail('At least one field must have (required: true) set to true.');
                     }
                 }
             ],
@@ -62,7 +62,8 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.order' => 'required|numeric',
             'fields.*.options' => ['nullable', 'array', function ($attribute, $value, $fail) {
                 $type = request()->input(str_replace('options', 'type', $attribute));
-                if (($type === 'date' || $type == 'dropdown' || $type === 'radio' || $type == 'checkbox') && empty($value)) {
+
+                if (in_array($type, ['date', 'dropdown', 'radio', 'checkbox']) && (is_null($value) || empty($value))) {
                     return $fail('The options field is required for ' . $type . ' input.');
                 }
             }],
@@ -71,6 +72,16 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.options.*.label.ar' => 'required|string|max:255',
             'fields.*.options.*.order' => 'required|numeric',
             'fields.*.options.*.selected' => 'nullable|boolean',
+            'fields.*.sources' => ['nullable', 'array', function ($attribute, $value, $fail) {
+                $type = request()->input(str_replace('sources', 'type', $attribute));
+
+                if ($type === 'dropdown' && (is_null($value) || empty($value))) {
+                    return $fail('The sources field is required when type is dropdown.');
+                }
+            }],
+
+            'fields.*.sources.*.source_table' => 'required|string|max:255',
+            'fields.*.sources.*.source_column' => 'required|string|max:255',
         ];
     }
 
@@ -92,11 +103,17 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.type.in' => 'Invalid field type. Allowed types: text, number, date, dropdown, radio, checkbox, file, map.',
             'fields.*.order.required' => 'Each form field must have an order.',
             'fields.*.order.numeric' => 'Each form field must have an order as number.',
+            'fields.*.options.required' => 'Each form field must have an options array.',
+            'fields.*.options.array' => 'Each form field must have an options as array.',
             'fields.*.options.*.label.required' => 'Each field option must have a label.',
             'fields.*.options.*.label.en.required' => 'Each field option must have an English label.',
             'fields.*.options.*.label.ar.required' => 'Each field option must have an Arabic label.',
             'fields.*.options.*.order.required' => 'Each field option must have an order.',
             'fields.*.options.*.order.numeric' => 'Each field option must have an order as number.',
+            'fields.*.sources.required' => 'Each form field must have an sources array.',
+            'fields.*.sources.array' => 'Each form field must have sources as array.',
+            'fields.*.sources.*.source_table.required' => 'Each form field source must have a source_table.',
+            'fields.*.sources.*.source_column.required' => 'Each form field source must have a source_column.',
         ];
     }
 
