@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\Permissions\PermissionsResource;
 use App\Http\Resources\Roles\RolesResource;
+use App\Http\Traits\Paginate;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Role\Permission;
 use App\Models\Role\Role;
@@ -16,8 +17,10 @@ use Illuminate\Support\Facades\Validator;
 
 class RoleAndPermissionController extends Controller
 {
-    use ResponseTrait;
-    public $translatable = ["displaying","description"];
+    use ResponseTrait, Paginate;
+
+    public $translatable = ["displaying", "description"];
+
     public function __construct()
     {
         // Apply middleware to all actions in this controller
@@ -25,16 +28,18 @@ class RoleAndPermissionController extends Controller
 
     }
 
-    public function index()
+    public function index(Request $request)
     {
-if(!auth()->user()->hasPermissionTo("role.show")){
-    return $this->Forbidden("you don't have permission to access this page");
-}
-
-            $roles = Role::where('name', '!=', 'Master')->get();
-
+        if (!auth()->user()->hasPermissionTo("role.show")) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
+        /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
-        return $this->returnData($data);
+        return $this->returnData($data);*/
+        $fields = ['displaying->ar','displaying->en'];
+        $roles = $this->allWithSearch(new Role(), $fields, $request,'name','Master','!=');
+        $date['roles'] = RolesResource::collection($roles);
+        return $this->PaginateData($date,$roles);
     }
 
     public function store(Request $request)
@@ -42,20 +47,20 @@ if(!auth()->user()->hasPermissionTo("role.show")){
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
-            if(!auth()->user()->hasPermissionTo("role.create")){
+            if (!auth()->user()->hasPermissionTo("role.create")) {
                 return $this->Forbidden("you don't have permission to access this page");
             }
             $validator = Validator::make($request->all(), [
                 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
-                "displaying.en"=> "required|string|unique:roles,displaying",
-                 "displaying.ar"=> "required|string|unique:roles,displaying",
+                "displaying.en" => "required|string|unique:roles,displaying",
+                "displaying.ar" => "required|string|unique:roles,displaying",
 
                 "description.en" => "required|string",
                 "description.ar" => "required|string",
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ],messageValidation());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -66,8 +71,8 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             $user = auth()->user();
             if ($user->HasRole('Master')) {
                 $request->roleName = "Master_" . $request->roleName;
-             $role=Role::where('name',$request->roleName);
-             if ($role->exists()) {
+                $role = Role::where('name', $request->roleName);
+                if ($role->exists()) {
                     return $this->badRequest("this role name alredy in use");
 
                 }
@@ -84,12 +89,12 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             $role->save();
 
             if ($request->has('permission') && !empty($request->permission)) {
-                foreach($request->permission as $perm){
-                 $permission = Permission::where("name",$perm)->first();
-                    if($permission->is_admin == 1){
+                foreach ($request->permission as $perm) {
+                    $permission = Permission::where("name", $perm)->first();
+                    if ($permission->is_admin == 1) {
 
 
-                        return  $this->Forbidden("this is a Master permission you can not assign it to this role");
+                        return $this->Forbidden("this is a Master permission you can not assign it to this role");
                     }
                 }
                 $role->syncPermissions($request->permission);
@@ -110,7 +115,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'nullable|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string'
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -151,7 +156,6 @@ if(!auth()->user()->hasPermissionTo("role.show")){
     }
 
 
-
     public function assignRole(Request $request)
 
     {
@@ -162,7 +166,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'role' => 'required|exists:roles,name',
 
             'user_uuid' => 'required|exists:users,uuid',
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -192,7 +196,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'user_uuid' => 'required|exists:users,uuid',
             'permissions' => 'nullable'
 
-        ],messageValidation());
+        ], messageValidation());
         if ($validatedData->fails()) {
             return $this->returnValidationError($validatedData);
         }
@@ -277,7 +281,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-        ],messageValidation());
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -316,7 +320,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',
             'user_uuid' => 'required|exists:users,uuid',
-        ],messageValidation());
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -386,7 +390,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 'group' => $request->group,
                 'is_admin' => $request->is_admin,
             ]);
-            $data['permission'] =  Permissionsresource::make($permission);
+            $data['permission'] = Permissionsresource::make($permission);
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $exception) {
@@ -406,7 +410,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             } else {
                 $permission['directed'] = $user->getDirectPermissions();
                 $permission['roll'] = $user->getPermissionsViaRoles();
-                $data['permission'] =  [
+                $data['permission'] = [
                     'directed' => PermissionsResource::collection($permission['directed']),
                     'roll' => PermissionsResource::collection($permission['roll'])
                 ];
@@ -426,12 +430,11 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-            'displaying.en' => 'string',
-            'displaying.ar' => 'string',
-            'description.ar' => 'string',
-
-            'description.en' => 'string',
-        ],messageValidation());
+            'displaying.en' => 'required|string',
+            'displaying.ar' => 'required|string',
+            'description.ar' => 'required|string',
+            'description.en' => 'required|string',
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -470,7 +473,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 if (!$permission) {
                     return $this->NotFound('Permission not found');
                 }
-                if ($permission->is_admin==true) {
+                if ($permission->is_admin == true) {
                     return $this->Forbidden("you are not allowed to add Master permission");
                 }
             }
@@ -492,7 +495,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
 
-                $permission = Permission::where('is_admin', false)->get();
+            $permission = Permission::where('is_admin', false)->get();
 
 
             $resource = new NewPermissionsResource($permission);
@@ -511,7 +514,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -545,11 +548,13 @@ if(!auth()->user()->hasPermissionTo("role.show")){
             return $this->returnError($exception->getMessage());
         }
     }
-    public function ShowRole(Request $request){
+
+    public function ShowRole(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'roleName' => 'required|exists:roles,name'
-        ]
-            );
+                'roleName' => 'required|exists:roles,name'
+            ]
+        );
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -558,17 +563,18 @@ if(!auth()->user()->hasPermissionTo("role.show")){
 
             $roles = Role::findByName($request->roleName);
 
-        if (!$roles) {
-            return $this->NotFound('Role not found');
+            if (!$roles) {
+                return $this->NotFound('Role not found');
+            }
+
+            $data['role'] = RolesResource::make($roles)->withTranslate();
+
+            return $this->returnData($data);
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
         }
-
-       $data['role']=RolesResource::make($roles)->withTranslate();
-
-        return $this->returnData($data);
     }
-    catch (\Exception $exception){
-        return  $this->handleException($exception);}
-    }
+
     public function isMasterRole($roleName)
     {
         return str_starts_with($roleName, 'Master_');
