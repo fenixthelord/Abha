@@ -10,22 +10,39 @@ return [
         ],
 
         'roleAndPerm' => [
-
-
-            'failed_to_obtain_token' => 'Failed to obtain token',
+            'dont_have_permission' => 'you dont have permission to access this page',
+            'not_allowed_create_Master_role' => 'you are not allowed to create Master role',
+            'role_name_already_use' => 'this role name already in use',
+            'master_permission' => 'this is a Master permission you can not assign it to this role',
             'role_created_successfully' => 'Role created successfully',
+            'not_allowed_assign_permissions_to_role' => 'you are not allowed to assign permissions to this role',
             'role_not_found' => 'Role not found',
-            'user_not_found' => 'User not found',
             'permission_not_found' => 'Permission not found',
-            'role_assigned_successfully' => 'Role assigned successfully',
+            'master_role_permission' => 'this is master role permission you can not assign it to this role',
+            'master_role_can_not_assign_user' => 'this is master role you can not assign it to this user',
+            'user_not_found' => 'User not found',
+            'role_has_been_assigned_successfully' => 'the role has been assigned successfully',
+            'forbidden_action' => 'You are not authorized to perform this action',
+            'permission_not_exist' => 'this permission does not exist',
+            'master_permission_user' => 'this is master permission you can not assign it to this user',
             'permission_assigned_successfully' => 'Permission assigned successfully',
+            'master_role_cannot_remove_from_Master' => 'this is master role, you can not remove it from Master',
             'role_removed_successfully' => 'Role removed successfully',
-            'permission_removed_successfully' => 'Permission removed successfully',
-            'role_deleted_successfully' => 'Role deleted successfully',
+            'role_not_exist' => 'this role does not exist',
+            'not_allowed_remove_permissions_to_this_role' => 'you are not allowed to remove permissions to this role',
+            'cannot_update_Master_role' => 'You cannot update the Master role',
+            'not_allowed_update_role' => 'you are not allowed to update this role',
+            'not_allowed_add_Master_permission' => 'you are not allowed to add Master permission',
             'master_role_cannot_be_deleted' => 'Master role cannot be deleted',
+            'master_cannot_be_deleted' => 'you cannot delete  Master',
+            'role_deleted_successfully' => 'Role deleted successfully',
+            //
+            'failed_to_obtain_token' => 'Failed to obtain token',
+            'role_assigned_successfully' => 'Role assigned successfully',
+            'permission_removed_successfully' => 'Permission removed successfully',
             'master_permission_cannot_be_assigned' => 'Master permission cannot be assigned',
             'validation_error' => 'Validation error',
-            'forbidden_action' => 'You are not authorized to perform this action',
+
         ],
 
         'userController' => [

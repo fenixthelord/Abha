@@ -10,20 +10,49 @@ return [
         ],
 
         'roleAndPerm' => [
-            'failed_to_obtain_token' => 'فشل في الحصول على الرمز',
+
+            'dont_have_permission' => 'ليس لديك صلاحية الوصول لهذه الصفحة',
+            'not_allowed_create_Master_role' => 'غير مسموح لك بانشاء دور رئيسي',
+            'role_name_already_use' => 'اسم الدور قيد الاستخدام بالفعل',
+            'master_permission' => 'هذه (صلاحية لدور رئيسي)، لا يمكنك تعيينها لهذا الدور',
             'role_created_successfully' => 'تم إنشاء الدور بنجاح',
+            'not_allowed_assign_permissions_to_role' => 'لا يُسمح لك بتعيين صلاحية لهذا الدور',
             'role_not_found' => 'الدور غير موجود',
-            'user_not_found' => 'المستخدم غير موجود',
             'permission_not_found' => 'الصلاحية غير موجودة',
-            'role_assigned_successfully' => 'تم تعيين الدور بنجاح',
+            'master_role_permission' => 'هذه هي صلاحية (الدور الرئيسي)، ولا يمكنك تعيينها لهذا الدور',
+            'master_role_can_not_assign_user' => 'هذا (الدور الرئيسي), لا يمكنك تعيينه لهذا المستخدم',
+            'user_not_found' => 'المستخدم غير موجود',
+            'role_has_been_assigned_successfully' => 'تم تعيين الدور بنجاح',
+            'forbidden_action' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+            'permission_not_exist' => 'هذه الصلاحية غير موجودة',
+            'master_permission_user' => 'هذه (صلاحية لدور رئيسي), لا يمكنك تعيينها لهذا المستخدم',
             'permission_assigned_successfully' => 'تم تعيين الصلاحية بنجاح',
+            'master_role_cannot_remove_from_Master' => 'هذا (الدور الرئيسي), لا يمكنك إزالته من ماستر',
             'role_removed_successfully' => 'تم إزالة الدور بنجاح',
-            'permission_removed_successfully' => 'تم إزالة الصلاحية بنجاح',
-            'role_deleted_successfully' => 'تم حذف الدور بنجاح',
+            'role_not_exist' => 'هذا الدور غير موجود',
+            'not_allowed_remove_permissions_to_this_role' => 'لا يسمح لك بإزالة الصلاحيات لهذا الدور',
+            'cannot_update_Master_role' => 'لا يمكنك تحديث (الدور الرئيسي)',
+            'not_allowed_update_role' => 'لا يسمح لك بتحديث هذا الدور',
+            'not_allowed_add_Master_permission' => 'لا يسمح لك بإضافة صلاحية رئيسية',
             'master_role_cannot_be_deleted' => 'لا يمكن حذف دور الماستر',
+            'master_cannot_be_deleted' => 'لا يمكنك حذف الماستر',
+            'role_deleted_successfully' => 'تم حذف الدور بنجاح',
+
+
+            'failed_to_obtain_token' => 'فشل في الحصول على الرمز',
+
+
+
+
+            'role_assigned_successfully' => 'تم تعيين الدور بنجاح',
+
+
+            'permission_removed_successfully' => 'تم إزالة الصلاحية بنجاح',
+
+
             'master_permission_cannot_be_assigned' => 'لا يمكن تعيين صلاحية الماستر',
             'validation_error' => 'خطأ في التحقق',
-            'forbidden_action' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+
         ],
 
         'userController' => [
