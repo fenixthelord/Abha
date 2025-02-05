@@ -13,26 +13,33 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Traits\Paginate;
 
-class RoleAndPermissionController extends Controller {
-    use ResponseTrait;
+class RoleAndPermissionController extends Controller
+{
+    use ResponseTrait, Paginate;
 
     public $translatable = ["displaying", "description"];
 
     public function __construct()
     {
         // Apply middleware to all actions in this controller
+
+
     }
 
-    public function index() {
+    public function index(Request $request)
+    {
         if (!auth()->user()->hasPermissionTo("role.show")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+            return $this->Forbidden("you don't have permission to access this page");
         }
-
-        $roles = Role::where('name', '!=', 'Master')->get();
-
+        /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
-        return $this->returnData($data);
+        return $this->returnData($data);*/
+        $fields = ['displaying->ar','displaying->en'];
+        $roles = $this->allWithSearch(new Role(), $fields, $request,'name','Master','!=');
+        $date['roles'] = RolesResource::collection($roles);
+        return $this->PaginateData($date,$roles);
     }
 
     public function store(Request $request) {
@@ -52,7 +59,7 @@ class RoleAndPermissionController extends Controller {
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ]);
+            ],messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -60,17 +67,23 @@ class RoleAndPermissionController extends Controller {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.not_allowed_create_Master_role'));
             }
 
+            $words = explode(' ', $request->displaying['en']);
+
+$name=implode(".",$words);
+
+
+
             $user = auth()->user();
             if ($user->HasRole('Master')) {
-                $request->roleName = "Master_" . $request->roleName;
-                $role = Role::where('name', $request->roleName);
-                if ($role->exists()) {
-                    return $this->badRequest(__('validation.custom.roleAndPerm.role_name_already_use'));
-                }
+                $request->roleName = "Master_" . $name;
+                $role = Role::where('name', $name)->first();
+            }
+            if (Role::where('name', $name)->exists()) {
+                return $this->badRequest("This role name is already in use.");
             }
 
             $role = new Role([
-                'name' => $request->roleName,
+                'name' => $name,
 
             ]);
             foreach ($this->translatable as $field) {
@@ -136,11 +149,10 @@ class RoleAndPermissionController extends Controller {
         }
     }
 
-    public function isMasterRole($roleName) {
-        return str_starts_with($roleName, 'Master_');
-    }
 
-    public function assignRole(Request $request) {
+    public function assignRole(Request $request)
+
+    {
         if (!auth()->user()->hasPermissionTo("user.update")) {
             return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
@@ -387,7 +399,7 @@ class RoleAndPermissionController extends Controller {
             'displaying.ar' => 'required|string',
             'description.ar' => 'required|string',
             'description.en' => 'required|string',
-        ]);
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -442,6 +454,7 @@ class RoleAndPermissionController extends Controller {
             if (!auth()->user()->hasPermissionTo("permission.show")) {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
             }
+
             $permission = Permission::where('is_admin', false)->get();
 
             $resource = new NewPermissionsResource($permission);
@@ -491,7 +504,8 @@ class RoleAndPermissionController extends Controller {
         }
     }
 
-    public function ShowRole(Request $request) {
+    public function ShowRole(Request $request)
+    {
         $validator = Validator::make($request->all(), [
                 'roleName' => 'required|exists:roles,name'
             ]
@@ -511,5 +525,10 @@ class RoleAndPermissionController extends Controller {
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
+    }
+
+    public function isMasterRole($roleName)
+    {
+        return str_starts_with($roleName, 'Master_');
     }
 }
