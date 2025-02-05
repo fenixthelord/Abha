@@ -9,8 +9,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('notification')->group(function () {
             Route::post('/send', [NotificationController::class, 'sendNotification']);
-            Route::post('/all', [NotificationController::class, 'allNotification']);
         });
+            Route::post('notifications/all', [NotificationController::class, 'allNotification']);
         Route::post('/notifications', [NotificationController::class, 'store']);
 
         Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
