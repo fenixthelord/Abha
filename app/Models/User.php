@@ -120,9 +120,16 @@ class User extends Authenticatable  implements Auditable
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function mangers()
+    // public function mangers()
+    // {
+    //     return $this->hasMany(Organization::class, 'manger_id');
+    // }
+    public function employees()
     {
         return $this->hasMany(Organization::class, 'manger_id');
+    }
+    public function organization() {
+        return $this->hasOne(Organization::class, 'employee_id');
     }
 
     public function scopeMangersInDepartment($query, $departmentId)
@@ -133,4 +140,6 @@ class User extends Authenticatable  implements Auditable
             });
         });
     }
+
+    
 }

@@ -52,7 +52,8 @@ return new class extends Migration
                 "name",
                 "parent_id",
             ]);
-            DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_insert');
-            DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_update');        });
+            // DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_insert');
+            // DB::unprepared('DROP TRIGGER IF EXISTS prevent_self_parent_update');
+        });
     }
 };

@@ -21,6 +21,8 @@ class UserResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             $this->mergeWhen(!$this->merge, [
+                "department_uuid" => $this->department?->uuid,
+                "department_name" => $this->department?->getTranslations("name"),
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'gender' => $this->gender,

@@ -140,6 +140,11 @@ return [
         ],
         'group_uuid' => [
             'exists' => 'المجموعة غير صالحة',
+        ],
+        'category_uuid' => [
+            "required" => "معرف الفئة مطلوب ",
+            "uuid" => "معرف الفئة غير صحيح" ,
+            "exists" => "معرف الفئة غير صحيح"
         ]
     ],
     'attributes' => [
@@ -167,5 +172,7 @@ return [
         'displayName' => 'اسم العرض',
         'description' => 'الوصف',
         'permission' => 'الصلاحية',
-        'role' => 'الدور',],
+        'role' => 'الدور',
+        "category_uuid" => "معرف الفئة"
+    ]
 ];
