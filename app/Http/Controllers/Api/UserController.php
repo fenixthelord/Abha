@@ -87,11 +87,11 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
             }
-            $user->gender = $request->gender ? $request->gender : $user->gender;
+            $user->gender = $request->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-            $user->image = $request->image ? $request->image : $user->image;
+            $user->image = $request->image;
             if ($request->has('password') && !empty($request->password)) {
                 if ($request->has('old_password')) {
                     if (Hash::check($request->old_password, $user->password)) {
@@ -161,11 +161,11 @@ class UserController extends Controller
                     $user->phone = $request->phone;
                     $user->otp_verified = false;
                 }
-                $user->gender = $request->gender ? $request->gender : $user->gender;
+                $user->gender = $request->gender;
                 $user->alt = $request->alt ? $request->alt : $user->alt;
                 $user->job = $request->job ? $request->job : $user->job;
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-                $user->image = $request->image ? $request->image : $user->image;
+                $user->image = $request->image;
                 if ($request->has('password') && !empty($request->password)) {
                     if ($request->has('old_password')) {
                         if (Hash::check($request->old_password, $user->password)) {

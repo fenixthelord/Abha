@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\Validator;
 
 class RoleAndPermissionController extends Controller
 {
-    use ResponseTrait;
-    public $translatable = ["displaying","description"];
+    use ResponseTrait, Paginate;
+
+    public $translatable = ["displaying", "description"];
+
     public function __construct()
     {
         // Apply middleware to all actions in this controller
@@ -25,16 +27,18 @@ class RoleAndPermissionController extends Controller
 
     }
 
-    public function index()
+    public function index(Request $request)
     {
-if(!auth()->user()->hasPermissionTo("role.show")){
-    return $this->Forbidden("you don't have permission to access this page");
-}
-
-            $roles = Role::where('name', '!=', 'Master')->get();
-
+        if (!auth()->user()->hasPermissionTo("role.show")) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
+        /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
-        return $this->returnData($data);
+        return $this->returnData($data);*/
+        $fields = ['displaying->ar','displaying->en'];
+        $roles = $this->allWithSearch(new Role(), $fields, $request,'name','Master','!=');
+        $date['roles'] = RolesResource::collection($roles);
+        return $this->PaginateData($date,$roles);
     }
 
     public function store(Request $request)
@@ -42,7 +46,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
-            if(!auth()->user()->hasPermissionTo("role.create")){
+            if (!auth()->user()->hasPermissionTo("role.create")) {
                 return $this->Forbidden("you don't have permission to access this page");
             }
             $validator = Validator::make($request->all(), [
@@ -55,7 +59,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ],messageValidation());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -89,12 +93,12 @@ $name=implode(".",$words);
             $role->save();
 
             if ($request->has('permission') && !empty($request->permission)) {
-                foreach($request->permission as $perm){
-                 $permission = Permission::where("name",$perm)->first();
-                    if($permission->is_admin == 1){
+                foreach ($request->permission as $perm) {
+                    $permission = Permission::where("name", $perm)->first();
+                    if ($permission->is_admin == 1) {
 
 
-                        return  $this->Forbidden("this is a Master permission you can not assign it to this role");
+                        return $this->Forbidden("this is a Master permission you can not assign it to this role");
                     }
                 }
                 $role->syncPermissions($request->permission);
@@ -115,7 +119,7 @@ $name=implode(".",$words);
             'permission' => 'nullable|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string'
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -156,7 +160,6 @@ $name=implode(".",$words);
     }
 
 
-
     public function assignRole(Request $request)
 
     {
@@ -167,7 +170,7 @@ $name=implode(".",$words);
             'role' => 'required|exists:roles,name',
 
             'user_uuid' => 'required|exists:users,uuid',
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -197,7 +200,7 @@ $name=implode(".",$words);
             'user_uuid' => 'required|exists:users,uuid',
             'permissions' => 'nullable'
 
-        ],messageValidation());
+        ], messageValidation());
         if ($validatedData->fails()) {
             return $this->returnValidationError($validatedData);
         }
@@ -282,7 +285,7 @@ $name=implode(".",$words);
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-        ],messageValidation());
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -321,7 +324,7 @@ $name=implode(".",$words);
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',
             'user_uuid' => 'required|exists:users,uuid',
-        ],messageValidation());
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -391,7 +394,7 @@ $name=implode(".",$words);
                 'group' => $request->group,
                 'is_admin' => $request->is_admin,
             ]);
-            $data['permission'] =  Permissionsresource::make($permission);
+            $data['permission'] = Permissionsresource::make($permission);
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $exception) {
@@ -411,7 +414,7 @@ $name=implode(".",$words);
             } else {
                 $permission['directed'] = $user->getDirectPermissions();
                 $permission['roll'] = $user->getPermissionsViaRoles();
-                $data['permission'] =  [
+                $data['permission'] = [
                     'directed' => PermissionsResource::collection($permission['directed']),
                     'roll' => PermissionsResource::collection($permission['roll'])
                 ];
@@ -431,12 +434,11 @@ $name=implode(".",$words);
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
             'roleName' => 'required|string|exists:roles,name',
-            'displaying.en' => 'string',
-            'displaying.ar' => 'string',
-            'description.ar' => 'string',
-
-            'description.en' => 'string',
-        ],messageValidation());
+            'displaying.en' => 'required|string',
+            'displaying.ar' => 'required|string',
+            'description.ar' => 'required|string',
+            'description.en' => 'required|string',
+        ], messageValidation());
 
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
@@ -475,7 +477,7 @@ $name=implode(".",$words);
                 if (!$permission) {
                     return $this->NotFound('Permission not found');
                 }
-                if ($permission->is_admin==true) {
+                if ($permission->is_admin == true) {
                     return $this->Forbidden("you are not allowed to add Master permission");
                 }
             }
@@ -497,7 +499,7 @@ $name=implode(".",$words);
                 return $this->Forbidden("you don't have permission to access this page");
             }
 
-                $permission = Permission::where('is_admin', false)->get();
+            $permission = Permission::where('is_admin', false)->get();
 
 
             $resource = new NewPermissionsResource($permission);
@@ -516,7 +518,7 @@ $name=implode(".",$words);
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
-        ],messageValidation());
+        ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -550,11 +552,13 @@ $name=implode(".",$words);
             return $this->returnError($exception->getMessage());
         }
     }
-    public function ShowRole(Request $request){
+
+    public function ShowRole(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'roleName' => 'required|exists:roles,name'
-        ]
-            );
+                'roleName' => 'required|exists:roles,name'
+            ]
+        );
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
@@ -563,17 +567,18 @@ $name=implode(".",$words);
 
             $roles = Role::findByName($request->roleName);
 
-        if (!$roles) {
-            return $this->NotFound('Role not found');
+            if (!$roles) {
+                return $this->NotFound('Role not found');
+            }
+
+            $data['role'] = RolesResource::make($roles)->withTranslate();
+
+            return $this->returnData($data);
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
         }
-
-       $data['role']=RolesResource::make($roles)->withTranslate();
-
-        return $this->returnData($data);
     }
-    catch (\Exception $exception){
-        return  $this->handleException($exception);}
-    }
+
     public function isMasterRole($roleName)
     {
         return str_starts_with($roleName, 'Master_');

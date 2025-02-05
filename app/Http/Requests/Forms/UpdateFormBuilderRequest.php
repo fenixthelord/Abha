@@ -39,17 +39,35 @@ class UpdateFormBuilderRequest extends FormRequest
                     ->where("category_id", $this->category_id)
             ],
 
-            'fields' => 'required|array|min:1',
+            'fields' => [
+                'required',
+                'array',
+                function ($attribute, $value, $fail) {
+                    $has_required_field = collect($value)->contains(function ($field) {
+                        return isset($field['required']) && ($field['required'] === true || $field['required'] === 1);
+                    });
+
+                    if (!$has_required_field) {
+                        $fail('At least one field must have "required" set to true.');
+                    }
+                }
+            ],
+
             'fields.*.label' => 'required|array|min:2|max:2',
             'fields.*.label.en' => 'required|string|max:255',
             'fields.*.label.ar' => 'required|string|max:255',
             'fields.*.placeholder' => 'required|array|min:2|max:2',
             'fields.*.placeholder.en' => 'required|string|max:255',
             'fields.*.placeholder.ar' => 'required|string|max:255',
-            'fields.*.type' => 'required|in:text,number,date,radio,checkbox,file',
+            'fields.*.type' => 'required|in:text,number,date,dropdown,radio,checkbox,file,map',
             'fields.*.required' => 'nullable|boolean',
             'fields.*.order' => 'required|numeric',
-            'fields.*.options'  => 'nullable|array', // For dropdown, radio, and checkbox types
+            'fields.*.options' => ['nullable', 'array', function ($attribute, $value, $fail) {
+                $type = request()->input(str_replace('options', 'type', $attribute));
+                if (($type === 'date' || $type == 'dropdown' || $type === 'radio' || $type == 'checkbox') && empty($value)) {
+                    return $fail('The options field is required for  $type input.');
+                }
+            }],
             'fields.*.options.*.label' => 'required|array|min:2|max:2',
             'fields.*.options.*.label.en' => 'required|string|max:255',
             'fields.*.options.*.label.ar' => 'required|string|max:255',
@@ -73,7 +91,7 @@ class UpdateFormBuilderRequest extends FormRequest
             'fields.*.placeholder.required' => 'Each form field must have a placeholder.',
             'fields.*.placeholder.en.required' => 'Each form field must have an English placeholder.',
             'fields.*.placeholder.ar.required' => 'Each form field must have an Arabic placeholder.',
-            'fields.*.type.in' => 'Invalid field type. Allowed types: text, number, date, dropdown, radio, checkbox, file.',
+            'fields.*.type.in' => 'Invalid field type. Allowed types: text, number, date, dropdown, radio, checkbox, file, map.',
             'fields.*.order.required' => 'Each form field must have an order.',
             'fields.*.order.numeric' => 'Each form field must have an order as number.',
             'fields.*.options.*.label.required' => 'Each field option must have a label.',
