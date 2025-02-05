@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class AddOrgRequest extends FormRequest
+class AllRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -27,11 +27,7 @@ class AddOrgRequest extends FormRequest
     {
         return [
             'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where('deleted_at', null)],
-            'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
-            'user_uuid' => [ 'required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
-            'position' => 'required|array',
-            'position.en' => 'required|string',
-            'position.ar' => 'required|string',
+
         ];
     }
     public function failedValidation($validator)

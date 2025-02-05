@@ -4,11 +4,11 @@ namespace App\Http\Requests\Organization;
 
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class AddOrgRequest extends FormRequest
+class ChartOrgRequest extends FormRequest
 {
+
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -26,14 +26,14 @@ class AddOrgRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where('deleted_at', null)],
-            'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where('deleted_at', null)],
-            'user_uuid' => [ 'required', Rule::exists('users', 'uuid')->where("deleted_at", null)],
-            'position' => 'required|array',
-            'position.en' => 'required|string',
-            'position.ar' => 'required|string',
+            "department_uuid" => [
+                "required",
+                "uuid",
+                "exists:departments,uuid,deleted_at,NULL"
+            ],
         ];
     }
+
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));

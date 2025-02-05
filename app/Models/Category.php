@@ -66,6 +66,6 @@ class Category extends Model implements Auditable
             })
             ->orWhereHas('parent', function ($query) use ($value) {
                 $query->where('name', 'like', '%' . $value . '%');
-            })  ;
+            });
     }
 }
