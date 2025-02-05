@@ -16,8 +16,8 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
         });
         Route::prefix('permissions')->group(function () {
             Route::get('/get', [RoleAndPermissionController::class, 'GetAllPermissions']);
-            Route::post('/create', [RoleAndPermissionController::class, 'CreatePermission']);
         });
+        Route::post('/permission/create', [RoleAndPermissionController::class, 'CreatePermission']);
         Route::post('role/sync', [RoleAndPermissionController::class, 'SyncPermission']);
         Route::prefix('users')->group(function () {
             Route::post('/roles', [RoleAndPermissionController::class, 'assignRole']);
