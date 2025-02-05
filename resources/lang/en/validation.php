@@ -10,6 +10,8 @@ return [
         ],
 
         'roleAndPerm' => [
+
+
             'failed_to_obtain_token' => 'Failed to obtain token',
             'role_created_successfully' => 'Role created successfully',
             'role_not_found' => 'Role not found',
@@ -40,12 +42,30 @@ return [
             'user_restore' => 'User restore successfully',
             'results' => 'No results found',
             'invalid_search' => 'Invalid search',
+            'user_not_deleted' => 'User Not Deleted',
+            'user_deleted_already' => 'User Deleted already',
+            'deleted_successfully' => 'User deleted successfully',
+            'master_can_not_be_deleted' => 'This user is Master and can not be deleted',
+            'can_not_be_activated_or_deactivated' => 'This user is Master account , it can not be activated or deactivated',
+            'user_is_deleted' => 'This user is deleted',
+            'old_password_wrong' => 'Old password is wrong',
+            'old_password_required' => 'Old password is required',
+            'master_account_can_not_updated' => 'This user is Master account and can not be updated',
+            'dont_have_permission_to_access' => 'you dont have permission to access this page',
         ],
 
         'firebase' => [
             'notification_failed' => 'Failed to send notification. FCM returned HTTP code: ',
             'failed_to_obtain_token' => 'Failed to obtain access token',
             'failed_to_send_notification' => 'Failed to send notification: ',
+        ],
+
+        'responseTrait' => [
+            'duplicate_entry_found' => 'Duplicate entry found',
+            'cannot_delete_or_update' => 'Cannot delete or update as it is referenced elsewhere',
+            'foreign_key_constraint_violation' => 'Foreign key constraint violation',
+            'category_cannot_parent' => 'A category cannot be its own parent',
+            'database_error' => 'Database error: ',
         ],
 
         'notifyGroup' => [

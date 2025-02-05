@@ -20,18 +20,16 @@ use Illuminate\Validation\Rule;
 use App\Http\Traits\Paginate;
 
 
-class UserController extends Controller
-{
+class UserController extends Controller {
 
     use FileUploader;
     use ResponseTrait;
     use Paginate;
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $user = auth()->user();
         if (!$user->hasPermissionTo('user.show')) {
-            return $this->Forbidden("you don't have permission to access this page");
+            return $this->Forbidden(__('validation.custom.userController.dont_have_permission_to_access'));
         }
         try {
 
@@ -55,8 +53,7 @@ class UserController extends Controller
         }
     }
 
-    public function Update(Request $request)
-    {
+    public function Update(Request $request) {
         DB::beginTransaction();
         try {
             $user = auth()->user();
@@ -98,10 +95,10 @@ class UserController extends Controller
                         $user->password = $request->password ? Hash::make($request->password) : null;
                         $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
                     } else {
-                        return $this->badRequest('Old password is wrong');
+                        return $this->badRequest(__('validation.custom.userController.old_password_wrong'));
                     }
                 } else {
-                    return $this->badRequest('Old password is required');
+                    return $this->badRequest(__('validation.custom.userController.old_password_required'));
                 }
             }
             $user->save();
@@ -114,8 +111,7 @@ class UserController extends Controller
         }
     }
 
-    public function updateAdmin(Request $request)
-    {
+    public function updateAdmin(Request $request) {
         $user = auth()->user();
         if (!$user->hasPermissionTo('user.update')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
@@ -130,7 +126,7 @@ class UserController extends Controller
             }
             if ($user = User::whereuuid($request->uuid)->first()) {
                 if ($user->hasRole("Master")) {
-                    return $this->Forbidden('This user is Master account and can not be updated');
+                    return $this->Forbidden(__('validation.custom.userController.master_account_can_not_updated'));
                 }
                 $validator = Validator::make($request->all(), [
                     'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -172,10 +168,10 @@ class UserController extends Controller
                             $user->password = $request->password ? Hash::make($request->password) : null;
                             $user->tokens()->delete();
                         } else {
-                            return $this->badRequest('Old password is wrong');
+                            return $this->badRequest(__('validation.custom.userController.old_password_wrong'));
                         }
                     } else {
-                        return $this->badRequest('Old password is required');
+                        return $this->badRequest(__('validation.custom.userController.old_password_required'));
                     }
                 }
                 $user->save();
@@ -195,14 +191,11 @@ class UserController extends Controller
         }
     }
 
-    public function active(Request $request)
-    {
+    public function active(Request $request) {
         $user = auth()->user();
         if (!$user->hasPermissionTo('user.restore')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
-
-
         try {
             $validator = Validator::make($request->all(), [
                 'uuid' => 'required|string|exists:users,uuid',
@@ -212,11 +205,11 @@ class UserController extends Controller
                 return $this->returnValidationError($validator);
             }
             if (User::whereuuid($request->uuid)->onlyTrashed()->first()) {
-                return $this->badRequest('This user is deleted');
+                return $this->badRequest(__('validation.custom.userController.user_is_deleted'));
             } else {
                 if ($user = User::whereuuid($request->uuid)->first()) {
                     if ($user->hasRole("Master")) {
-                        return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
+                        return $this->Forbidden(__('validation.custom.userController.can_not_be_activated_or_deactivated'));
                     }
                     $user->active = $request->active;
                     $user->save();
@@ -234,8 +227,7 @@ class UserController extends Controller
         }
     }
 
-    public function deleteUser(Request $request)
-    {
+    public function deleteUser(Request $request) {
         $current_user = auth()->user();
         if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
@@ -253,13 +245,13 @@ class UserController extends Controller
             $selected_user = User::whereuuid($request->uuid)->first();
             if ($selected_user){
                 if ($selected_user->hasRole("Master") || $selected_user->id == 1) {
-                    return $this->Forbidden('This user is Master and can not be deleted');
+                    return $this->Forbidden(__('validation.custom.userController.master_can_not_be_deleted'));
                 }
                 $selected_user->delete();
                 DB::commit();
-                return $this->returnSuccessMessage('User deleted successfully');
+                return $this->returnSuccessMessage(__('validation.custom.userController.deleted_successfully'));
             } else {
-                return $this->badRequest('User Deleted already.');
+                return $this->badRequest(__('validation.custom.userController.user_deleted_already'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -362,7 +354,7 @@ class UserController extends Controller
                 DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.userController.user_restore'));
             } else {
-                return $this->badRequest('User Not Deleted.');
+                return $this->badRequest(__('validation.custom.userController.user_not_deleted'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -422,8 +414,7 @@ class UserController extends Controller
         }
     }
 
-    public function verifyOtp(Request $request)
-    {
+    public function verifyOtp(Request $request) {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [

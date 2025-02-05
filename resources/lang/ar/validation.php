@@ -40,12 +40,30 @@ return [
             'user_restore' => 'تمت استعادة المستخدم بنجاح',
             'results' => 'لم يتم العثور على نتائج',
             'invalid_search' => 'بحث غير صالح',
+            'user_not_deleted' => 'لم يتم حذف المستخدم',
+            'user_deleted_already' => 'تم حذف المستخدم بالفعل',
+            'deleted_successfully' => 'تم حذف المستخدم بنجاح',
+            'master_can_not_be_deleted' => 'هذا المستخدم رئيسي ولا يمكن حذفه',
+            'can_not_be_activated_or_deactivated' => 'هذا المستخدم هو حساب رئيسي, ولا يمكن تفعيله أو الغاء تفعيله',
+            'user_is_deleted' => 'تم حذف هذا المستخدم',
+            'old_password_wrong' => 'كلمة المرور القديمة خاطئة',
+            'old_password_required' => 'كلمة المرور القديمة مطلوبة',
+            'master_account_can_not_updated' => 'هذا المستخدم هو حساب رئيسي ولا يمكن تحديثه',
+            'dont_have_permission_to_access' => 'ليس لديك اذن الوصول لهذه الصفحة',
         ],
 
         'firebase' => [
             'notification_failed' => 'فشل في إرسال الإشعار. رمز الحالة من FCM: ',
             'failed_to_obtain_token' => 'فشل في الحصول على رمز الوصول',
             'failed_to_send_notification' => 'فشل في إرسال الإشعار: ',
+        ],
+
+        'responseTrait' => [
+            'duplicate_entry_found' => 'تم العثور على ادخال مكرر',
+            'cannot_delete_or_update' => 'لا يمكن حذفه أو تحديثه كما هو مشار إليه في مكان آخر',
+            'foreign_key_constraint_violation' => 'انتهاك قيود المفتاح الخارجي',
+            'category_cannot_parent' => 'لا يمكن أن تكون الفئة الأصل الخاص بها',
+            'database_error' => 'خطأ في قاعدة البيانات: ',
         ],
 
         'notifyGroup' => [
