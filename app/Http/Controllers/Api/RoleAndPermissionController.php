@@ -46,7 +46,7 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 return $this->Forbidden("you don't have permission to access this page");
             }
             $validator = Validator::make($request->all(), [
-                'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
+
                 "displaying.en"=> "required|string|unique:roles,displaying",
                  "displaying.ar"=> "required|string|unique:roles,displaying",
 
@@ -63,18 +63,23 @@ if(!auth()->user()->hasPermissionTo("role.show")){
                 return $this->Forbidden("you are not allowed to create Master role");
             }
 
+            $words = explode(' ', $request->displaying['en']);
+
+$name=implode(".",$words);
+
+
+
             $user = auth()->user();
             if ($user->HasRole('Master')) {
-                $request->roleName = "Master_" . $request->roleName;
-             $role=Role::where('name',$request->roleName);
-             if ($role->exists()) {
-                    return $this->badRequest("this role name alredy in use");
-
-                }
+                $request->roleName = "Master_" . $name;
+                $role = Role::where('name', $name)->first();
+            }
+            if (Role::where('name', $name)->exists()) {
+                return $this->badRequest("This role name is already in use.");
             }
 
             $role = new Role([
-                'name' => $request->roleName,
+                'name' => $name,
 
             ]);
             foreach ($this->translatable as $field) {
