@@ -35,17 +35,17 @@ class ChangePasswordController extends Controller
             $user = User::where('email', $request->email)->first();
             // dd($user->otp_expires_at  );
             if ($user->otp_expires_at == null ? false : Carbon::now()->lessThan($user->otp_expires_at)) {
-                return $this->badRequest('OTP Not expired');
+                return $this->badRequest(__('validation.custom.forget_password.expired'));
             } elseif (Carbon::now()->isAfter($user->otp_expires_at)) {
                 $verificationCode = rand(100000, 999999);
                 $user->verify_code = $verificationCode;
                 $user->otp_expires_at = Carbon::now()->addMinutes(5);
                 $user->save();
                 Mail::to($user->email)->send(new OtpMail($verificationCode));
-                return $this->returnSuccessMessage('Verification code sent!');
+                return $this->returnSuccessMessage(__('validation.custom.forget_password.sent_code'));
             } else {
                 DB::rollBack();
-                return $this->returnError('You have to try again');
+                return $this->returnError(__('validation.custom.forget_password.error'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -78,11 +78,10 @@ class ChangePasswordController extends Controller
                     'otp_expires_at' => null
                 ]);
                 $user->tokens()->delete();
-
                 DB::commit();
-                return $this->returnSuccessMessage("Password changed and You've been logged out of all your sessions");
+                return $this->returnSuccessMessage(__('validation.custom.forget_password.done'));
             } else {
-                return $this->badRequest('The verification code is invalid!');
+                return $this->badRequest(__('validation.custom.forget_password.not_done'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
