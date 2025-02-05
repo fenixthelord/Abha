@@ -462,7 +462,7 @@ class UserController extends Controller
         }
     }
 
-    public function user_profile()
+    public function userProfile()
     {
         $user = auth()->user();
         $data = [
