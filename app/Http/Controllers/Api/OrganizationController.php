@@ -203,7 +203,7 @@ class OrganizationController extends Controller
 
             $data["organizations"] = OrganizationResource::collection($organization);
 
-            return $this->returnData($data);
+            return $this->PaginateData($data, $organization);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
