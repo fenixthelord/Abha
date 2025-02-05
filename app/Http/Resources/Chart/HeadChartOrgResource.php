@@ -28,14 +28,17 @@ class HeadChartOrgResource extends JsonResource
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "image" => $this->image,
-            "position" => $this->organization?->position?->getTranslations("name"),
+            // "position" => $this->organization?->position?->getTranslations("position"),
+            "position" => [
+                'en' => "head manger",
+                'ar' => "الرئيس"
+            ],
 
             'employees' => $this->whenLoaded('employees', function () {
                 return EmployeesChartOrgResource::collection(
                     $this
                         ->employees
                         ->each
-                        // ->employee
                         ->load('employee')
                 );
             }),

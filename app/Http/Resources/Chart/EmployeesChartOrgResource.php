@@ -22,7 +22,7 @@ class EmployeesChartOrgResource extends JsonResource
             "first_name" => $this->user?->first_name,
             "last_name" => $this->user?->last_name,
             "image" => $this->user?->image,
-            "position" => $this->organization?->position?->getTranslations("name"),
+            "position" => $this->getTranslations("position"),
 
             'employees' => $this->whenLoaded('employee', function () {
                 return EmployeesChartOrgResource::collection(

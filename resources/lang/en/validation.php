@@ -8,6 +8,112 @@ return [
             'unique' => 'This department already exists.',
             'uuid' => 'The UUID is invalid.',
         ],
+
+        'roleAndPerm' => [
+            'dont_have_permission' => 'you dont have permission to access this page',
+            'role_name_already_in_use' => 'This role name is already in use',
+            'not_allowed_create_Master_role' => 'you are not allowed to create Master role',
+            'role_name_already_use' => 'this role name already in use',
+            'master_permission' => 'this is a Master permission you can not assign it to this role',
+            'role_created_successfully' => 'Role created successfully',
+            'not_allowed_assign_permissions_to_role' => 'you are not allowed to assign permissions to this role',
+            'role_not_found' => 'Role not found',
+            'permission_not_found' => 'Permission not found',
+            'master_role_permission' => 'this is master role permission you can not assign it to this role',
+            'master_role_can_not_assign_user' => 'this is master role you can not assign it to this user',
+            'user_not_found' => 'User not found',
+            'role_has_been_assigned_successfully' => 'the role has been assigned successfully',
+            'forbidden_action' => 'You are not authorized to perform this action',
+            'permission_not_exist' => 'this permission does not exist',
+            'master_permission_user' => 'this is master permission you can not assign it to this user',
+            'permission_assigned_successfully' => 'Permission assigned successfully',
+            'master_role_cannot_remove_from_Master' => 'this is master role, you can not remove it from Master',
+            'role_removed_successfully' => 'Role removed successfully',
+            'role_not_exist' => 'this role does not exist',
+            'not_allowed_remove_permissions_to_this_role' => 'you are not allowed to remove permissions to this role',
+            'cannot_update_Master_role' => 'You cannot update the Master role',
+            'not_allowed_update_role' => 'you are not allowed to update this role',
+            'not_allowed_add_Master_permission' => 'you are not allowed to add Master permission',
+            'master_role_cannot_be_deleted' => 'Master role cannot be deleted',
+            'master_cannot_be_deleted' => 'you cannot delete  Master',
+            'role_deleted_successfully' => 'Role deleted successfully',
+            //
+            'failed_to_obtain_token' => 'Failed to obtain token',
+            'role_assigned_successfully' => 'Role assigned successfully',
+            'permission_removed_successfully' => 'Permission removed successfully',
+            'master_permission_cannot_be_assigned' => 'Master permission cannot be assigned',
+            'validation_error' => 'Validation error',
+
+        ],
+
+        'userController' => [
+            'user_not_found' => 'User not found',
+            'invalid_page' => 'Invalid page number',
+            'permission_denied' => "You don't have permission to access this page",
+            'user_activated' => 'User activated successfully',
+            'user_deactivated' => 'User deactivated successfully',
+            'image_uploaded' => 'Image uploaded successfully',
+            'otp_sent' => 'OTP sent successfully',
+            'otp_verified' => 'OTP verified successfully',
+            'invalid_otp' => 'Invalid OTP Or Expired',
+            'otp_expired' => 'OTP Not expired',
+            'user_restore' => 'User restore successfully',
+            'results' => 'No results found',
+            'invalid_search' => 'Invalid search',
+            'user_not_deleted' => 'User Not Deleted',
+            'user_deleted_already' => 'User Deleted already',
+            'deleted_successfully' => 'User deleted successfully',
+            'master_can_not_be_deleted' => 'This user is Master and can not be deleted',
+            'can_not_be_activated_or_deactivated' => 'This user is Master account , it can not be activated or deactivated',
+            'user_is_deleted' => 'This user is deleted',
+            'old_password_wrong' => 'Old password is wrong',
+            'old_password_required' => 'Old password is required',
+            'master_account_can_not_updated' => 'This user is Master account and can not be updated',
+            'dont_have_permission_to_access' => 'you dont have permission to access this page',
+        ],
+
+        'firebase' => [
+            'notification_failed' => 'Failed to send notification. FCM returned HTTP code: ',
+            'failed_to_obtain_token' => 'Failed to obtain access token',
+            'failed_to_send_notification' => 'Failed to send notification: ',
+        ],
+
+        'responseTrait' => [
+            'duplicate_entry_found' => 'Duplicate entry found',
+            'cannot_delete_or_update' => 'Cannot delete or update as it is referenced elsewhere',
+            'foreign_key_constraint_violation' => 'Foreign key constraint violation',
+            'category_cannot_parent' => 'A category cannot be its own parent',
+            'database_error' => 'Database error: ',
+        ],
+
+        'notifyGroup' => [
+            'group_created' => 'Group created successfully',
+            'group_not_found' => 'Group not found',
+            'users_added' => 'Users added to notify group successfully',
+            'users_removed' => 'Users removed from notify group successfully',
+            'notifications_sent' => 'Notifications sent successfully',
+            'failed_to_send_notifications' => 'Failed to send notifications',
+            'group_deleted' => 'Notify group deleted successfully',
+            'failed_to_retrieve_groups' => 'Failed to retrieve notify groups: ',
+            'no_users_in_group' => 'Group does not have users',
+            'no_device_tokens' => 'No device tokens found for this notify group',
+            'validation_failed' => 'Validation failed',
+        ],
+
+        'language' => [
+            'lang_success' => 'Language changed successfully',
+        ],
+
+        'notification' => [
+            'notification_sent_success' => 'Notifications sent successfully!',
+            'notification_sent_fail' => 'Failed to send notifications.',
+            'device_token_saved' => 'Device Token saved successfully.',
+            'no_device_tokens' => 'No device tokens found for the specified users or group.',
+            'invalid_page_number' => 'Invalid page number.',
+            'user_not_found' => 'User not found.',
+            'validation_error' => 'Validation error.',
+        ],
+
         'name' => [
             'required' => 'The name field is required.',
             'array' => 'The name must be sent as an array.',
@@ -63,6 +169,13 @@ return [
             'regex' => 'It must contain at least one lowercase letter, one uppercase letter, and one number.',
             'confirmed' => 'Password does not match.',
         ],
+
+        'category' => [
+            'category_deleted' => 'Category and all related subcategories were deleted successfully.',
+            'category_updated' => 'Categories updated successfully.',
+            'category_created' => 'Categories created successfully.',
+        ],
+
         'user' => [
             'required' => 'Email is required.',
         ],
@@ -121,6 +234,26 @@ return [
         'role' => [
             'required' => 'Role is required.',
             'exists' => 'This role does not exist.',
+        ],
+        'forget_password' => [
+            'sent_code' => 'otp send successfully.',
+            'error' => 'try again later.',
+            'expired' => 'otp not expired.',
+            'done' => 'change password successfully and logout from all devices.',
+            'not_done' => 'the verification code is not valid.',
+        ],
+        'auth' => [
+            'permission' => 'you are not allowed to access this page.',
+            'failed' => 'email or password is wrong.',
+            'deleted' => 'this account is deleted.',
+            'logout' => 'loged out.',
+        ],
+        'department' => [
+            'notfound' => 'department not found.',
+            'try' => 'try again.',
+            'done' => 'department added successfully.',
+            'deleted' =>'department already deleted.',
+            'delete' => 'department deleted successfully.',
         ],
     ],
 

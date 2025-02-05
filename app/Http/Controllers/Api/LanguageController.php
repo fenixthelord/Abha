@@ -17,7 +17,7 @@ class LanguageController extends Controller
             }
             app()->setLocale($locale);
 
-            return $this->returnSuccessMessage('Language changed successfully');
+            return $this->returnSuccessMessage(__('validation.custom.language.lang_success'));
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

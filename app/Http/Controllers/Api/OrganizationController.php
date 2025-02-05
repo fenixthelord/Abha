@@ -7,6 +7,7 @@ use App\Http\Requests\Organization\AddOrgRequest;
 use App\Http\Requests\Organization\AllRequest;
 use App\Http\Requests\Organization\ChartOrgRequest;
 use App\Http\Requests\Organization\EditOrgRequest;
+use App\Http\Requests\Organization\FilterOrgRequest;
 use App\Http\Requests\Organization\MangerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\Chart\HeadChartOrgResource;
@@ -33,13 +34,12 @@ class OrganizationController extends Controller
             $department = Department::where('uuid', $request->department_uuid)->pluck('id')->first();
             $manger = User::whereuuid($request->manger_uuid)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
-            if(!in_array($manger, $employee)) {
+            if (!in_array($manger, $employee)) {
                 $employee[] = $manger;
             }
             $user = User::where('department_id', $department)->whereNotin('id', $employee)->get();
             $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
-
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
         }
@@ -117,7 +117,6 @@ class OrganizationController extends Controller
 
             $data['organization'] = new OrganizationResource($orgUser);
             return $this->returnData($data);
-
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
@@ -165,11 +164,9 @@ class OrganizationController extends Controller
             $orgUser->save();
             $data['organization'] = new OrganizationResource($orgUser);
             return $this->returnData($data);
-
         } catch (\Exception $exception) {
             return $this->handleException($exception);
         }
-
     }
 
 
@@ -206,28 +203,20 @@ class OrganizationController extends Controller
 
             $data["organizations"] = OrganizationResource::collection($organization);
 
-            return $this->returnData($data);
+            return $this->PaginateData($data, $organization);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function filter(Request $request)
+    public function filter(FilterOrgRequest $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                "department_uuid" => [
-                    "required",
-                    "uuid",
-                    Rule::exists('departments', 'uuid')->where("deleted_at", null)
-                ]
-            ]);
-            if ($validator->fails()) {
-                return $this->returnValidationError($validator);
-            }
-            $departmentId = Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail();
-            $mangers = User::query()
-                ->MangersInDepartment($departmentId)->get();
+            
+            $mangersIDs = Organization::query()->onlyHeadMangers(
+                Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail()
+            );
+            $mangers = User::whereIn("id", $mangersIDs)->get();
 
             $data["mangers"] = UserResource::collection($mangers)->each->onlyName();
             return $this->returnData($data);
@@ -265,9 +254,7 @@ class OrganizationController extends Controller
                 Department::where("uuid", $request->department_uuid)->pluck("id")->firstOrFail()
             );
 
-            // dd($mangersIDs);
             $mangers = User::whereIn("id", $mangersIDs)->get();
-            // dd($mangers);
             $data["chart"] = HeadChartOrgResource::collection($mangers->load("employees"));
 
             return $this->returnData($data);
