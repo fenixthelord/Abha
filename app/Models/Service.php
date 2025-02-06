@@ -37,4 +37,8 @@ class Service extends Model implements Auditable {
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+    public function services () 
+    {
+        return $this->hasMany(Service::class);
+    }
 }

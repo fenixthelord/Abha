@@ -207,6 +207,9 @@ Route::group(["prefix" => "/db"], function () {
 Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
 
 Route::group(["prefix" => "/event"], function () {
-   Route::post('/', [EventController::class, 'list']); 
+   Route::get('/', [EventController::class, 'list']); 
+//    Route::get('/show/{id}', [EventController::class, 'showEvent']);
    Route::post('/create', [EventController::class, 'createEvent']); 
+   Route::put('/update/{id}', [EventController::class, 'updateEvent']); 
+   Route::delete('/delete/{id}', [EventController::class, 'createEvent']); 
 });
