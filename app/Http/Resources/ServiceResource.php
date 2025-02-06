@@ -15,15 +15,13 @@ class ServiceResource extends JsonResource
     public function toArray(Request $request) {
         return [
             'uuid' => $this->id,
-            'name' => $this->name,
-            'details' => $this->details,
+            'name' => $this->getTranslations('name'),
+            'details' => $this->getTranslations('details'),
             'image' => $this->image,
             'department' => [
                 'uuid' => $this->department->uuid ?? null,
                 'name' => $this->department->name ?? null,
             ],
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }

@@ -208,8 +208,8 @@ Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
 
 Route::prefix('services')->group(function () {
     Route::get('/', [ServiceController::class, 'index']);
-    Route::get('/{uuid}', [ServiceController::class, 'show']);
-    Route::post('/', [ServiceController::class, 'store']);
-    Route::put('/{uuid}', [ServiceController::class, 'update']);
-    Route::delete('/{uuid}', [ServiceController::class, 'destroy']);
+    Route::get('/{uuid}', [ServiceController::class, 'show']); //done
+    Route::post('/add', [ServiceController::class, 'store']); //done
+    Route::put('/update/{uuid}', [ServiceController::class, 'update']); //done
+    Route::delete('/delete/{uuid}', [ServiceController::class, 'destroy']);
 });
