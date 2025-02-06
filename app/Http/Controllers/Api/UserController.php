@@ -87,7 +87,7 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
             }
-            $user->gender = $request->gender;
+            $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
@@ -161,7 +161,7 @@ class UserController extends Controller
                     $user->phone = $request->phone;
                     $user->otp_verified = false;
                 }
-                $user->gender = $request->gender;
+                $user->gender = $request->gender ? $request->gender : $user->gender;
                 $user->alt = $request->alt ? $request->alt : $user->alt;
                 $user->job = $request->job ? $request->job : $user->job;
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
@@ -267,7 +267,8 @@ class UserController extends Controller
         }
     }
 
-    public function oldSearch(Request $request) {
+    public function oldSearch(Request $request)
+    {
         DB::beginTransaction();
         try {
             $pageNumber = request()->input('page', 1);
@@ -451,7 +452,8 @@ class UserController extends Controller
         }
     }
 
-    public function user_profile() {
+    public function userProfile()
+    {
         $user = auth()->user();
         $data = [
             'user' => UserResource::make($user),
