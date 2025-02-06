@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
 use App\Http\Controllers\Api\OrganizationController;
-
+use App\Http\Controllers\Api\ServiceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -204,3 +204,12 @@ Route::group(["prefix" => "/db"], function () {
 });
 
 Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
+
+
+Route::prefix('services')->group(function () {
+    Route::get('/', [ServiceController::class, 'index']);
+    Route::get('/{uuid}', [ServiceController::class, 'show']);
+    Route::post('/', [ServiceController::class, 'store']);
+    Route::put('/{uuid}', [ServiceController::class, 'update']);
+    Route::delete('/{uuid}', [ServiceController::class, 'destroy']);
+});

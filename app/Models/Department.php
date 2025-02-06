@@ -48,4 +48,10 @@ class Department extends Model implements Auditable
     {
         return $this->hasMany(User::class, "department_id");
     }
+
+
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'department_id');
+    }
 }

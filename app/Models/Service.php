@@ -13,8 +13,7 @@ use Spatie\Translatable\HasTranslations;
 class Service extends Model implements Auditable {
     use HasFactory, SoftDeletes, AuditingTrait, HasTranslations;
 
-    protected $table = 'services'; protected $primaryKey = 'id'; public $incrementing = false; protected $keyType = 'string';
-
+    protected $table = 'services';
 
     public $translatable = ['name', 'details'];
 
