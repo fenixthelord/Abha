@@ -7,7 +7,7 @@ use App\Http\Resources\ServiceResource;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Http\Traits\ResponseTrait;
-use App\Http\Traits\Paginate;
+use App\Http\Traits\PaginateTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
