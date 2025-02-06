@@ -19,7 +19,8 @@ class User extends Authenticatable  implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasAutoPermissions;
 
-
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -35,7 +36,6 @@ class User extends Authenticatable  implements Auditable
         'image',
         'alt',
         'gender',
-        'uuid',
         'otp_code',
         'job',
         'job_id',
@@ -81,7 +81,7 @@ class User extends Authenticatable  implements Auditable
     public function transformAudit(array $data): array
     {
         // Include user details in the audit metadata
-        $data['user_uuid'] = $this->uuid; // Store the user's UUID
+        $data['user_id'] = $this->id; // Store the user's UUID
         $data['user_full_name'] = "{$this->first_name} {$this->last_name}"; // Store the user's full name
 
         // Include additional details (optional)
@@ -91,15 +91,6 @@ class User extends Authenticatable  implements Auditable
         return $data;
     }
 
-    // Automatically generate UUID when creating a new NotifyGroup
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = Str::uuid();
-        });
-    }
     protected $auditExclude = [
         'password',
     ];
@@ -107,7 +98,7 @@ class User extends Authenticatable  implements Auditable
     // Relationship with notify groups
     public function groups()
     {
-        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_uuid', 'notify_group_uuid', 'uuid', 'uuid');
+        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_id', 'notify_group_id', 'id', 'id');
     }
 
     // Relationship with device tokens
@@ -128,7 +119,8 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manger_id');
     }
-    public function organization() {
+    public function organization()
+    {
         return $this->hasOne(Organization::class, 'employee_id');
     }
 
@@ -141,5 +133,13 @@ class User extends Authenticatable  implements Auditable
         });
     }
 
-    
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = Str::uuid();
+            }
+        });
+    }
 }

@@ -2,32 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
 
-class Category extends Model implements Auditable
+class Category extends BaseModel implements Auditable
 {
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
 
     private $translatable = ['name'];
 
-    protected $fillable = [
-        "uuid",
-        "name",
-        "parent_id",
-        "department_id",
-    ];
+    protected $fillable = ["name", "parent_id",  "department_id"];
 
-    protected static function boot()
+    public function forms()
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = \Str::uuid();
-        });
+        return $this->morphMany(Form::class, 'formable');
     }
 
     public function children()
@@ -56,6 +47,7 @@ class Category extends Model implements Auditable
 
         $this->delete();
     }
+
     public function scopeWithSearch($query, $value)
     {
         return $query

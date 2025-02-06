@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('details')->nullable();
             $table->string('image')->nullable();
-            $table->unsignedBigInteger('department_id');
-            $table->foreign("department_id")->references("id")->on("departments")->onDelete("cascade");
+            $table->foreignUuid('department_id')->constrained('departments')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

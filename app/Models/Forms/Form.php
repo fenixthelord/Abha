@@ -17,9 +17,9 @@ class Form extends BaseModel
     private $translatable = ['name'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
-    public function category(): BelongsTo
+    public function formable()
     {
-        return $this->belongsTo(Category::class);
+        return $this->morphTo();
     }
 
     public function fields(): HasMany

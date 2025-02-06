@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('device_tokens', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('token')->unique();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

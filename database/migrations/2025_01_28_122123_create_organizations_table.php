@@ -12,18 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('organizations', function (Blueprint $table) {
-            $table->id();
-            $table->uuid();
-
-            $table->unsignedBigInteger("department_id");
-            $table->foreign("department_id")->references("id")->on("departments")->onDelete("cascade");
-
-            $table->unsignedBigInteger("manger_id")->nullable();
-            $table->foreign("manger_id")->references("id")->on("users")->onDelete("cascade");
-
-            $table->unsignedBigInteger("employee_id");
-            $table->foreign("employee_id")->references("id")->on("users")->onDelete("cascade");
-
+            $table->uuid('id')->primary();
+            $table->foreignUuid('department_id')->constrained('departments')->onDelete('cascade');
+            $table->foreignUuid('manger_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('employee_id')->constrained('users')->onDelete('cascade');
             $table->string("position", 500)->nullable();
             $table->softDeletes();
             $table->timestamps();

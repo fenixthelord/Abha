@@ -23,15 +23,6 @@ class Organization extends Model  implements Auditable
         "position",
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = Str::uuid();
-        });
-    }
-
     public function department()
     {
         return $this->belongsTo(Department::class);
@@ -49,9 +40,9 @@ class Organization extends Model  implements Auditable
         return $this->hasMany(Organization::class, 'manger_id');
     }
 
-    public function User() {
+    public function User()
+    {
         return $this->belongsTo(User::class, 'employee_id');
-    
     }
 
     // public function 
@@ -72,6 +63,7 @@ class Organization extends Model  implements Auditable
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             });
     }
+
     public function scopeOnlyHeadMangers($query, $departmentId)
     {
 

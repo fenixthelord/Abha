@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\Paginate;
 
-class NotificationController extends Controller {
+class NotificationController extends Controller
+{
     use Firebase, ResponseTrait, Paginate;
-    public function sendNotification(Request $request) {
+    public function sendNotification(Request $request)
+    {
         global $status;
         DB::beginTransaction();
 
@@ -29,8 +31,8 @@ class NotificationController extends Controller {
                 'image' => 'nullable|string',
                 'data' => 'nullable|array',
                 'group_uuid' => 'nullable|exists:notify_groups,uuid',
-                'user_uuids' => 'nullable|array',
-                //'user_uuids.*' => 'exists:users,uuid',
+                'user_ids' => 'nullable|array',
+                //'user_ids.*' => 'exists:users,id',
             ]);
 
             // Fetch device tokens
@@ -47,8 +49,8 @@ class NotificationController extends Controller {
                 $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
                 $userIds = $group->users()->pluck('users.id');
                 $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
-            } elseif ($request->has('user_uuids')) {
-                if ($request->user_uuids[0] == '*') {
+            } elseif ($request->has('user_ids')) {
+                if ($request->user_ids[0] == '*') {
                     $this->store($request);
                     User::chunk(100, function ($users) use ($content) {
                         foreach ($users as $user) {
@@ -60,7 +62,7 @@ class NotificationController extends Controller {
                         ? $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'))
                         : $this->returnError(__('validation.custom.notification.notification_sent_fail'));
                 } else {
-                    $userIds = User::whereIn('uuid', $request->input('user_uuids'))->pluck('id');
+                    $userIds = User::whereIn('uuid', $request->input('user_ids'))->pluck('id');
                 }
 
                 $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
@@ -83,15 +85,16 @@ class NotificationController extends Controller {
         }
     }
 
-    public function saveDeviceToken(Request $request) {
+    public function saveDeviceToken(Request $request)
+    {
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string',
-            'user_uuid' => 'nullable|exists:users,uuid',
+            'user_id' => 'nullable|exists:users,uuid',
         ]);
 
         try {
-            $user = User::where('uuid', $request->input('user_uuid'))->first();
+            $user = User::where('uuid', $request->input('user_id'))->first();
             DeviceToken::firstOrCreate([
                 'token' => $request->input('token'),
                 'user_id' => $user->id,
@@ -104,9 +107,10 @@ class NotificationController extends Controller {
         }
     }
 
-    public function allNotification(Request $request) {
+    public function allNotification(Request $request)
+    {
         try {
-/*            $pageNumber = $request->input('page', 1);
+            /*            $pageNumber = $request->input('page', 1);
             $perPage = $request->input("perPage", 10);
 
             $validator = Validator::make($request->all(), [
@@ -128,16 +132,17 @@ class NotificationController extends Controller {
                 'previous_page' => $notifications->previousPageUrl(),
                 'total_pages' => $notifications->lastPage(),
             ];*/
-            $fields = ['title','description'];
+            $fields = ['title', 'description'];
             $notification = $this->allWithSearch(new Notification(), $fields, $request);
             $data['notification'] = NotificationResource::collection($notification);
-            return $this->PaginateData($data,$notification);
+            return $this->PaginateData($data, $notification);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -165,21 +170,21 @@ class NotificationController extends Controller {
             if (NotifyGroup::whereuuid($request->group_uuid)) {
                 $notification->recipients()->create([
                     'recipient_type' => 'group',
-                    'recipient_uuid' => $request->group_uuid,
+                    'recipient_id' => $request->group_uuid,
                 ]);
             }
         }
-        if ($request['user_uuids']) {
-            $recipient = $request['user_uuids'];
+        if ($request['user_ids']) {
+            $recipient = $request['user_ids'];
             if ($recipient[0] == '*') {
                 $notification->for_all = true;
                 $notification->save();
             } else {
-                foreach ($request['user_uuids'] as $recipient) {
+                foreach ($request['user_ids'] as $recipient) {
                     if (User::whereuuid($recipient)) {
                         $notification->recipients()->create([
                             'recipient_type' => 'user',
-                            'recipient_uuid' => $recipient
+                            'recipient_id' => $recipient
                         ]);
                     }
                 }
@@ -189,7 +194,8 @@ class NotificationController extends Controller {
         return $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'));
     }
 
-    private function processRecipient(Notification $notification, string $recipient) {
+    private function processRecipient(Notification $notification, string $recipient)
+    {
         if ($recipient == '*') {
             $notification->for_all = true;
             $notification->save();
@@ -209,10 +215,11 @@ class NotificationController extends Controller {
 
         $notification->recipients()->create([
             'recipient_type' => $type,
-            'recipient_uuid' => $uuid
+            'recipient_id' => $uuid
         ]);
     }
-    public function getUserNotifications(Request $request) {
+    public function getUserNotifications(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'perPage' => 'nullable|integer|min:9',
@@ -228,18 +235,18 @@ class NotificationController extends Controller {
                     ->orwhereHas('recipients', function ($query) use ($user) {
                         $query->where(function ($q) use ($user) {
                             $q->where('recipient_type', 'user')
-                                ->where('recipient_uuid', $user->uuid);
+                                ->where('recipient_id', $user->id);
                         })
                             ->orWhere(function ($q2) use ($user) {
                                 $q2->where('recipient_type', 'group')
-                                    ->whereIn('recipient_uuid', $user->groups()->pluck('uuid'));
+                                    ->whereIn('recipient_id', $user->groups()->pluck('id'));
                             });
                     })->with('recipients')->paginate($perPage, ['*'], 'page', $pageNumber);
                 if ($pageNumber > $notifications->lastPage() || $pageNumber < 1 || $perPage < 1) {
                     return $this->badRequest('Invalid page number');
                 }
                 $data['users'] = NotificationResource::collection($notifications);
-                return $this->PaginateData($data , $notifications );
+                return $this->PaginateData($data, $notifications);
             } else {
                 return $this->badRequest(__('validation.custom.notification.user_not_found'));
             }
