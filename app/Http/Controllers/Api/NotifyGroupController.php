@@ -16,13 +16,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Traits\Paginate;
-class NotifyGroupController extends Controller
-{
+class NotifyGroupController extends Controller {
     use Firebase, ResponseTrait, Paginate;
 
     // Create a new notify group
-    public function createNotifyGroup(Request $request)
-    {
+    public function createNotifyGroup(Request $request) {
         DB::beginTransaction();
         try {
             $request->validate([
@@ -33,7 +31,7 @@ class NotifyGroupController extends Controller
                 'description.en' => 'required|string',
                 'description.ar' => 'required|string',
                 'user_uuids' => 'required|array',
-                'user_uuids.*' => 'exists:users,uuid',
+       //         'user_uuids.*' => 'exists:users,uuid',
             ]);
             $notifyGroup = NotifyGroup::create([
                 'name' => $request->input('name'),
@@ -50,21 +48,20 @@ class NotifyGroupController extends Controller
     }
 
     // Add users to a notify group
-    public function addUsersToNotifyGroup(Request $request, $notifyGroupUuid)
-    {
+    public function addUsersToNotifyGroup(Request $request, $notifyGroupUuid) {
         try {
             DB::beginTransaction();
             $request->validate([
                 'user_uuids' => 'required|array',
-                'user_uuids.*' => 'exists:users,uuid',
+     //           'user_uuids.*' => 'exists:users,uuid',
             ]);
 
             if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
                 $notifyGroup->users()->syncWithoutDetaching($request->input('user_uuids'));
                 DB::commit();
-                return $this->returnSuccessMessage('Users added to notify group successfully');
+                return $this->returnSuccessMessage(__('validation.custom.notifyGroup.users_added'));
             } else {
-                return $this->badRequest('Group not found');
+                return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
             }
         } catch (Exception $e) {
             DB::rollBack();
@@ -73,8 +70,7 @@ class NotifyGroupController extends Controller
     }
 
     // Remove users from a notify group
-    public function removeUsersFromNotifyGroup(Request $request, $notifyGroupUuid)
-    {
+    public function removeUsersFromNotifyGroup(Request $request, $notifyGroupUuid) {
         try {
             DB::beginTransaction();
             $request->validate([
@@ -84,9 +80,9 @@ class NotifyGroupController extends Controller
             if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
                 $notifyGroup->users()->detach($request->input('user_uuids'));
                 DB::commit();
-                return $this->returnSuccessMessage('Users removed from notify group successfully');
+                return $this->returnSuccessMessage(__('validation.custom.notifyGroup.users_removed'));
             } else {
-                return $this->badRequest('Group not found');
+                return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
             }
         } catch (Exception $e) {
             DB::rollBack();
@@ -95,18 +91,17 @@ class NotifyGroupController extends Controller
     }
 
     // Send notification to a notify group
-    public function sendNotificationToNotifyGroup(Request $request, $notifyGroupUuid)
-    {
+    public function sendNotificationToNotifyGroup(Request $request, $notifyGroupUuid) {
         if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
 
             $userIds = $notifyGroup->users()->pluck('users.id');
             if (!$userIds) {
-                return $this->badRequest('Group does not  have user');
+                return $this->badRequest(__('validation.custom.notifyGroup.no_users_in_group'));
             }
             $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
 
             if (empty($tokens)) {
-                return $this->badRequest('No device tokens found for this notify group.');
+                return $this->badRequest(__('validation.custom.notifyGroup.no_device_tokens'));
             }
 
             $content = [
@@ -121,18 +116,16 @@ class NotifyGroupController extends Controller
                 (new NotificationController())->store($request);
                 $status = $this->HandelDataAndSendNotify($tokens, $content);
                 return $status
-                    ? $this->returnSuccessMessage('Notifications sent successfully!')
-                    : $this->returnError('Failed to send notifications.');
+                    ? $this->returnSuccessMessage(__('validation.custom.notifyGroup.notifications_sent'))
+                    : $this->returnError(__('validation.custom.notifyGroup.failed_to_send_notifications'));
             } catch (\Exception $e) {
                 return $this->returnError($e->getMessage());
             }
         } else {
-            return $this->badRequest('Group not found');
+            return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
         }
     }
-
-    public function allGroup(Request $request)
-    {
+    public function allGroup(Request $request) {
         try {
             /*$perPage = request()->input('perPage', 10);
             $pageNumber = request()->input('page', 1);
@@ -157,27 +150,25 @@ class NotifyGroupController extends Controller
 
    //         return $this->PaginateData($data, $notifyGroups);
         } catch (\Exception $e) {
-            return $this->returnError('Failed to retrieve notify groups: ' . $e->getMessage());
+            return $this->returnError(__('validation.custom.notifyGroup.failed_to_retrieve_groups : ') . $e->getMessage());
         }
     }
 
-    public function groupDetail($groupUuid)
-    {
+    public function groupDetail($groupUuid) {
         try {
             if ($group = NotifyGroup::where('uuid', $groupUuid)->first()) {
                 $data['group'] = GroupResource::make($group);
   //              $data['members'] = UserResource::collection($group->users);
                 return $this->returnData($data);
             } else {
-                return $this->badRequest('Group not found');
+                return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
             }
         } catch (Exception $e) {
             return $this->badRequest($e->getMessage());
         }
     }
 
-    public function editGroup(Request $request, $groupUuid)
-    {
+    public function editGroup(Request $request, $groupUuid) {
         DB::beginTransaction();
         try {
             if ($group = NotifyGroup::whereuuid($groupUuid)->first()) {
@@ -203,7 +194,7 @@ class NotifyGroupController extends Controller
                 DB::commit();
                 return $this->returnData('group', GroupResource::make($group));
             } else {
-                return $this->badRequest('Group not found');
+                return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
             }
         } catch (Exception $e) {
             DB::rollBack();
@@ -211,8 +202,7 @@ class NotifyGroupController extends Controller
         }
     }
 
-    public function deleteNotifyGroup(Request $request, $notifyGroupUuid)
-    {
+    public function deleteNotifyGroup(Request $request, $notifyGroupUuid) {
         try {
             DB::beginTransaction();
             $validated = Validator::make(['notifyGroupId' => $notifyGroupUuid], [
@@ -225,9 +215,9 @@ class NotifyGroupController extends Controller
                 $notifyGroup->users()->delete();
                 $notifyGroup->delete();
                 DB::commit();
-                return $this->returnSuccessMessage('Notify group Deleted successfully');
+                return $this->returnSuccessMessage(__('validation.custom.notifyGroup.group_deleted'));
             } else {
-                return $this->badRequest('Group not found');
+                return $this->badRequest(__('validation.custom.notifyGroup.group_not_found'));
             }
         } catch (Exception $e) {
             DB::rollBack();

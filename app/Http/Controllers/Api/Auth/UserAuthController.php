@@ -29,7 +29,7 @@ class UserAuthController extends Controller
     {
         $user = auth()->user();
         if (!$user->hasPermissionTo("user.create")) {
-            return $this->Forbidden("you don't have permission");
+            return $this->Forbidden(__('validation.custom.auth.permission'));
         }
         DB::beginTransaction();
         try {
@@ -78,7 +78,7 @@ class UserAuthController extends Controller
                 if ($request->role != "Master") {
                     $user->syncRoles($request->role);
                 } else {
-                    $user->assignRole('employee');
+                    $user->assignRole('Master_employee');
                 }
             }
             if ($user) {
@@ -114,7 +114,7 @@ class UserAuthController extends Controller
                     function ($attribute, $value, $fail) {
                         $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
                         if (!User::where($field, $value)->exists()) {
-                            $fail("email or phone or password false.");
+                            $fail(__('validation.custom.auth.failed'));
                         }
                     }
                 ],
@@ -125,10 +125,10 @@ class UserAuthController extends Controller
             }
             $username = filter_var($request->user, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
             if (User::where($username, $request->user)->onlyTrashed()->first()) {
-                return $this->badRequest('this user is deleted');
+                return $this->badRequest(__('validation.custom.auth.deleted'));
             } elseif ($user = User::where($username, $request->user)->first()) {
                 if (!$user || !Hash::check($request->password, $user->password)) {
-                    return $this->Unauthorized('email or phone or password false');
+                    return $this->Unauthorized(__('validation.custom.auth.failed'));
                 } else {
                     //               event(new UserLogin($user));
                     $data['user'] = UserResource::make($user);
@@ -155,7 +155,7 @@ class UserAuthController extends Controller
                     return $this->returnData($data);
                 }
             } else {
-                return $this->Unauthorized('email or phone or password false');
+                return $this->Unauthorized(__('validation.custom.auth.failed'));
             }
         } catch (\Exception $ex) {
 
@@ -170,7 +170,7 @@ class UserAuthController extends Controller
 
             $request->user()->currentAccessToken()->delete();
             DB::commit();
-            return $this->returnSuccessMessage("logged out");
+            return $this->returnSuccessMessage(__('validation.custom.auth.logout'));
         } catch (\Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());

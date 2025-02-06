@@ -17,6 +17,7 @@ class FormFieldResource extends JsonResource
             'type' => $this->type,
             'required' => $this->required,
             'options' => FormFieldOptionResource::collection($this->whenLoaded('options')),
+            'sources' => FormFieldDataSourceResource::collection($this->whenLoaded('sources')),
         ];
     }
 }

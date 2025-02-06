@@ -91,7 +91,7 @@ class UserController extends Controller
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-            $user->image = $request->image ? $request->image : $user->image;
+            $user->image = $request->image;
             if ($request->has('password') && !empty($request->password)) {
                 if ($request->has('old_password')) {
                     if (Hash::check($request->old_password, $user->password)) {
@@ -116,9 +116,9 @@ class UserController extends Controller
 
     public function updateAdmin(Request $request)
     {
-        $auth_user = auth()->user();
-        if (!$auth_user->hasPermissionTo('user.update')) {
-            return $this->Forbidden("you don't have permission to access this page");
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('user.update')) {
+            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
         DB::beginTransaction();
         try {
@@ -165,7 +165,7 @@ class UserController extends Controller
                 $user->alt = $request->alt ? $request->alt : $user->alt;
                 $user->job = $request->job ? $request->job : $user->job;
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
-                $user->image = $request->image ? $request->image : $user->image;
+                $user->image = $request->image;
                 if ($request->has('password') && !empty($request->password)) {
                     if ($request->has('old_password')) {
                         if (Hash::check($request->old_password, $user->password)) {
@@ -187,7 +187,7 @@ class UserController extends Controller
                 DB::commit();
                 return $this->returnData($data);
             } else {
-                return $this->badRequest('User not found');
+                return $this->badRequest(__('validation.custom.userController.user_not_found'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -197,9 +197,9 @@ class UserController extends Controller
 
     public function active(Request $request)
     {
-        $auth_user= auth()->user();
-        if (!$auth_user->hasPermissionTo('user.restore')) {
-            return $this->Forbidden("you don't have permission to access this page");
+        $user = auth()->user();
+        if (!$user->hasPermissionTo('user.restore')) {
+            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
 
 
@@ -215,18 +215,18 @@ class UserController extends Controller
                 return $this->badRequest('This user is deleted');
             } else {
                 if ($user = User::whereuuid($request->uuid)->first()) {
-                    if ($user->hasRole("Master")||$user->id==1) {
+                    if ($user->hasRole("Master")) {
                         return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
                     }
                     $user->active = $request->active;
                     $user->save();
                     if ($user->active == 1) {
-                        return $this->returnSuccessMessage('User activated');
+                        return $this->returnSuccessMessage(__('validation.custom.userController.user_activated'));
                     } elseif ($user->active == 0) {
-                        return $this->returnSuccessMessage('User not activated');
+                        return $this->returnSuccessMessage(__('validation.custom.userController.user_deactivated'));
                     }
                 } else {
-                    return $this->badRequest('User not found');
+                    return $this->badRequest(__('validation.custom.userController.user_not_found'));
                 }
             }
         } catch (\Exception $e) {
@@ -238,7 +238,7 @@ class UserController extends Controller
     {
         $current_user = auth()->user();
         if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
-            return $this->Forbidden("you don't have permission to access this page");
+            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
 
         DB::beginTransaction();
@@ -285,24 +285,21 @@ class UserController extends Controller
                     ->orWhere('job_id', 'like', "%$search%");
             })->paginate($perPage, ['*'], 'page', $pageNumber)) {
                 if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                    return $this->badRequest('Invalid page number');
+                    return $this->badRequest(__('validation.custom.userController.invalid_page'));
                 }
 
                 $data['users'] = UserResource::collection($users);
                 DB::commit();
                 return $this->PaginateData($data, $users);
             } else {
-                return $this->badRequest('Invalid search');
+                return $this->badRequest(__('validation.custom.userController.invalid_search'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
     }
-
-
-    public function searchUser(Request $request)
-    {
+    public function searchUser(Request $request) {
         try {
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
@@ -313,28 +310,25 @@ class UserController extends Controller
                     $query->where($key, 'LIKE', '%' . $value . '%');
                     $users = $query->paginate($perPage, ['*'], 'page', $pageNumber);
                     if ($pageNumber > $users->lastPage() || $pageNumber < 1 || $perPage < 1) {
-                        return $this->badRequest('Invalid page number');
+                        return $this->badRequest(__('validation.custom.userController.invalid_page'));
                     }
 
                     $data['users'] = UserResource::collection($users);
                     return $this->PaginateData($data, $users);
                 } else {
-                    return $this->returnSuccessMessage('No results found');
+                    return $this->returnSuccessMessage(__('validation.custom.userController.results'));
                 }
             }
         } catch (Exception $e) {
             return $this->handleException($e);
         }
     }
-
-
-    public function showDeleteUser()
-    {
+    public function showDeleteUser() {
 
         try {
             $user = auth()->user();
             if (!$user->hasPermissionTo('user.delete')) {
-                return $this->Forbidden("you don't have permission to access this page");
+                return $this->Forbidden(__('validation.custom.userController.permission_denied'));
             }
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
@@ -343,19 +337,18 @@ class UserController extends Controller
                     $data['users'] = UserResource::collection($users);
                     return $this->PaginateData($data, $users);
                 } else {
-                    return $this->badRequest('Invalid page number');
+                    return $this->badRequest(__('validation.custom.userController.invalid_page'));
                 }
-            } else return $this->returnSuccessMessage('No results found');
+            } else return $this->returnSuccessMessage(__('validation.custom.userController.results'));
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function restoreUser(Request $request)
-    {
+    public function restoreUser(Request $request) {
         $user = auth()->user();
         if (!$user->hasPermissionTo('user.restore')) {
-            return $this->Forbidden("you don't have permission to access this page");
+            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
         DB::beginTransaction();
         try {
@@ -368,7 +361,7 @@ class UserController extends Controller
             if ($user = User::whereuuid($request->uuid)->onlyTrashed()->first()) {
                 $user->restore();
                 DB::commit();
-                return $this->returnSuccessMessage('User restore successfully');
+                return $this->returnSuccessMessage(__('validation.custom.userController.user_restore'));
             } else {
                 return $this->badRequest('User Not Deleted.');
             }
@@ -377,9 +370,7 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
-
-    public function addImage(Request $request)
-    {
+    public function addImage(Request $request) {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -392,7 +383,7 @@ class UserController extends Controller
             $image = $this->uploadImagePublic($request, $request->type);
 
             DB::commit();
-            return $this->returnData($image, 'Image Uploaded');
+            return $this->returnData($image, __('validation.custom.userController.image_uploaded'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -410,13 +401,12 @@ class UserController extends Controller
                 return $this->returnSuccessMessage('OTP send successfully');
             }
         }*/
-    public function sendOtp()
-    {
+    public function sendOtp() {
         DB::beginTransaction();
         try {
             $user = auth()->user();
             if (Carbon::now()->lessThan($user->otp_expires_at) || $user->otp_verified == true) {
-                return $this->badRequest('OTP Not expired');
+                return $this->badRequest(__('validation.custom.userController.otp_expired'));
             }
             $otp = $user->otp_code = rand(100000, 999999);
             $user->otp_expires_at = Carbon::now()->addMinutes(5);
@@ -425,7 +415,7 @@ class UserController extends Controller
             DB::commit();
             $phone = Mail::to($user->email)->send(new OtpMail($user->otp_code));
             if ($phone) {
-                return $this->returnSuccessMessage('OTP send successfully');
+                return $this->returnSuccessMessage(__('validation.custom.userController.otp_sent'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -448,14 +438,14 @@ class UserController extends Controller
                 ->where('otp_expires_at', '>', now())
                 ->firstorfail();
             if (!$user) {
-                return $this->badRequest('Invalid OTP Or Expired');
+                return $this->badRequest(__('validation.custom.userController.invalid_otp'));
             }
             $user->otp_code = null;
             $user->otp_expires_at = null;
             $user->otp_verified = true;
             $user->save();
             DB::commit();
-            $this->returnSuccessMessage('OTP verified successfully');
+            $this->returnSuccessMessage(__('validation.custom.userController.otp_verified'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

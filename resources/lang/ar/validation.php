@@ -8,6 +8,121 @@ return [
             "unique" => "هذا القسم موجود بالفعل.",
             "uuid" => "المعرف الفريد غير صالح.",
         ],
+
+        'roleAndPerm' => [
+            'dont_have_permission' => 'ليس لديك صلاحية الوصول لهذه الصفحة',
+            'role_name_already_in_use' => 'اسم الدور هذا قيد الاستخدام بالفعل',
+            'not_allowed_create_Master_role' => 'غير مسموح لك بانشاء دور رئيسي',
+            'role_name_already_use' => 'اسم الدور قيد الاستخدام بالفعل',
+            'master_permission' => 'هذه (صلاحية لدور رئيسي)، لا يمكنك تعيينها لهذا الدور',
+            'role_created_successfully' => 'تم إنشاء الدور بنجاح',
+            'not_allowed_assign_permissions_to_role' => 'لا يُسمح لك بتعيين صلاحية لهذا الدور',
+            'role_not_found' => 'الدور غير موجود',
+            'permission_not_found' => 'الصلاحية غير موجودة',
+            'master_role_permission' => 'هذه هي صلاحية (الدور الرئيسي)، ولا يمكنك تعيينها لهذا الدور',
+            'master_role_can_not_assign_user' => 'هذا (الدور الرئيسي), لا يمكنك تعيينه لهذا المستخدم',
+            'user_not_found' => 'المستخدم غير موجود',
+            'role_has_been_assigned_successfully' => 'تم تعيين الدور بنجاح',
+            'forbidden_action' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+            'permission_not_exist' => 'هذه الصلاحية غير موجودة',
+            'master_permission_user' => 'هذه (صلاحية لدور رئيسي), لا يمكنك تعيينها لهذا المستخدم',
+            'permission_assigned_successfully' => 'تم تعيين الصلاحية بنجاح',
+            'master_role_cannot_remove_from_Master' => 'هذا (الدور الرئيسي), لا يمكنك إزالته من ماستر',
+            'role_removed_successfully' => 'تم إزالة الدور بنجاح',
+            'role_not_exist' => 'هذا الدور غير موجود',
+            'not_allowed_remove_permissions_to_this_role' => 'لا يسمح لك بإزالة الصلاحيات لهذا الدور',
+            'cannot_update_Master_role' => 'لا يمكنك تحديث (الدور الرئيسي)',
+            'not_allowed_update_role' => 'لا يسمح لك بتحديث هذا الدور',
+            'not_allowed_add_Master_permission' => 'لا يسمح لك بإضافة صلاحية رئيسية',
+            'master_role_cannot_be_deleted' => 'لا يمكن حذف دور الماستر',
+            'master_cannot_be_deleted' => 'لا يمكنك حذف الماستر',
+            'role_deleted_successfully' => 'تم حذف الدور بنجاح',
+
+
+            'failed_to_obtain_token' => 'فشل في الحصول على الرمز',
+
+
+
+
+            'role_assigned_successfully' => 'تم تعيين الدور بنجاح',
+
+
+            'permission_removed_successfully' => 'تم إزالة الصلاحية بنجاح',
+
+
+            'master_permission_cannot_be_assigned' => 'لا يمكن تعيين صلاحية الماستر',
+            'validation_error' => 'خطأ في التحقق',
+
+        ],
+
+        'userController' => [
+            'user_not_found' => 'المستخدم غير موجود',
+            'invalid_page' => 'رقم الصفحة غير صالح',
+            'permission_denied' => 'ليس لديك إذن للوصول إلى هذه الصفحة',
+            'user_activated' => 'تم تفعيل المستخدم بنجاح',
+            'user_deactivated' => 'تم إلغاء تفعيل المستخدم بنجاح',
+            'image_uploaded' => 'تم تحميل الصورة بنجاح',
+            'otp_sent' => 'تم إرسال OTP بنجاح',
+            'otp_verified' => 'تم التحقق من OTP بنجاح',
+            'invalid_otp' => 'رمز التحقق غير صالح أو منتهي الصلاحية',
+            'otp_expired' => 'رمز التحقق غير منتهي',
+            'user_restore' => 'تمت استعادة المستخدم بنجاح',
+            'results' => 'لم يتم العثور على نتائج',
+            'invalid_search' => 'بحث غير صالح',
+            'user_not_deleted' => 'لم يتم حذف المستخدم',
+            'user_deleted_already' => 'تم حذف المستخدم بالفعل',
+            'deleted_successfully' => 'تم حذف المستخدم بنجاح',
+            'master_can_not_be_deleted' => 'هذا المستخدم رئيسي ولا يمكن حذفه',
+            'can_not_be_activated_or_deactivated' => 'هذا المستخدم هو حساب رئيسي, ولا يمكن تفعيله أو الغاء تفعيله',
+            'user_is_deleted' => 'تم حذف هذا المستخدم',
+            'old_password_wrong' => 'كلمة المرور القديمة خاطئة',
+            'old_password_required' => 'كلمة المرور القديمة مطلوبة',
+            'master_account_can_not_updated' => 'هذا المستخدم هو حساب رئيسي ولا يمكن تحديثه',
+            'dont_have_permission_to_access' => 'ليس لديك اذن الوصول لهذه الصفحة',
+        ],
+
+        'firebase' => [
+            'notification_failed' => 'فشل في إرسال الإشعار. رمز الحالة من FCM: ',
+            'failed_to_obtain_token' => 'فشل في الحصول على رمز الوصول',
+            'failed_to_send_notification' => 'فشل في إرسال الإشعار: ',
+        ],
+
+        'responseTrait' => [
+            'duplicate_entry_found' => 'تم العثور على ادخال مكرر',
+            'cannot_delete_or_update' => 'لا يمكن حذفه أو تحديثه كما هو مشار إليه في مكان آخر',
+            'foreign_key_constraint_violation' => 'انتهاك قيود المفتاح الخارجي',
+            'category_cannot_parent' => 'لا يمكن أن تكون الفئة الأصل الخاص بها',
+            'database_error' => 'خطأ في قاعدة البيانات: ',
+        ],
+
+        'notifyGroup' => [
+            'group_created' => 'تم إنشاء المجموعة بنجاح',
+            'group_not_found' => 'المجموعة غير موجودة',
+            'users_added' => 'تمت إضافة المستخدمين إلى المجموعة بنجاح',
+            'users_removed' => 'تمت إزالة المستخدمين من المجموعة بنجاح',
+            'notifications_sent' => 'تم إرسال الإشعارات بنجاح',
+            'failed_to_send_notifications' => 'فشل في إرسال الإشعارات',
+            'group_deleted' => 'تم حذف المجموعة بنجاح',
+            'failed_to_retrieve_groups' => 'فشل في استرجاع المجموعات: ',
+            'no_users_in_group' => 'المجموعة لا تحتوي على مستخدمين',
+            'no_device_tokens' => 'لم يتم العثور على رموز الأجهزة لهذه المجموعة',
+            'validation_failed' => 'فشل التحقق من البيانات',
+        ],
+
+        'language' => [
+            'lang_success' => 'تم تغيير اللغة بنجاح',
+        ],
+
+        'notification' => [
+            'notification_sent_success' => 'تم إرسال الإشعارات بنجاح!',
+            'notification_sent_fail' => 'فشل في إرسال الإشعارات.',
+            'device_token_saved' => 'تم حفظ رمز الجهاز بنجاح.',
+            'no_device_tokens' => 'لم يتم العثور على رموز أجهزة للمستخدمين أو المجموعة المحددة.',
+            'invalid_page_number' => 'رقم الصفحة غير صالح.',
+            'user_not_found' => 'المستخدم غير موجود.',
+            'validation_error' => 'خطأ في التحقق من صحة البيانات.',
+        ],
+
         'name' => [
             'required' => 'حقل الاسم مطلوب.',
             "array" => 'يجب ارسال الاسم بشكل مصفوفة ',
@@ -62,6 +177,7 @@ return [
             'email' => 'البريد الإلكتروني غير صالح.',
             'unique' => 'البريد الإلكتروني مستخدم بالفعل.',
             'max' => 'يجب ألا يتجاوز البريد الإلكتروني 255 حرفًا.',
+            'exists' => 'هذا الايميل غير موجود'
         ],
         'password' => [
             'required' => 'حقل كلمة المرور مطلوب.',
@@ -70,12 +186,21 @@ return [
             'regex' => 'يجب أن تحتوي على حرف صغير على الأقل، وحرف كبير، ورقم واحد.',
             'confirmed' => 'كلمة المرور غير متطابقة.',
         ],
+
+        'category' => [
+            'category_deleted' => 'تم حذف الفئة وجميع الفئات الفرعية المرتبطة بها بنجاح.',
+            'category_updated' => 'تم تحديث الفئات بنجاح.',
+            'category_created' => 'تم إنشاء الفئات بنجاح.',
+        ],
+
         'user' => [
             'required' => 'حقل البريد الإلكتروني مطلوب.',
         ],
         'phone' => [
             'required' => 'حقل الهاتف مطلوب.',
-            'unique' => 'الهاتف مستخدم بالفعل.', 'numeric' => 'يجب أن يكون الهاتف رقمًا.',
+            'unique' => 'الهاتف مستخدم بالفعل.',
+            'numeric' => 'يجب أن يكون الهاتف رقمًا.',
+            'regex' => 'يجب ان يتكون رقم الهاتف من 10 ارقام و يبدء ب 05'
         ],
         'gender' => [
             'required' => 'حقل الجنس مطلوب.',
@@ -103,7 +228,9 @@ return [
             'required' => 'حقل الصورة مطلوب.',
             'image' => 'يجب أن تكون الصورة صورة.',
             'mimes' => 'يجب أن تكون الصورة من نوع: jpeg, jpg, png.',
-            'max' => 'يجب ألا تتجاوز الصورة 2MB.',
+            'max' => 'يجب ألا تتجاوز الصورة :max كيلوبايت.',
+            'string' => 'يجب ارسال رابط الصورة',
+
         ],
         'type' => [
             'required' => 'حقل النوع مطلوب.',
@@ -116,10 +243,10 @@ return [
             'required' => 'حقل الوصف مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
             'array' => 'يجب ادخال الوصف بالعربية و الانكليزية'
-        ],'description.en' => [
+        ], 'description.en' => [
             'required' => 'حقل الوصف بالانكليزية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
-        ],'description.ar' => [
+        ], 'description.ar' => [
             'required' => 'حقل الوصف بالعربية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
         ],
@@ -143,9 +270,29 @@ return [
         ],
         'category_uuid' => [
             "required" => "معرف الفئة مطلوب ",
-            "uuid" => "معرف الفئة غير صحيح" ,
+            "uuid" => "معرف الفئة غير صحيح",
             "exists" => "معرف الفئة غير صحيح"
         ]
+    ],
+    'forget_password' => [
+        'sent_code' => 'تم ارسال الكود',
+        'error' => 'عليك المحاولة مرة اخرى',
+        'expired' => 'لم تنتهي صلاحية الرمز بعد',
+        'done' => 'تم تغير الكلمة بنجاح و تسجيل الخروج من جميع الجلسات النشطة',
+        'not_done' => 'الرمز المرسل غير صالح',
+    ],
+    'auth' => [
+        'permission' => 'ليس لديك صلاحيات لهذا الاجراء',
+        'failed' => 'اسم المستخدم او كلمة السر خاطئة',
+        'deleted' => 'هذا الحساب محذوف',
+        'logout' => 'تم تسجيل الخروج',
+    ],
+    'department' => [
+        'notfound' => 'هذا القسم غير موجود',
+        'try' => 'الرجاء المحاولة لاحقا',
+        'done' => 'تم انشاء القسم بنجاح',
+        'deleted' => 'القسم محذوف مسبقا',
+        'delete' => 'تم حذف القسم'
     ],
     'attributes' => [
         'department_uuid' => 'معرف القسم',
