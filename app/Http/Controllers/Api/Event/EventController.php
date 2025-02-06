@@ -98,10 +98,12 @@ class EventController extends Controller
     {
         try {
             DB::beginTransaction();
+            
             $event = Event::find($id);
             $event->update($request->validated());
-            return $this->returnSuccessMessage("Event Updated successfully");
+            
             DB::commit();
+            return $this->returnSuccessMessage("Event Updated successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

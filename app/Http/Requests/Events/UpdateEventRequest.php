@@ -5,6 +5,7 @@ namespace App\Http\Requests\Events;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 class UpdateEventRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class UpdateEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "id" => ["required", "uuid", "exists:events,id,deleted_at,NULL"],
+            // "id" => ["required", "uuid", "exists:events,id,deleted_at,NULL"],
             "service_id" => ["required", "uuid", "exists:services,id,deleted_at,NULL"],
             "form_id" => ["required",   "uuid",   "exists:forms,id,deleted_at,NULL"],
             "name" => ["required", "array", "max:2" , "min:2"],
@@ -45,6 +46,15 @@ class UpdateEventRequest extends FormRequest
             "image" => ["required", "string", "max:255"],
             "file" => ["required" , "string", "max:255"]
         ];
+    }
+
+    protected function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $valid = Validator::make($this->all(), [
+                "id" => ["required", "uuid", "exists:events,id,deleted_at,NULL"],
+            ]);
+        });
     }
 
     public function failedValidation($validator)

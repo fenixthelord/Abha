@@ -11,9 +11,9 @@ use Spatie\Translatable\HasTranslations;
 use Illuminate\Support\Str;
 
 
-class Event extends Model implements Auditable
+class Event extends Model 
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
+    use HasFactory, SoftDeletes, HasTranslations;
 
     protected $translatable = [
         'name',

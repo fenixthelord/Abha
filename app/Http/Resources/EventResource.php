@@ -17,11 +17,12 @@ class EventResource extends JsonResource
         return [
             'id' => $this->id,
             'service_id' => $this->service_id,
+            "form_id" => $this->form?->id,
+            
             'service_name' => $this->service->getTranslations("name"),
             'name' => $this->getTranslations("name"),
             'details' => $this->getTranslations("details"),
             // $this->mergeWhen($this->info, [
-            "form_id" => $this->form?->id,
             'form_name' => $this->form?->getTranslations("name"),
             'file' => $this->file,
             'image' => $this->image,
