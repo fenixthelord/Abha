@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
             $table->unsignedBigInteger("department_id")->nullable();
             $table->foreign("department_id")->references("id")->on("departments")->onDelete("cascade");
+
+            $table->unique(["name", "parent_id"]);
             $table->softDeletes();
             $table->timestamps();
         });

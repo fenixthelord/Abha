@@ -13,11 +13,29 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->uuid('uuid');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->char('phone')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('image')->nullable();
+            $table->string('alt')->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
+            $table->string('job')->nullable();
+            $table->string('job_id')->nullable();
+            $table->enum('role', ['super_admin', 'employee'])->default('employee');
+            $table->boolean('is_admin')->default(false);
+            $table->boolean('active')->default(true);
+            $table->string('otp_code')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+            $table->boolean('otp_verified')->default(false);
+            $table->string('verify_code')->nullable();
+            $table->string('refresh_token')->nullable();
+            $table->timestamp('refresh_token_expires_at')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
