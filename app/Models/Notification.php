@@ -13,7 +13,6 @@ class Notification extends Model   implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
-    use HasTranslations;
 
     protected $table = 'notifications';
     protected $fillable = [

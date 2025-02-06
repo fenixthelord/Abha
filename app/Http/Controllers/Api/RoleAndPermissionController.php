@@ -50,7 +50,7 @@ class RoleAndPermissionController extends Controller
                 return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
             }
             $validator = Validator::make($request->all(), [
-                'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
+               // 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displaying.en" => "required|string|unique:roles,displaying",
                 "displaying.ar" => "required|string|unique:roles,displaying",
 

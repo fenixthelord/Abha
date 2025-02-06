@@ -1,5 +1,5 @@
 <?php
-
+/*
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\UploadFileController;
 */
 
 // Change Lang
+/*
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
 Route::post("upload/file" , [UploadFileController::class , "upload"]);
 
@@ -151,7 +152,7 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
  * All Departments and Categories
  *
  */
-
+/*
 Route::group(["prefix" => "/categories"], function () {
 
     Route::get("/show", [CategoryController::class, "list"]);
@@ -172,6 +173,7 @@ Route::prefix('departments')->group(function () {
  * Organization Routes
  *
  */
+/*
 Route::group(["prefix" => "/org"], function () {
     Route::get('/list' , [OrganizationController::class , "index"] );
     Route::get('/list/chart' , [OrganizationController::class , "chart"] );
