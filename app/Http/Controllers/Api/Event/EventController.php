@@ -68,8 +68,8 @@ class EventController extends Controller
             DB::beginTransaction();
             $event = Event::find($id);
             $event->delete();
-            return $this->returnSuccessMessage("Event Deleted successfully");
             DB::commit();
+            return $this->returnSuccessMessage("Event Deleted successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
