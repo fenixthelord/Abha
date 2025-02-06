@@ -205,8 +205,7 @@ trait ResponseTrait
         return $this->apiResponse(null, false, $msg, Response::HTTP_NOT_FOUND);
     }
 
-    public function PaginateData(array $data, $object)
-    {
+    public function PaginateData(array $data, $object) {
         $data['current_page'] = $object->currentPage();        // $data[] =
         $data['next_page'] = $object->nextPageUrl();
         $data['previous_page'] = $object->previousPageUrl();
@@ -215,8 +214,7 @@ trait ResponseTrait
     }
 
 
-    public function handleException(\Exception $e)
-    {
+    public function handleException(\Exception $e) {
         if ($e instanceof ModelNotFoundException) {
 
             $modelName = class_basename($e->getModel());
@@ -237,24 +235,23 @@ trait ResponseTrait
         }
     }
 
-    protected function handleQueryException(\Illuminate\Database\QueryException $e)
-    {
+    protected function handleQueryException(\Illuminate\Database\QueryException $e) {
         $errorCode = $e->errorInfo[1]; // Error code from the database
         // dd($e->errorInfo[1]);
         switch ($errorCode) {
             case 1062: // Duplicate entry Like Unique Email Twice
-                return $this->badRequest("Duplicate entry found.");
+                return $this->badRequest('Duplicate entry found');
 
             case 1451: // Cannot delete or update due to foreign key constraint
-                return $this->badRequest("Cannot delete or update as it is referenced elsewhere.");
+                return $this->badRequest('Cannot delete or update as it is referenced elsewhere');
 
             case 1452: // Cannot add or update a child row due to foreign key constraint
-                return $this->badRequest("Foreign key constraint violation.");
+                return $this->badRequest('Foreign key constraint violation');
             case 1644:
-                return $this->badRequest("A category cannot be its own parent");
+                return $this->badRequest('A category cannot be its own parent');
 
             default:
-                return $this->returnError("Database error: " . $e->getMessage());
+                return $this->returnError('Database error: ' . $e->getMessage());
         }
     }
 }

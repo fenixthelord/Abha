@@ -28,8 +28,7 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function list(ListOfCategoriesRequest $request)
-    {
+    public function list(ListOfCategoriesRequest $request) {
         try {
 
             $perPage = $request->input('per_page', $this->per_page);
@@ -107,7 +106,7 @@ class CategoryController extends Controller
             $category->deleteWithChildren();
 
             DB::commit();
-            return $this->returnSuccessMessage("Category and all related sup-categories deleted successfully");
+            return $this->returnSuccessMessage(__('validation.custom.category.category_deleted'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -139,7 +138,7 @@ class CategoryController extends Controller
             );
 
             DB::commit();
-            return $this->returnSuccessMessage("Categories updated successfully");
+            return $this->returnSuccessMessage(__('validation.custom.category.category_updated'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -223,7 +222,7 @@ class CategoryController extends Controller
             );
 
             DB::commit();
-            return $this->returnSuccessMessage("Categories created successfully");
+            return $this->returnSuccessMessage(__('validation.custom.category.category_created'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

@@ -50,7 +50,7 @@ class DepartmentsControllers extends Controller
                 $data['department'] = DepartmentResource::make($department);
                 return $this->returnData($data);
             } else {
-                return $this->badRequest('Department not found');
+                return $this->badRequest(__('validation.custom.department.notfound'));
             }
         } catch (\Exception $e) {
             return $this->handleException($e);
@@ -73,9 +73,9 @@ class DepartmentsControllers extends Controller
                 $data['department'] = DepartmentResource::make($department);
 
                 DB::commit();
-                return $this->returnData($data, 'success created department');
+                return $this->returnData($data, __('validation.custom.department.done'));
             } else {
-                return $this->badRequest('try again later');
+                return $this->badRequest(__('validation.custom.department.try'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -103,7 +103,7 @@ class DepartmentsControllers extends Controller
                 DB::commit();
                 return $this->returnData($data);
             } else {
-                return $this->badRequest('Department not found');
+                return $this->badRequest(__('validation.custom.department.notfound'));
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -125,7 +125,7 @@ class DepartmentsControllers extends Controller
                 return $this->returnValidationError($validator);
             }
             if (Department::whereuuid($uuid)->onlyTrashed()->first()) {
-                return $this->badRequest('Department already deleted.');
+                return $this->badRequest(__('validation.custom.department.deleted'));
             } else {
                 if ($department = Department::whereuuid($uuid)->first()) {
                     $name = $department->getTranslations("name");
@@ -135,9 +135,10 @@ class DepartmentsControllers extends Controller
                     $department->deleteWithChildren();
                     $department->delete();
                     DB::commit();
-                    return $this->returnSuccessMessage('Department deleted successfully');
+                    return $this->returnSuccessMessage(__('validation.custom.department.delete'));
                 } else {
-                    return $this->badRequest('Department not found');
+                    return $this->badRequest(__('validation.custom.department.notfound'));
+
                 }
             }
         } catch (\Exception $e) {
