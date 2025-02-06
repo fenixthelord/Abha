@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DatabaseController;
 use App\Http\Controllers\Api\DepartmentsControllers;
+use App\Http\Controllers\Api\Event\EventController;
 use App\Http\Controllers\Api\ExcelController;
 use App\Http\Controllers\Api\Forms\FormBuilderController;
 use App\Http\Controllers\Api\Forms\FormFieldController;
@@ -15,10 +16,10 @@ use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\UploadFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,8 +35,7 @@ use App\Http\Controllers\Api\OrganizationController;
 // Change Lang
 /*
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
-
-
+Route::post("upload/file" , [UploadFileController::class , "upload"]);
 
 // Login Throw Social (***** For Customers Only ******) Don't Use it
 Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
@@ -206,3 +206,11 @@ Route::group(["prefix" => "/db"], function () {
 });
 
 Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
+
+Route::group(["prefix" => "/event"], function () {
+   Route::get('/', [EventController::class, 'list']); 
+//    Route::get('/show/{id}', [EventController::class, 'showEvent']);
+   Route::post('/create', [EventController::class, 'createEvent']); 
+   Route::put('/update/{id}', [EventController::class, 'updateEvent']); 
+   Route::delete('/delete/{id}', [EventController::class, 'createEvent']); 
+});
