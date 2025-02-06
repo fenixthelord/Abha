@@ -96,6 +96,7 @@ class CreateFormBuilderRequest extends FormRequest
             'fields.*.label.en.required' => 'Each form field must have an English label.',
             'fields.*.label.ar.required' => 'Each form field must have an Arabic label.',
             'fields.*.placeholder.required' => 'Each form field must have a placeholder.',
+            'fields.*.placeholder.string' => 'Each form field must be a string.',
             'fields.*.type.in' => 'Invalid field type. Allowed types: text, number, date, dropdown, radio, checkbox, file, map.',
             'fields.*.order.required' => 'Each form field must have an order.',
             'fields.*.order.numeric' => 'Each form field must have an order as number.',
