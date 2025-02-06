@@ -1,7 +1,7 @@
 <?php
-use \Illuminate\Routing\Route;
 use App\Http\Controllers\Api\UploadFileController;
 use App\Http\Controllers\Api\Event\EventController;
+use Illuminate\Support\Facades\Route;
 
 
 Route::post("upload/file" , [UploadFileController::class , "upload"]);
