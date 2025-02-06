@@ -69,15 +69,16 @@ class ServiceController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'array', 'max:255'],
-                'name.en' => ['required', Rule::unique('services', 'name->en')],
-                'name.ar' => ['required', Rule::unique('services', 'name->ar')],
-                'details' => ['nullable', 'array'],
-                'details.en' => ['nullable'],
-                'details.ar' => ['nullable'],
-                'image' => ['nullable', 'string'],
                 'department_uuid' => ['required', 'exists:departments,uuid'],
-            ], messageValidation());
+                'name' => ['required', 'array', 'max:255'],
+                'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
+                'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],
+                'details' => ['required', 'array'],
+                'details.en' => ['required'],
+                'details.ar' => ['required'],
+                'image' => ['required', 'string'],
+
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);

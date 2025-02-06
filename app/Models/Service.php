@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
+use phpseclib3\Common\Functions\Strings;
 use Spatie\Translatable\HasTranslations;
 
 class Service extends Model implements Auditable {
@@ -25,12 +26,14 @@ class Service extends Model implements Auditable {
         'department_id',
     ];
 
-    protected static function boot() {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
+    protected $casts =['id' => 'String'];
+
+//    protected static function boot() {
+//        parent::boot();
+//        static::creating(function ($model) {
+//            $model->id = Str::uuid();
+//        });
+//    }
 
     public function department()
     {
