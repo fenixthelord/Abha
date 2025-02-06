@@ -16,10 +16,10 @@ use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\UploadFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,8 +34,7 @@ use App\Http\Controllers\Api\OrganizationController;
 
 // Change Lang
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
-
-
+Route::post("upload/file" , [UploadFileController::class , "upload"]);
 
 // Login Throw Social (***** For Customers Only ******) Don't Use it
 Route::post('/auth/social-login', [SocialLoginController::class, 'login'])

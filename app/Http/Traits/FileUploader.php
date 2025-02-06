@@ -4,7 +4,7 @@ namespace App\Http\Traits;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use Illuminate\Http\UploadedFile;
 trait FileUploader
 {
     /**
@@ -88,5 +88,60 @@ trait FileUploader
             }
         }
         return $uploadedImages;
+    }
+
+
+        /**
+     * Upload a file safely.
+     *
+     * @param  \Illuminate\Http\UploadedFile  $file
+     * @param  string  $folder  Folder path to store the file (default: 'files')
+     * @param  int  $maxSize  Maximum allowed file size in kilobytes (default: 2048 KB)
+     * @return string  The file path where the file was stored.
+     *
+     * @throws \Exception If the file type, MIME type, or size is not allowed.
+     */
+    public function uploadFile(UploadedFile $file, string $folder = 'files', int $maxSize = 2048): string
+    {
+        // Define allowed file extensions.
+        $allowedExtensions = ['doc', 'docx', 'xls', 'xlsx', 'pdf'];
+
+        // Define allowed MIME types.
+        $allowedMimeTypes = [
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/pdf',
+        ];
+
+        // Validate file size.
+        if (($file->getSize() / 1024) > $maxSize) {
+            throw new \Exception("The file exceeds the maximum allowed size of {$maxSize} KB.");
+        }
+
+        // Validate file extension.
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedExtensions)) {
+            throw new \Exception("Files of type '{$extension}' are not allowed.");
+        }
+
+        // Validate MIME type.
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            throw new \Exception("Files with MIME type '{$mimeType}' are not allowed.");
+        }
+
+        // Generate a unique file name.
+        $safeName = Str::random(40) . '.' . $extension;
+
+        // Store the file using Laravel's Storage facade (using the 'public' disk).
+        $path = "storage/" . $file->storeAs($folder, $safeName, 'public');
+
+        if (!$path) {
+            throw new \Exception("Failed to upload file.");
+        }
+
+        return $path;
     }
 }
