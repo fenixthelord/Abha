@@ -28,9 +28,9 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function list(ListOfCategoriesRequest $request) {
+    public function list(ListOfCategoriesRequest $request)
+    {
         try {
-
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
@@ -40,16 +40,17 @@ class CategoryController extends Controller
                 })
                 ->where("parent_id", null)
                 ->when(
-                    $request->has("department_uuid"),
+                    $request->has("department_id"),
                     function ($q) use ($request) {
-                        $department = Department::where("uuid", $request->department_uuid)->firstOrFail();
+                        $department = Department::findOrFail($request->department_id);
                         $q->where("department_id", $department->id);
                     }
                 )
                 ->when(
-                    $request->has("categories_uuid"),
+                    $request->has("category_id"),
                     function ($q) use ($request) {
-                        $q->Where("uuid", $request->categories_uuid);
+                        $category = Category::findOrFail($request->category_id);
+                        $q->findOrFail($category->id);
                     }
                 );
 
@@ -76,10 +77,10 @@ class CategoryController extends Controller
     public function filter(FilterRequest $request)
     {
         try {
-            $departmentQuery = Department::where("uuid", $request->department_uuid)->firstOrFail();
+            $department = Department::findOrFail($request->department_id);
 
             $categories = Category::query()
-                ->where("department_id", $departmentQuery->id)
+                ->where("department_id", $department->id)
                 ->whereNull("parent_id")
                 ->get();
 
@@ -124,12 +125,10 @@ class CategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $department = Department::where('uuid', $request->department_uuid)->first();
-            $category = Category::where("uuid", $request->category_uuid)->firstOrFail();
+            $department = Department::findOrFail($request->department_id);
+            $category = Category::find($request->category_id);
 
-            $category->update([
-                'name' => $request->name,
-            ]);
+            $category->update(['department_id' => $request->department_id, 'name' => $request->name]);
 
             $this->updateCategories(
                 department: $department,
@@ -155,34 +154,33 @@ class CategoryController extends Controller
     private function updateCategories($department, $categories, $parentId = null)
     {
 
-        $currentUuids = collect($categories)->pluck('category_uuid')->filter()->toArray();
-
+        $current_ids = collect($categories)->pluck('category_id')->filter()->toArray();
         // Delete existing children not present in the current request
         Category::where('parent_id', $parentId)
             ->where('department_id', $department->id)
-            ->whereNotIn('uuid', $currentUuids)
+            ->whereNotIn('id', $current_ids)
             ->each(function ($category) {
                 $category->deleteWithChildren();
             });
 
-        foreach ($categories as $categoryData) {
+        foreach ($categories as $category_data) {
 
             // Create the new categories
-            if (!isset($categoryData["category_uuid"])) {
+            if (!isset($category_data["category_id"])) {
                 $this->createCategories(
                     departmentId: $department->id,
-                    categories: [$categoryData],
+                    categories: [$category_data],
                     parentId: $parentId,
                     status: 'update'
                 );
                 continue;
             }
 
-            $category = Category::where("uuid", $categoryData["category_uuid"])->firstOrFail();
+            $category = Category::findOrFail($category_data["category_id"]);
 
             // update the parent category
             $category->update([
-                'name' => $categoryData['name'],
+                'name' => $category_data['name'],
                 "parent_id" => $parentId,
                 "department_id" => $department->id,
             ]);
@@ -190,7 +188,7 @@ class CategoryController extends Controller
             // update the chields all categories
             $this->updateCategories(
                 department: $department,
-                categories: $categoryData['chields'],
+                categories: $category_data['chields'],
                 parentId: $category->id
             );
         }
@@ -206,7 +204,7 @@ class CategoryController extends Controller
     {
         try {
             DB::beginTransaction();
-            $department = Department::where('uuid', $request->department_uuid)->first();
+            $department = Department::findOrFail($request->department_id);
 
 
             $category = Category::create([

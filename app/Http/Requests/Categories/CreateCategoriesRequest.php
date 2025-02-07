@@ -37,7 +37,7 @@ class CreateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_id" => ["required", "exists:departments,id"],
+            "department_id" => ["required", "uuid", "exists:departments,id"],
             "name" => ["required", "array"],
             "name.en" => [
                 "required",
