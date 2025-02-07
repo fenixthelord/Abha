@@ -7,10 +7,10 @@ Route::prefix('departments')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
             Route::get('/', [DepartmentsControllers::class, 'index']);
-            Route::get('/{uuid}/show', [DepartmentsControllers::class, 'show']);
+            Route::get('/{id}/show', [DepartmentsControllers::class, 'show']);
             Route::post('/create', [DepartmentsControllers::class, 'store']);
-            Route::put('/{uuid}/update', [DepartmentsControllers::class, 'update']);
-            Route::delete('/{uuid}/destroy', [DepartmentsControllers::class, 'destroy']);
+            Route::put('/{id}/update', [DepartmentsControllers::class, 'update']);
+            Route::delete('/{id}/destroy', [DepartmentsControllers::class, 'destroy']);
         });
     });
 });

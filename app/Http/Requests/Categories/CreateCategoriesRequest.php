@@ -3,11 +3,9 @@
 namespace App\Http\Requests\Categories;
 
 use App\Http\Traits\ResponseTrait;
-use App\Models\Category;
 use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
