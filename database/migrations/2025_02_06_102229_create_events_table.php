@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('name', 500);
             $table->string("details");
             $table->string("image");
-            $table->string("file");
             $table->date("start_date");
             $table->date("end_date");
+            $table->string("file");
             $table->softDeletes();
             $table->timestamps();
         });

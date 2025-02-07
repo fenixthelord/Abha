@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -16,24 +18,20 @@ class Event extends BaseModel
         'service_id',
         'name',
         'details',
-        'form_id',
-        'file',
+        'image',
         'start_date',
         'end_date',
-        'image'
+        'file',
     ];
 
-    protected $casts = [
-        'name' => 'json',
-        'details' => 'json',
-    ];
+    protected $casts = ['name' => 'json', 'details' => 'json'];
 
-    public function service()
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    public function forms()
+    public function forms(): MorphMany
     {
         return $this->morphMany(Form::class, 'formable');
     }
