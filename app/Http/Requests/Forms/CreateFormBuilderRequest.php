@@ -88,7 +88,7 @@ class CreateFormBuilderRequest extends FormRequest
     {
         return [
             'formable_id.required' => 'The formable id is required.',
-            'formable_id.uuid' => 'The formable id must be coorect uuid.',
+            'formable_id.uuid' => 'The formable id must be correct uuid.',
             'formable_type.required' => 'The formable type is required.',
             'formable_type.in' => 'Invalid formable type. Allowed types: category,event.',
             'name.required' => 'The form name is required.',

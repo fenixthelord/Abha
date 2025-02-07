@@ -15,7 +15,7 @@ class DepartmentResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      'department_uuid' => $this->uuid,
+      'department_id' => $this->id,
       'name' => $this->getTranslations("name"),
       'chields' => $this->whenLoaded('categories', function () {
         return CategoryResource::collection($this->categories()->where("parent_id", null)->get()->load("children"));

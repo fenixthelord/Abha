@@ -27,9 +27,9 @@ class FilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
+            "department_id" => [
                 "required",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
+                Rule::exists("departments", "id")->where("deleted_at", null)
 
             ],
         ];

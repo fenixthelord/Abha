@@ -15,13 +15,13 @@ class OrganizationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "uuid" => $this->uuid,
+            "id" => $this->id,
             "department_name" => $this->department?->getTranslations("name"),
-            "department_uuid" => $this->department?->uuid,
-            "manger_uuid" =>$this->manger?->uuid,
+            "department_id" => $this->department?->id,
+            "manger_id" => $this->manger?->id,
             "manger_first_name" => $this->manger?->first_name,
             "manger_last_name" => $this->manger?->last_name,
-            "employee_uuid" => $this->user?->uuid,
+            "employee_id" => $this->user?->id,
             "employee_first_name" => $this->user?->first_name,
             "employee_last_name" => $this->user?->last_name,
             "position" => $this->getTranslations("position"),

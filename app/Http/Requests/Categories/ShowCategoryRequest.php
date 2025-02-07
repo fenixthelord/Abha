@@ -26,7 +26,7 @@ class ShowCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_uuid' => ['required', Rule::exists("categories", 'uuid')->where('deleted_at', null)],
+            'category_id' => ['required', Rule::exists("categories", 'id')->where('deleted_at', null)],
         ];
     }
 

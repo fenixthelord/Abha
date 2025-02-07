@@ -28,18 +28,17 @@ class OrgFilterRequest extends FormRequest
         return [
             'per_page' => 'nullable|integer|min:1',
             'page' => 'nullable|integer|min:1',
-            "department_uuid" => [
+            "department_id" => [
                 "nullable",
-                "uuid",
-                Rule::exists('departments', 'uuid')->where("deleted_at", null)
+                "id",
+                Rule::exists('departments', 'id')->where("deleted_at", null)
             ],
-            "manger_uuid" => [
+            "manger_id" => [
                 "nullable",
-                "uuid",
-                Rule::exists('users', 'uuid')->where("deleted_at", null)
+                "id",
+                Rule::exists('users', 'id')->where("deleted_at", null)
             ]
         ];
-
     }
     public function failedValidation($validator)
     {

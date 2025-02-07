@@ -26,8 +26,8 @@ class CreateCategoriesRequest extends FormRequest
     }
     protected function prepareForValidation(): void
     {
-        if (request()->has("department_uuid")) {
-            $this->departmentId = Department::where("uuid", $this->department_uuid)->pluck("id")->first();
+        if (request()->has("department_id")) {
+            $this->departmentId = Department::where("id", $this->department_id)->pluck("id")->first();
         }
     }
 
@@ -39,7 +39,7 @@ class CreateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => ["required", "exists:departments,uuid"],
+            "department_id" => ["required", "exists:departments,id"],
             "name" => ["required", "array"],
             "name.en" => [
                 "required",
@@ -86,12 +86,12 @@ class CreateCategoriesRequest extends FormRequest
             $currentPath = "{$path}.{$index}";
 
             // Validate child structure
-            if (isset($child["uuid"])) {
+            if (isset($child["id"])) {
                 $childValidator = Validator::make($child, [
-                    'uuid' => [
+                    'id' => [
                         'sometimes',
                         'string',
-                        Rule::exists("categories", "uuid")->where("deleted_at", null)
+                        Rule::exists("categories", "id")->where("deleted_at", null)
 
                     ],
                 ]);

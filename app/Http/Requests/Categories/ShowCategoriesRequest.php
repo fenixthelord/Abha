@@ -21,7 +21,7 @@ class ShowCategoriesRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'department_uuid' => $this->department_uuid,
+            'department_id' => $this->department_id,
         ]);
     }
 
@@ -33,9 +33,9 @@ class ShowCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
+            "department_id" => [
                 "required",
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
+                Rule::exists("departments", "id")->where("deleted_at", null)
             ]
         ];
     }

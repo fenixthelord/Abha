@@ -16,11 +16,11 @@ class GroupResource extends JsonResource
     {
 
         return [
-            'uuid' => $this->uuid,
+            'id' => $this->id,
             'name' => $this->getTranslations("name"),
             'description' => $this->getTranslations("description"),
             'user' => GroupUser::collection($this->users()->get())
 
-            ];
+        ];
     }
 }

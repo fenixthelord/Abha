@@ -26,8 +26,8 @@ class MangerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => ['required', Rule::exists('departments', 'uuid')->where("deleted_at", null)],
-            'manger_uuid' => ['required', Rule::exists('users', 'uuid')->where("deleted_at", null)]
+            'department_id' => ['required', Rule::exists('departments', 'id')->where("deleted_at", null)],
+            'manger_id' => ['required', Rule::exists('users', 'id')->where("deleted_at", null)]
         ];
     }
     public function failedValidation($validator)
