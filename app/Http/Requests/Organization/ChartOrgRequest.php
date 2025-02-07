@@ -28,7 +28,7 @@ class ChartOrgRequest extends FormRequest
         return [
             "department_id" => [
                 "required",
-                "id",
+                "uuid",
                 "exists:departments,id,deleted_at,NULL"
             ],
         ];

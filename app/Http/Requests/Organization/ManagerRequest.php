@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class MangerRequest extends FormRequest
+class ManagerRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -27,7 +27,7 @@ class MangerRequest extends FormRequest
     {
         return [
             'department_id' => ['required', Rule::exists('departments', 'id')->where("deleted_at", null)],
-            'manger_id' => ['required', Rule::exists('users', 'id')->where("deleted_at", null)]
+            'manager_id' => ['required', Rule::exists('users', 'id')->where("deleted_at", null)]
         ];
     }
     public function failedValidation($validator)

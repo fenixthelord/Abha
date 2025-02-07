@@ -30,7 +30,7 @@ class HeadChartOrgResource extends JsonResource
             "image" => $this->image,
             // "position" => $this->organization?->position?->getTranslations("position"),
             "position" => [
-                'en' => "head manger",
+                'en' => "head manager",
                 'ar' => "الرئيس"
             ],
 

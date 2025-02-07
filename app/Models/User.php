@@ -115,22 +115,22 @@ class User extends Authenticatable  implements Auditable
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    // public function mangers()
+    // public function managers()
     // {
-    //     return $this->hasMany(Organization::class, 'manger_id');
+    //     return $this->hasMany(Organization::class, 'manager_id');
     // }
     public function employees()
     {
-        return $this->hasMany(Organization::class, 'manger_id');
+        return $this->hasMany(Organization::class, 'manager_id');
     }
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');
     }
 
-    public function scopeMangersInDepartment($query, $departmentId)
+    public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("mangers", function ($q) use ($departmentId) {
+        return $query->whereHas("managers", function ($q) use ($departmentId) {
             $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });

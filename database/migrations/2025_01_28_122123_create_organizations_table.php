@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('department_id')->constrained('departments')->onDelete('cascade');
-            $table->foreignUuid('manger_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('manager_id')->constrained('users')->onDelete('cascade');
             $table->foreignUuid('employee_id')->constrained('users')->onDelete('cascade');
             $table->string("position", 500)->nullable();
             $table->softDeletes();

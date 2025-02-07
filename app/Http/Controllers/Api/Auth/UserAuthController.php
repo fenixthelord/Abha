@@ -54,8 +54,6 @@ class UserAuthController extends Controller
             }
             $department = Department::where("id", $request->department_id)->firstorFail();
 
-
-
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,

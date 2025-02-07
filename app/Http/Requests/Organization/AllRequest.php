@@ -26,7 +26,7 @@ class AllRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_id' => ['required', Rule::exists('departments', 'id')->where('deleted_at', null)],
+            'department_id' => ['required', 'uuid', Rule::exists('departments', 'id')->where('deleted_at', null)],
 
         ];
     }

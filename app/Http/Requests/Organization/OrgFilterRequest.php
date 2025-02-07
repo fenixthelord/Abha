@@ -30,12 +30,12 @@ class OrgFilterRequest extends FormRequest
             'page' => 'nullable|integer|min:1',
             "department_id" => [
                 "nullable",
-                "id",
+                "uuid",
                 Rule::exists('departments', 'id')->where("deleted_at", null)
             ],
-            "manger_id" => [
+            "manager_id" => [
                 "nullable",
-                "id",
+                "uuid",
                 Rule::exists('users', 'id')->where("deleted_at", null)
             ]
         ];

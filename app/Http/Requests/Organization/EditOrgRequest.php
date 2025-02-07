@@ -26,10 +26,10 @@ class EditOrgRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'org_id' => ['required', Rule::exists('organizations', 'id')->where("deleted_at", null)],
-            'department_id' => [Rule::exists('departments', 'id')->where("deleted_at", null)],
-            'manger_id' => [Rule::exists('users', 'id')->where("deleted_at", null)],
-            'employee_id' => [Rule::exists('users', 'id')->where("deleted_at", null)],
+            'org_id' => ['required', 'uuid', Rule::exists('organizations', 'id')->where("deleted_at", null)],
+            'department_id' => ['uuid', Rule::exists('departments', 'id')->where("deleted_at", null)],
+            'manager_id' => ['uuid', Rule::exists('users', 'id')->where("deleted_at", null)],
+            'employee_id' => ['uuid', Rule::exists('users', 'id')->where("deleted_at", null)],
             'position.en' => 'string',
             'position.ar' => 'string',
             'position' => 'array'
