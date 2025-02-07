@@ -103,7 +103,7 @@ class CategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $category = Category::where('uuid', $request->uuid)->firstOrFail();
+            $category = Category::whereId($request->id)->firstOrFail();
             $category->deleteWithChildren();
 
             DB::commit();
@@ -238,11 +238,11 @@ class CategoryController extends Controller
         try {
             foreach ($categories as $categoryData) {
                 // dd($categories);
-                // log::info($categoryData['category_uuid']);
+                // log::info($categoryData['category_id']);
                 // continue;
                 if ($status == "update") {
-                    if (isset($categoryData["category_uuid"])) {
-                        $isCategoryExists = Category::where("uuid", $categoryData["category_uuid"])->first();
+                    if (isset($categoryData["category_id"])) {
+                        $isCategoryExists = Category::whereId($categoryData["category_id"])->first();
                         if ($isCategoryExists->exists()) {
                             continue;
                         }

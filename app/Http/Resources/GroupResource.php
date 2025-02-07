@@ -20,7 +20,6 @@ class GroupResource extends JsonResource
             'name' => $this->getTranslations("name"),
             'description' => $this->getTranslations("description"),
             'user' => GroupUser::collection($this->users()->get())
-
         ];
     }
 }

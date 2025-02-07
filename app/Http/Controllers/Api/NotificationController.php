@@ -30,7 +30,7 @@ class NotificationController extends Controller
                 'body' => 'required|string',
                 'image' => 'nullable|string',
                 'data' => 'nullable|array',
-                'group_uuid' => 'nullable|exists:notify_groups,uuid',
+                'group_id' => 'nullable|exists:notify_groups,id',
                 'user_ids' => 'nullable|array',
                 //'user_ids.*' => 'exists:users,id',
             ]);
@@ -44,9 +44,9 @@ class NotificationController extends Controller
                 'data' => $request->input('data', []), // Additional metadata
             ];
 
-            if ($request->has('group_uuid')) {
+            if ($request->has('group_id')) {
                 // Fetch tokens for all users in the group
-                $group = NotifyGroup::where('uuid', $request->input('group_uuid'))->firstOrFail();
+                $group = NotifyGroup::whereId('id', $request->input('group_id'))->firstOrFail();
                 $userIds = $group->users()->pluck('users.id');
                 $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
             } elseif ($request->has('user_ids')) {
@@ -62,7 +62,7 @@ class NotificationController extends Controller
                         ? $this->returnSuccessMessage(__('validation.custom.notification.notification_sent_success'))
                         : $this->returnError(__('validation.custom.notification.notification_sent_fail'));
                 } else {
-                    $userIds = User::whereIn('uuid', $request->input('user_ids'))->pluck('id');
+                    $userIds = User::whereIn('id', $request->input('user_ids'))->pluck('id');
                 }
 
                 $tokens = DeviceToken::whereIn('user_id', $userIds)->pluck('token')->toArray();
@@ -90,11 +90,11 @@ class NotificationController extends Controller
         DB::beginTransaction();
         $request->validate([
             'token' => 'required|string',
-            'user_id' => 'nullable|exists:users,uuid',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         try {
-            $user = User::where('uuid', $request->input('user_id'))->first();
+            $user = User::whereId($request->input('user_id'))->first();
             DeviceToken::firstOrCreate([
                 'token' => $request->input('token'),
                 'user_id' => $user->id,
@@ -166,11 +166,11 @@ class NotificationController extends Controller
             'scheduled_at' => $request['scheduled_at'] ?? null,
             'sender_id' => $request->user()->id,
         ]);
-        if ($request->has('group_uuid')) {
-            if (NotifyGroup::whereuuid($request->group_uuid)) {
+        if ($request->has('group_id')) {
+            if (NotifyGroup::whereId($request->group_id)) {
                 $notification->recipients()->create([
                     'recipient_type' => 'group',
-                    'recipient_id' => $request->group_uuid,
+                    'recipient_id' => $request->group_id,
                 ]);
             }
         }
@@ -181,7 +181,7 @@ class NotificationController extends Controller
                 $notification->save();
             } else {
                 foreach ($request['user_ids'] as $recipient) {
-                    if (User::whereuuid($recipient)) {
+                    if (User::whereId($recipient)) {
                         $notification->recipients()->create([
                             'recipient_type' => 'user',
                             'recipient_id' => $recipient
@@ -201,7 +201,7 @@ class NotificationController extends Controller
             $notification->save();
             return true;
         }
-        [$type, $uuid] = explode(':', $recipient);
+        [$type, $id] = explode(':', $recipient);
         // التحقق من صحة الـ ID
         $model = match ($type) {
             'user' => \App\Models\User::class,
@@ -209,13 +209,13 @@ class NotificationController extends Controller
             default => null
         };
 
-        if (!$model || !$model::where('uuid', $uuid)->exists()) {
+        if (!$model || !$model::whereId($id)->exists()) {
             return $this->badRequest('Recipient not found.'); //??
         }
 
         $notification->recipients()->create([
             'recipient_type' => $type,
-            'recipient_id' => $uuid
+            'recipient_id' => $id
         ]);
     }
     public function getUserNotifications(Request $request)
@@ -223,14 +223,14 @@ class NotificationController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'perPage' => 'nullable|integer|min:9',
-                'uuid' => 'required|exists:users,uuid',
+                'id' => 'required|exists:users,id',
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
-            if ($user = User::where('uuid', $request->uuid)->first()) {
+            if ($user = User::whereId($request->id)->first()) {
                 $notifications = Notification::where('for_all', true)
                     ->orwhereHas('recipients', function ($query) use ($user) {
                         $query->where(function ($q) use ($user) {

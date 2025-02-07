@@ -80,14 +80,14 @@ class AuditLogController extends Controller
         $auditLogs->getCollection()->transform(function ($log) {
             $log->created_at_readable = Carbon::parse($log->created_at)->format('Y-m-d H:i:s');
             $log->updated_at_readable = Carbon::parse($log->updated_at)->format('Y-m-d H:i:s');
-            $log->uuid = $log->fullName = null;
+            $log->id = $log->fullName = null;
             if ($log->user_type) {
                 $user = new $log->user_type;
                 $details = $user->find($log->user_id);
 
                 // Check if user details were found
                 if ($details) {
-                    $log->uuid = $details->uuid;
+                    $log->id = $details->id;
                     $log->fullName = $details->first_name . " " . $details->last_name;
                 }
             }

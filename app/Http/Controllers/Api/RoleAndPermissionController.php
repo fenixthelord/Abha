@@ -161,14 +161,14 @@ class RoleAndPermissionController extends Controller
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
-            'user_id' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
         ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
 
         try {
-            $user = User::where("uuid", $request->user_id)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -189,7 +189,7 @@ class RoleAndPermissionController extends Controller
             return $this->Forbidden(__('validation.custom.roleAndPerm.forbidden_action'));
         }
         $validatedData = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
             'permissions' => 'nullable'
 
         ], messageValidation());
@@ -197,7 +197,7 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validatedData);
         }
         try {
-            $user = User::where("uuid", $request->user_id)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -229,14 +229,14 @@ class RoleAndPermissionController extends Controller
             return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
         try {
-            $user = User::where("uuid", $request->user_id)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -303,7 +303,7 @@ class RoleAndPermissionController extends Controller
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',
-            'user_id' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
         ], messageValidation());
 
         if ($validator->fails()) {
@@ -314,7 +314,7 @@ class RoleAndPermissionController extends Controller
             DB::beginTransaction();
 
             // Fetch the user
-            $user = User::where("uuid", $request->user_id)->first();
+            $user = User::whereId($request->user_id)->first();
 
             if (!$user) {
                 DB::rollBack();
@@ -378,7 +378,7 @@ class RoleAndPermissionController extends Controller
     public function GetUserPermissions(Request $request)
     {
         try {
-            $user = User::where("uuid", $request->user_id)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             } else {
