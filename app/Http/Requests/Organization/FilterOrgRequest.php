@@ -26,10 +26,10 @@ class FilterOrgRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
+            "department_id" => [
                 "required",
                 "uuid",
-                Rule::exists('departments', 'uuid')->where("deleted_at", null)
+                Rule::exists('departments', 'id')->where("deleted_at", null)
             ]
         ];
     }

@@ -4,54 +4,37 @@ namespace App\Models;
 
 use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
-use Illuminate\Support\Str;
 
-
-class Event extends Model 
+class Event extends BaseModel
 {
     use HasFactory, SoftDeletes, HasTranslations;
 
-    protected $translatable = [
-        'name',
-        'details',
-    ];
+    protected $translatable = ['name', 'details'];
     protected $fillable = [
-        'id',
         'service_id',
+        'form_id',
         'name',
         'details',
-        'form_id',
-        'file',
+        'image',
         'start_date',
         'end_date',
-        'image'
+        'file',
     ];
 
-    protected $casts = [
-        'id' => 'string',
-        'name' => 'json',
-        'details' => 'json',
-    ];
+    protected $casts = ['name' => 'json', 'details' => 'json'];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
-    public function service()
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
-    public function form () {
-        return $this->belongsTo(Form::class);
-        
+
+    public function forms(): MorphMany
+    {
+        return $this->morphMany(Form::class, 'formable');
     }
 
     public function scopeSearch($query, $search)
@@ -61,6 +44,7 @@ class Event extends Model
             ->orWherE("details", "LIKE", "%" . $search . "%")
         ;
     }
+
     public function scopeFilter($query, $service_id)
     {
         return $query

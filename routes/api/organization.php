@@ -13,7 +13,7 @@ Route::prefix('/org')->group(function () {
             Route::post('/department/employee', [OrganizationController::class, 'getDepartmentEmployees']);
             Route::post('/employee/add', [OrganizationController::class, 'AddEmployee']);
             Route::post('/employee/update', [OrganizationController::class, 'UpdateEmployee']);
-            Route::post('/manger/employee', [OrganizationController::class, 'getDepartmentMangers']);
+            Route::post('/manager/employee', [OrganizationController::class, 'getDepartmentManagers']);
         });
     });
 });

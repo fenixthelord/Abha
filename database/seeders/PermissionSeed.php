@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 class PermissionSeed extends Seeder
 {
-// Define the actions you want to create permissions for
+    // Define the actions you want to create permissions for
     protected $actions = ['create', 'update', 'show', 'delete', 'restore'];
 
     /**
@@ -49,10 +49,10 @@ class PermissionSeed extends Seeder
             $relativePath = $file->getRelativePathName();
             // Remove the file extension and replace slashes with namespace separators
             $modelClass = app()->getNamespace() . 'Models\\' . str_replace(
-                    ['/', '.php'],
-                    ['\\', ''],
-                    $relativePath
-                );
+                ['/', '.php'],
+                ['\\', ''],
+                $relativePath
+            );
 
             // Check if the class exists
             if (class_exists($modelClass)) {
@@ -90,17 +90,15 @@ class PermissionSeed extends Seeder
                 ]);
             }
         }
-
     }
-    public function MasterRole(){
-        {
+    public function MasterRole()
+    { {
             DB::beginTransaction();
             try {
                 // Create Master Role
-                $masterRole = Role::where('name' ,'Master')->where('guard_name', 'sanctum')->first();
-                if(!$masterRole){
-                    $masterRole = Role::Create(['name' => 'Master', "displaying"=>"Master","description" => "Master in the system"]);
-
+                $masterRole = Role::where('name', 'Master')->where('guard_name', 'sanctum')->first();
+                if (!$masterRole) {
+                    $masterRole = Role::Create(['name' => 'Master', "displaying" => "Master", "description" => "Master in the system"]);
                 }
 
                 // Define permissions
@@ -113,32 +111,40 @@ class PermissionSeed extends Seeder
                     $permission = Permission::where('name', $permissionName)
                         ->where('guard_name', 'sanctum')
                         ->first();
-                    if(!$permission){
-                    $permission = Permission::Create(['name' => $permissionName, "displaying" => $permissionName,
-                        "guard_name" => "sanctum", "group" => "master", "is_admin" => true]);}
+                    if (!$permission) {
+                        $permission = Permission::Create([
+                            'name' => $permissionName,
+                            "displaying" => $permissionName,
+                            "guard_name" => "sanctum",
+                            "group" => "master",
+                            "is_admin" => true
+                        ]);
+                    }
 
                     // Assign permission to Master role
                     $masterRole->givePermissionTo($permission);
                 }
-$masterUser=User::where('email','masteracount@gmail.com')->first();
-                if(!$masterUser){
-                // Create Master User
-                $masterUser = User::Create(
-                    ['email' => "masteracount@gmail.com",
-                        'password' => Hash::make('master123'),
-                        'first_name' => "master",
-                        'last_name' => "master",
-                        'phone' => "0592257835",
+                $masterUser = User::where('email', 'masteracount@gmail.com')->first();
+                if (!$masterUser) {
+                    // Create Master User
+                    $masterUser = User::Create(
+                        [
+                            'email' => "masteracount@gmail.com",
+                            'password' => Hash::make('master123'),
+                            'first_name' => "master",
+                            'last_name' => "master",
+                            'phone' => "0592257835",
 
-                        'gender' => "male",
-                        'uuid' => \Str::uuid(),
-                        // Update password as needed
-                    ]
-                );}
-                $permissions=Permission::all();
-                if (!$permissions->isEmpty()){
+                            'gender' => "male",
+                            // Update password as needed
+                        ]
+                    );
+                }
+                $permissions = Permission::all();
+                if (!$permissions->isEmpty()) {
 
-                    $masterRole->givePermissionTo($permissions);}
+                    $masterRole->givePermissionTo($permissions);
+                }
 
                 // Assign Master role to the Master user
                 $masterUser->assignRole($masterRole);
@@ -154,39 +160,40 @@ $masterUser=User::where('email','masteracount@gmail.com')->first();
     }
 
     protected function OwnerRole()
-    {
-
-        {
+    { {
             DB::beginTransaction();
             try {
                 // Create Master Role
-$owner=Role::where('name','Master_Owner')->first();
-if(!$owner){
-                $owner = Role::Create(['name' => 'Master_Owner', "displaying"=>"owner","description" => "owner of the system"]);}
+                $owner = Role::where('name', 'Master_Owner')->first();
+                if (!$owner) {
+                    $owner = Role::Create(['name' => 'Master_Owner', "displaying" => "owner", "description" => "owner of the system"]);
+                }
 
                 // Define permissions
 
 
-$OwnerUser=User::where('email','owneracount@gmail.com')->first();
-if(!$OwnerUser){
+                $OwnerUser = User::where('email', 'owneracount@gmail.com')->first();
+                if (!$OwnerUser) {
 
-                // Create Master User
-                $OwnerUser = User::Create(
-                    ['email' => "owneracount@gmail.com",
-                        'password' => Hash::make('owner123'),
-                        'first_name' => "owner",
-                        'last_name' => "Owner",
-                        'phone' => "0592257836",
+                    // Create Master User
+                    $OwnerUser = User::Create(
+                        [
+                            'email' => "owneracount@gmail.com",
+                            'password' => Hash::make('owner123'),
+                            'first_name' => "owner",
+                            'last_name' => "Owner",
+                            'phone' => "0592257836",
 
-                        'gender' => "male",
-                        'uuid' => \Str::uuid(),
-                        // Update password as needed
-                    ]
-                );}
-                $permissions=Permission::where('is_admin',false)->get();
-                if (!$permissions->isEmpty()){
+                            'gender' => "male",
+                            // Update password as needed
+                        ]
+                    );
+                }
+                $permissions = Permission::where('is_admin', false)->get();
+                if (!$permissions->isEmpty()) {
 
-                    $owner->givePermissionTo($permissions);}
+                    $owner->givePermissionTo($permissions);
+                }
 
                 // Assign Master role to the Master user
                 $OwnerUser->assignRole($owner);

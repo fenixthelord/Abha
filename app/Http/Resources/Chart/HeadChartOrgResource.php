@@ -22,15 +22,15 @@ class HeadChartOrgResource extends JsonResource
          */
         return [
             "department_name" => $this->department?->getTranslations("name"),
-            "department_uuid" => $this->department?->uuid,
+            "department_id" => $this->department?->id,
 
-            "uuid" => $this->uuid,
+            "id" => $this->id,
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "image" => $this->image,
             // "position" => $this->organization?->position?->getTranslations("position"),
             "position" => [
-                'en' => "head manger",
+                'en' => "head manager",
                 'ar' => "الرئيس"
             ],
 

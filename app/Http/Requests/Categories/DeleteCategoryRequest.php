@@ -26,12 +26,12 @@ class DeleteCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd($this->parent_category_uuid);
+        // dd($this->parent_category_id);
         return [
-            'uuid' => [
+            'id' => [
                 'required',
-                // 'exists:categories,uuid',
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
+                // 'exists:categories,id',
+                Rule::exists("categories", "id")->where("deleted_at", null)
             ]
         ];
     }

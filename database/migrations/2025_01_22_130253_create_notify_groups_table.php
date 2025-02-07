@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notify_groups', function (Blueprint $table) {
-            $table->id();
-            $table->string('name'); // Group/channel name
-            $table->string('description')->nullable();
+            $table->uuid('id')->primary();
+            $table->string("name", 500); // Group/channel name
+            $table->string("description", 500)->nullable();
             $table->string('model')->default('Users');
-            $table->uuid()->unique();
             $table->timestamps();
         });
     }

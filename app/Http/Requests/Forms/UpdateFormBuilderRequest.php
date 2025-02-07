@@ -17,8 +17,16 @@ class UpdateFormBuilderRequest extends FormRequest
 
     public function rules(): array
     {
+        // dd($this->formable_type);
         return [
-            'category_id' => ['required', 'numeric', Rule::exists('categories', 'id')->whereNull('deleted_at')],
+            'formable_type' => 'required|in:category,event',
+            'formable_id' => [
+                'required',
+                'uuid',
+                $this->formable_type === 'category' ?
+                    Rule::exists('categories', 'id')->whereNull('deleted_at') :
+                    Rule::exists('events', 'id')->whereNull('deleted_at')
+            ],
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
@@ -27,7 +35,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'max:255',
                 Rule::unique('forms', 'name->en')
                     ->ignore($this->route('form'))
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
             'name.ar' => [
                 'required',
@@ -36,7 +44,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'max:255',
                 Rule::unique('forms', 'name->ar')
                     ->ignore($this->route('form'))
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
 
             'fields' => [
@@ -88,7 +96,10 @@ class UpdateFormBuilderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.required' => 'The category name is required.',
+            'formable_id.required' => 'The formable id is required.',
+            'formable_id.uuid' => 'The formable id must be coorect uuid.',
+            'formable_type.required' => 'The formable type is required.',
+            'formable_type.in' => 'Invalid formable type. Allowed types: category,event.',
             'name.required' => 'The form name is required.',
             'name.required.en' => 'The form English name is required.',
             'name.en.unique' => 'The English name already exists in this category.',
