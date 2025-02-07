@@ -16,6 +16,7 @@ class Event extends BaseModel
     protected $translatable = ['name', 'details'];
     protected $fillable = [
         'service_id',
+        'form_id',
         'name',
         'details',
         'image',

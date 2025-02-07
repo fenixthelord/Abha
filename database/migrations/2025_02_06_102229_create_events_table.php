@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_id')->constrained('services')->onDelete('cascade');
+            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
             $table->string('name', 500);
             $table->string("details");
             $table->string("image");
