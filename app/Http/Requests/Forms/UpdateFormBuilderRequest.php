@@ -17,10 +17,16 @@ class UpdateFormBuilderRequest extends FormRequest
 
     public function rules(): array
     {
+        // dd($this->formable_type);
         return [
-            'formable_id' => 'required|uuid',
             'formable_type' => 'required|in:category,event',
-            // 'category_id' => ['required', 'numeric', Rule::exists('categories', 'id')->whereNull('deleted_at')],
+            'formable_id' => [
+                'required',
+                'uuid',
+                $this->formable_type === 'category' ?
+                    Rule::exists('categories', 'id')->whereNull('deleted_at') :
+                    Rule::exists('events', 'id')->whereNull('deleted_at')
+            ],
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
@@ -29,7 +35,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'max:255',
                 Rule::unique('forms', 'name->en')
                     ->ignore($this->route('form'))
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
             'name.ar' => [
                 'required',
@@ -38,7 +44,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'max:255',
                 Rule::unique('forms', 'name->ar')
                     ->ignore($this->route('form'))
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
 
             'fields' => [

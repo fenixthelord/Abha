@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
@@ -16,7 +17,7 @@ class Category extends BaseModel implements Auditable
 
     protected $fillable = ["name", "parent_id",  "department_id"];
 
-    public function forms()
+    public function forms(): MorphMany
     {
         return $this->morphMany(Form::class, 'formable');
     }

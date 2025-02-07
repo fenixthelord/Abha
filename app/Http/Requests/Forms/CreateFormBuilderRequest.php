@@ -27,7 +27,7 @@ class CreateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->en')
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
             'name.ar' => [
                 'required',
@@ -35,7 +35,7 @@ class CreateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->ar')
-                    ->where("category_id", $this->category_id)
+                    ->where("formable_id", $this->formable_id)
             ],
 
             'fields' => [
@@ -93,8 +93,8 @@ class CreateFormBuilderRequest extends FormRequest
             'formable_type.in' => 'Invalid formable type. Allowed types: category,event.',
             'name.required' => 'The form name is required.',
             'name.required.en' => 'The form English name is required.',
-            'name.en.unique' => 'The English name already exists in this category.',
-            'name.required.ar' => 'The Arabic name already exists in this category.',
+            'name.en.unique' => 'The English name already exists in this ' . $this->formale_type . '.',
+            'name.required.ar' => 'The Arabic name already exists in this ' . $this->formale_type . '.',
             'fields.required' => 'The form fields is required.',
             'fields.*.label.required' => 'Each form field must have a label.',
             'fields.*.label.en.required' => 'Each form field must have an English label.',
