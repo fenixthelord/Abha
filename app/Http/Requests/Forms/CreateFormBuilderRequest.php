@@ -18,7 +18,8 @@ class CreateFormBuilderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => 'required|numeric',
+            'formable_id' => 'required|uuid',
+            'formable_type' => 'required|in:category,event',
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
@@ -86,7 +87,10 @@ class CreateFormBuilderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.required' => 'The category name is required.',
+            'formable_id.required' => 'The formable id is required.',
+            'formable_id.uuid' => 'The formable id must be coorect uuid.',
+            'formable_type.required' => 'The formable type is required.',
+            'formable_type.in' => 'Invalid formable type. Allowed types: category,event.',
             'name.required' => 'The form name is required.',
             'name.required.en' => 'The form English name is required.',
             'name.en.unique' => 'The English name already exists in this category.',

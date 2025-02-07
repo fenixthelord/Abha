@@ -28,25 +28,27 @@ class User extends Authenticatable  implements Auditable
      * @var array<int, string>
      */
     protected $fillable = [
-        'email',
-        'password',
+        "department_id",
         'first_name',
         'last_name',
         'phone',
+        'email',
+        'email_verified_at',
+        'password',
         'image',
         'alt',
         'gender',
-        'otp_code',
         'job',
         'job_id',
         'role',
-        'verify_code',
         'is_admin',
         'active',
+        'otp_code',
         'otp_expires_at',
+        'otp_verified',
+        'verify_code',
         'refresh_token',
         'refresh_token_expires_at',
-        "department_id"
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -69,6 +71,7 @@ class User extends Authenticatable  implements Auditable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'otp_expires_at' => 'datetime',
         'password' => 'hashed',
         'refresh_token_expires_at' => 'datetime',
     ];

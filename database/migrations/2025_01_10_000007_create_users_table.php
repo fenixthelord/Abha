@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('department_id')->nullable()->constrained('departments')->nullOnDelete()->onUpdate("cascade");
             $table->string('first_name');
             $table->string('last_name');
             $table->char('phone')->unique();
