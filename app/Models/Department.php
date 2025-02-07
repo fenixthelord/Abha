@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
@@ -14,7 +15,7 @@ class Department extends BaseModel implements Auditable
     private $translatable = ['name'];
     protected $fillable = ['name'];
 
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(Category::class, "department_id");
     }
@@ -31,8 +32,13 @@ class Department extends BaseModel implements Auditable
         });
     }
 
-    public function employees()
+    public function employees(): HasMany
     {
         return $this->hasMany(User::class, "department_id");
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
     }
 }
