@@ -103,10 +103,10 @@ class ServiceController extends Controller {
         }
     }
 
-    public function update(Request $request, $uuid) {
+    public function update(Request $request, $id) {
         DB::beginTransaction();
         try {
-            $service = Service::where('id', $uuid)->first();
+            $service = Service::where('id', $id)->first();
 
             if (!$service) {
                 return $this->badRequest(__('validation.custom.service.not_found'));
@@ -163,25 +163,25 @@ class ServiceController extends Controller {
         }
     }
 
-    public function destroy($uuid) {
+    public function destroy($id) {
         DB::beginTransaction();
         try {
-            $validator = Validator::make(['uuid' => $uuid], [
-                'uuid' => 'required|exists:services,id',
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required|exists:services,id',
             ], [
-                'uuid.required' => 'Service uuid is required.',
-                'uuid.exists' => 'Service uuid not found.',
+                'id.required' => 'Service id is required.',
+                'id.exists' => 'Service id not found.',
             ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
-            if (Service::where('id', $uuid)->onlyTrashed()->first()) {
+            if (Service::where('id', $id)->onlyTrashed()->first()) {
                 return $this->badRequest(__('validation.custom.service.deleted'));
             }
 
-            if ($service = Service::where('id', $uuid)->first()) {
+            if ($service = Service::where('id', $id)->first()) {
                 $name = $service->getTranslations("name");
                 $service->name = [
                     'en' => $name['en'] . '-' . $service->id . '-deleted',
@@ -191,7 +191,7 @@ class ServiceController extends Controller {
                 $service->delete();
 
                 DB::commit();
-                return $this->returnSuccessMessage(__('validation.custom.service.delete'));
+                return $this->returnSuccessMessage(__('validation.custom.service.deleted'));
             } else {
                 return $this->badRequest(__('validation.custom.service.not_found'));
             }

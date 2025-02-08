@@ -2,11 +2,12 @@
 
 return [
     'custom' => [
-        'department_uuid' => [
-            'required' => 'The department UUID field is required.',
-            'exists' => 'The selected department UUID is invalid.',
+
+        'department_id' => [
+            'required' => 'The department ID field is required.',
+            'exists' => 'The selected department ID is invalid.',
             'unique' => 'This department already exists.',
-            'uuid' => 'The UUID is invalid.',
+            'id' => 'The ID is invalid.',
         ],
 
         'roleAndPerm' => [
