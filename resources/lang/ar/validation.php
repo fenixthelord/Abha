@@ -2,7 +2,7 @@
 
 return [
     'custom' => [
-        'department_uuid' => [
+        'department_id' => [
             'required' => 'حقل معرف القسم مطلوب.',
             'exists' => 'معرف القسم المحدد غير صالح.',
             "unique" => "هذا القسم موجود بالفعل.",
@@ -254,10 +254,12 @@ return [
             'required' => 'حقل الوصف مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
             'array' => 'يجب ادخال الوصف بالعربية و الانكليزية'
-        ], 'description.en' => [
+        ],
+        'description.en' => [
             'required' => 'حقل الوصف بالانكليزية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
-        ], 'description.ar' => [
+        ],
+        'description.ar' => [
             'required' => 'حقل الوصف بالعربية مطلوب.',
             'string' => 'يجب أن يكون الوصف نصًا.',
         ],
@@ -276,10 +278,10 @@ return [
             'required' => 'لاشعار مطلوب.',
             'string' => 'الاشعار يجب ان يكون نص.'
         ],
-        'group_uuid' => [
+        'group_id' => [
             'exists' => 'المجموعة غير صالحة',
         ],
-        'category_uuid' => [
+        'category_id' => [
             "required" => "معرف الفئة مطلوب ",
             "uuid" => "معرف الفئة غير صحيح",
             "exists" => "معرف الفئة غير صحيح"
@@ -306,7 +308,7 @@ return [
         'delete' => 'تم حذف القسم'
     ],
     'attributes' => [
-        'department_uuid' => 'معرف القسم',
+        'department_id' => 'معرف القسم',
         'name' => 'الاسم',
         'name.en' => 'الاسم الإنجليزي',
         'name.ar' => 'الاسم العربي',
@@ -331,6 +333,6 @@ return [
         'description' => 'الوصف',
         'permission' => 'الصلاحية',
         'role' => 'الدور',
-        "category_uuid" => "معرف الفئة"
+        "category_id" => "معرف الفئة"
     ]
 ];

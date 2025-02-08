@@ -2,7 +2,7 @@
 
 return [
     'custom' => [
-        'department_uuid' => [
+        'department_id' => [
             'required' => 'The department UUID field is required.',
             'exists' => 'The selected department UUID is invalid.',
             'unique' => 'This department already exists.',
@@ -230,7 +230,8 @@ return [
         ],
         'image' => [
             'required' => 'Image is required.',
-            'image' => 'Image must be an image.', 'mimes' => 'Image must be a file of type: jpeg, jpg, png.',
+            'image' => 'Image must be an image.',
+            'mimes' => 'Image must be a file of type: jpeg, jpg, png.',
             'max' => 'Image must be less than 2MB.',
         ],
         'type' => [
@@ -280,7 +281,7 @@ return [
     ],
 
     'attributes' => [
-        'department_uuid' => 'Department UUID',
+        'department_id' => 'Department UUID',
         'name' => 'Name',
         'name.en' => 'English Name',
         'name.ar' => 'Arabic Name',

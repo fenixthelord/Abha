@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,13 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->uuid();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
+            $table->foreignUuid('department_id')->constrained('departments')->onDelete('cascade');
             $table->string('name');
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->unsignedBigInteger("department_id")->nullable();
-            $table->foreign("department_id")->references("id")->on("departments")->onDelete("cascade");
+            $table->unique(["name", "parent_id"]);
             $table->softDeletes();
             $table->timestamps();
         });

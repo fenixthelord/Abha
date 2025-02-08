@@ -2,31 +2,24 @@
 
 namespace App\Models\Role;
 
-use App\Http\Traits\HasAutoPermissions;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Spatie\Permission\Models\Role as BaseRole;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
 use Spatie\Translatable\HasTranslations;
 
-class Role extends BaseRole   implements Auditable
+class Role extends BaseRole implements Auditable
 {
     use AuditingTrait;
-    use HasTranslations;
+    use HasTranslations, HasUuids;
     use \OwenIt\Auditing\Auditable;
-    //use HasAutoPermissions;
-    private $translatable = ['displaying','description'];
-    // You may add additional properties or methods here
-  /*  protected static function booted()
-    {
-        //static::addGlobalScope(new MasterScope());
-    }*/
+
+    protected $primaryKey = 'id';
+
+    private $translatable = ['displaying', 'description'];
+
     public function getTransAble()
     {
-        return ['displaying','description']; // Example columns for translation
+        return ['displaying', 'description'];
     }
-
-
 }

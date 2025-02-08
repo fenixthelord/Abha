@@ -14,7 +14,7 @@ class FormField extends BaseModel
     use HasTranslations, SoftDeletes;
 
     protected $fillable = ['form_id', 'label', 'placeholder', 'type', 'required', 'order'];
-    private $translatable = ['label', 'placeholder'];
+    private $translatable = ['label'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     protected $casts = [

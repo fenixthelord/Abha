@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
-use phpseclib3\Common\Functions\Strings;
 use Spatie\Translatable\HasTranslations;
 
-class Service extends Model implements Auditable {
+class Service extends BaseModel implements Auditable
+{
     use HasFactory, SoftDeletes, AuditingTrait, HasTranslations;
 
     protected $table = 'services';
@@ -20,10 +19,10 @@ class Service extends Model implements Auditable {
 
     protected $fillable = [
         'id',
+        'department_id',
         'name',
         'details',
         'image',
-        'department_id',
     ];
 
     protected $casts =['id' => 'String'];

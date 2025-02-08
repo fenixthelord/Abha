@@ -33,7 +33,7 @@ class DepartmentsControllers extends Controller
                            $data["groups"] = DepartmentResource::collection($department);
                            return $this->PaginateData($data, $department);
                        }*/
-            $fields = ['name->ar','name->en'];
+            $fields = ['name->ar', 'name->en'];
             $department = $this->allWithSearch(new Department(), $fields, $request);
             $data['department'] = DepartmentResource::collection($department);
             return $this->PaginateData($data, $department);
@@ -43,10 +43,10 @@ class DepartmentsControllers extends Controller
     }
 
 
-    public function show($uuid)
+    public function show($id)
     {
         try {
-            if ($department = Department::whereuuid($uuid)->first()) {
+            if ($department = Department::find($id)) {
                 $data['department'] = DepartmentResource::make($department);
                 return $this->returnData($data);
             } else {
@@ -62,7 +62,7 @@ class DepartmentsControllers extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'array','max:254'],
+                'name' => ['required', 'array', 'max:254'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
                 'name.ar' => ['required', 'max:255', Rule::unique('departments', 'name->ar')]
             ], messageValidation());
@@ -83,12 +83,12 @@ class DepartmentsControllers extends Controller
         }
     }
 
-    public function update(Request $request, $uuid)
+    public function update(Request $request, $id)
     {
         DB::beginTransaction();
         try {
 
-            if ($department = Department::whereuuid($uuid)->first()) {
+            if ($department = Department::find($id)) {
                 $validator = Validator::make($request->all(), [
                     'name' => ['nullable', 'array'],
                     'name.en' => ['required_with:name', 'max:255', Rule::unique('departments', 'name->en')->ignore($department->id)],
@@ -111,26 +111,28 @@ class DepartmentsControllers extends Controller
         }
     }
 
-    public function destroy($uuid)
+    public function destroy($id)
     {
         DB::beginTransaction();
         try {
-            $validator = Validator::make(['uuid' => $uuid], [
-                'uuid' => 'required|exists:departments,uuid',
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required|exists:departments,id',
             ], [
-                'uuid.required' => 'Department uuid is required.',
-                'uuid.exists' => 'Department uuid not found.',
+                'id.required' => 'Department id is required.',
+                'id.exists' => 'Department id not found.',
             ]);
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if (Department::whereuuid($uuid)->onlyTrashed()->first()) {
+            if (Department::onlyTrashed()->find($id)) {
                 return $this->badRequest(__('validation.custom.department.deleted'));
             } else {
-                if ($department = Department::whereuuid($uuid)->first()) {
+                if ($department = Department::find($id)) {
                     $name = $department->getTranslations("name");
-                    $department->name = ['en' => $name['en'] . '-' . $department->uuid . '-deleted',
-                        'ar' => $name['ar'] . '-' . $department->uuid . '-محذوف'];
+                    $department->name = [
+                        'en' => $name['en'] . '-' . $department->id . '-deleted',
+                        'ar' => $name['ar'] . '-' . $department->id . '-محذوف'
+                    ];
                     $department->save();
                     $department->deleteWithChildren();
                     $department->delete();
@@ -138,7 +140,6 @@ class DepartmentsControllers extends Controller
                     return $this->returnSuccessMessage(__('validation.custom.department.delete'));
                 } else {
                     return $this->badRequest(__('validation.custom.department.notfound'));
-
                 }
             }
         } catch (\Exception $e) {

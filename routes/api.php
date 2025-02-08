@@ -1,5 +1,5 @@
 <?php
-
+/*
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DatabaseController;
 use App\Http\Controllers\Api\DepartmentsControllers;
+use App\Http\Controllers\Api\Event\EventController;
 use App\Http\Controllers\Api\ExcelController;
 use App\Http\Controllers\Api\Forms\FormBuilderController;
 use App\Http\Controllers\Api\Forms\FormFieldController;
@@ -15,11 +16,11 @@ use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoleAndPermissionController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotifyGroupController;
 use App\Http\Controllers\Api\OrganizationController;
-use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\UploadFileController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,9 +33,9 @@ use App\Http\Controllers\Api\ServiceController;
 */
 
 // Change Lang
+/*
 Route::get('lang/{locale}', [LanguageController::class, 'swap'])->middleware("changeLang");
-
-
+Route::post("upload/file" , [UploadFileController::class , "upload"]);
 
 // Login Throw Social (***** For Customers Only ******) Don't Use it
 Route::post('/auth/social-login', [SocialLoginController::class, 'login'])
@@ -151,7 +152,7 @@ Route::get('/user/notifications', [NotificationController::class, 'getUserNotifi
  * All Departments and Categories
  *
  */
-
+/*
 Route::group(["prefix" => "/categories"], function () {
 
     Route::get("/show", [CategoryController::class, "list"]);
@@ -172,6 +173,7 @@ Route::prefix('departments')->group(function () {
  * Organization Routes
  *
  */
+/*
 Route::group(["prefix" => "/org"], function () {
     Route::get('/list' , [OrganizationController::class , "index"] );
     Route::get('/list/chart' , [OrganizationController::class , "chart"] );
@@ -180,7 +182,7 @@ Route::group(["prefix" => "/org"], function () {
     Route::post('/department/employee',[OrganizationController::class,'getDepartmentEmployees']);
     Route::post('/employee/add',[OrganizationController::class,'AddEmployee']);
     Route::post('/employee/update',[OrganizationController::class,'UpdateEmployee']);
-    Route::post('/manger/employee',[OrganizationController::class,'getDepartmentMangers']);
+    Route::post('/manager/employee',[OrganizationController::class,'getDepartmentManagers']);
 });
 
 Route::group(["prefix" => "/forms"], function () {
@@ -205,6 +207,13 @@ Route::group(["prefix" => "/db"], function () {
 
 Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
 
+Route::group(["prefix" => "/event"], function () {
+   Route::get('/', [EventController::class, 'list']);
+//    Route::get('/show/{id}', [EventController::class, 'showEvent']);
+   Route::post('/create', [EventController::class, 'createEvent']);
+   Route::put('/update/{id}', [EventController::class, 'updateEvent']);
+   Route::delete('/delete/{id}', [EventController::class, 'createEvent']);
+});
 
 Route::prefix('services')->group(function () {
     Route::get('/index', [ServiceController::class, 'index']);

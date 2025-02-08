@@ -7,6 +7,8 @@ use App\Http\Requests\Forms\CreateFormBuilderRequest;
 use App\Http\Requests\Forms\UpdateFormBuilderRequest;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Category;
+use App\Models\Event;
 use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
 use App\Models\Forms\FormFieldDataSource;
@@ -25,7 +27,7 @@ class FormBuilderController extends Controller
             $perPage = $request->input('perPage', 10);
             $forms = Form::orderByAll($request->sortBy, $request->sortType)
                 ->filter($request->only('search'))
-                ->with(['category', 'fields.options', 'fields.sources']);
+                ->with(['formable', 'fields.options', 'fields.sources']);
             $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
 
             $data['forms'] =  FormResource::collection($form);
@@ -38,7 +40,7 @@ class FormBuilderController extends Controller
     public function show($id)
     {
         try {
-            $form = Form::with(['category', 'fields.options', 'fields.sources'])->findOrFail($id);
+            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -51,9 +53,17 @@ class FormBuilderController extends Controller
         try {
             DB::beginTransaction();
             $form = Form::create([
-                'category_id' => $request->category_id,
                 'name' => $request->name,
+                'formable_type' => $request->formable_type,
+                'formable_id' => $request->formable_id
             ]);
+            if ($request->formable_type === 'category') {
+                $category = Category::findOrfail($request->formable_id);
+                $category->forms()->save($form);
+            } else {
+                $event = Event::findOrfail($request->formable_id);
+                $event->forms()->save($form);
+            }
 
             foreach ($request['fields'] as $field_data) {
                 $form_field = $form->fields()->create($field_data);
@@ -66,9 +76,9 @@ class FormBuilderController extends Controller
                         $form_field->sources()->create($data_source);
                     }
             }
-            DB::commit();
-            $form = Form::with(['category', 'fields.options', 'fields.sources'])->findOrFail($form->id);
+            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
+            DB::commit();
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
@@ -78,10 +88,21 @@ class FormBuilderController extends Controller
 
     public function update(UpdateFormBuilderRequest $request, $id)
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             $form = Form::findOrFail($id);
-            $form->update(['category_id' => $request->category_id, 'name' => $request->name]);
+            $form->update([
+                'name' => $request->name,
+                'formable_type' => $request->formable_type,
+                'formable_id' => $request->formable_id
+            ]);
+            if ($request->formable_type === 'category') {
+                $category = Category::findOrfail($request->formable_id);
+                $category->forms()->save($form);
+            } else {
+                $event = Event::findOrfail($request->formable_id);
+                $event->forms()->save($form);
+            }
 
             $field_ids = $request->input('fields.*.id');
             $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);
@@ -132,7 +153,7 @@ class FormBuilderController extends Controller
                         }
                 }
             }
-            $form = Form::with(['category', 'fields.options', 'fields.sources'])->findOrFail($id);
+            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             DB::commit();
             return $this->returnData($data);

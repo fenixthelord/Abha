@@ -3,9 +3,8 @@
 namespace App\Models\Forms;
 
 use App\Models\BaseModel;
-use App\Models\Category;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -13,13 +12,13 @@ class Form extends BaseModel
 {
     use HasTranslations, SoftDeletes;
 
-    protected $fillable = ['category_id', 'name'];
+    protected $fillable = ['formable_id', 'formable_type', 'name'];
     private $translatable = ['name'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
-    public function category(): BelongsTo
+    public function formable(): MorphTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->morphTo();
     }
 
     public function fields(): HasMany

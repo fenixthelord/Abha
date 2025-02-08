@@ -36,13 +36,14 @@ class RoleAndPermissionController extends Controller
         /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
         return $this->returnData($data);*/
-        $fields = ['displaying->ar','displaying->en'];
-        $roles = $this->allWithSearch(new Role(), $fields, $request,'name','Master','!=');
+        $fields = ['displaying->ar', 'displaying->en'];
+        $roles = $this->allWithSearch(new Role(), $fields, $request, 'name', 'Master', '!=');
         $date['roles'] = RolesResource::collection($roles);
-        return $this->PaginateData($date,$roles);
+        return $this->PaginateData($date, $roles);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
@@ -50,7 +51,7 @@ class RoleAndPermissionController extends Controller
                 return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
             }
             $validator = Validator::make($request->all(), [
-                'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
+                // 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displaying.en" => "required|string|unique:roles,displaying",
                 "displaying.ar" => "required|string|unique:roles,displaying",
 
@@ -59,7 +60,7 @@ class RoleAndPermissionController extends Controller
                 'permission' => 'nullable|array',
                 'permission.*' => 'exists:permissions,name'
 
-            ],messageValidation());
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
@@ -69,7 +70,7 @@ class RoleAndPermissionController extends Controller
 
             $words = explode(' ', $request->displaying['en']);
 
-$name=implode(".",$words);
+            $name = implode(".", $words);
 
 
 
@@ -109,7 +110,8 @@ $name=implode(".",$words);
             return $this->handleException($e);
         }
     }
-    public function AssignPermissionsToRole(Request $request) {
+    public function AssignPermissionsToRole(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'permission' => 'nullable|array',
             'permission.*' => 'exists:permissions,name',
@@ -159,14 +161,14 @@ $name=implode(".",$words);
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
-            'user_uuid' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
         ], messageValidation());
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
 
         try {
-            $user = User::where("uuid", $request->user_uuid)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -181,12 +183,13 @@ $name=implode(".",$words);
         }
     }
 
-    public function assignPermission(Request $request) {
+    public function assignPermission(Request $request)
+    {
         if (!auth()->user()->hasPermissionTo("user.update")) {
             return $this->Forbidden(__('validation.custom.roleAndPerm.forbidden_action'));
         }
         $validatedData = Validator::make($request->all(), [
-            'user_uuid' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
             'permissions' => 'nullable'
 
         ], messageValidation());
@@ -194,7 +197,7 @@ $name=implode(".",$words);
             return $this->returnValidationError($validatedData);
         }
         try {
-            $user = User::where("uuid", $request->user_uuid)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -219,20 +222,21 @@ $name=implode(".",$words);
         }
     }
 
-    function removeRoleFromUser(Request $request) {
+    function removeRoleFromUser(Request $request)
+    {
         // Find the user by ID
         if (!auth()->user()->hasPermissionTo("user.update")) {
             return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
         $validator = Validator::make($request->all(), [
-            'user_uuid' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
             'roleName' => 'required|string'
         ]);
         if ($validator->fails()) {
             return $this->returnValidationError($validator);
         }
         try {
-            $user = User::where("uuid", $request->user_uuid)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             }
@@ -256,7 +260,8 @@ $name=implode(".",$words);
         }
     }
 
-    public function RemovePermissionsFromRole(Request $request) {
+    public function RemovePermissionsFromRole(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'exists:permissions,name',
@@ -293,11 +298,12 @@ $name=implode(".",$words);
         }
     }
 
-    public function RemoveDirectPermission(Request $request) {
+    public function RemoveDirectPermission(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array|min:1',
             'permission.*' => 'string|exists:permissions,name',
-            'user_uuid' => 'required|exists:users,uuid',
+            'user_id' => 'required|exists:users,id',
         ], messageValidation());
 
         if ($validator->fails()) {
@@ -308,7 +314,7 @@ $name=implode(".",$words);
             DB::beginTransaction();
 
             // Fetch the user
-            $user = User::where("uuid", $request->user_uuid)->first();
+            $user = User::whereId($request->user_id)->first();
 
             if (!$user) {
                 DB::rollBack();
@@ -341,7 +347,8 @@ $name=implode(".",$words);
         }
     }
 
-    public function CreatePermission(Request $request) {
+    public function CreatePermission(Request $request)
+    {
         $validatedData = Validator::make($request->all(), [
             'name' => 'required|string|unique:permissions,name|regex:/^[^\s]+$/',
             'displaying' => 'required|string|unique:permissions,displaying',
@@ -368,9 +375,10 @@ $name=implode(".",$words);
         }
     }
 
-    public function GetUserPermissions(Request $request) {
+    public function GetUserPermissions(Request $request)
+    {
         try {
-            $user = User::where("uuid", $request->user_uuid)->first();
+            $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
             } else {
@@ -387,7 +395,8 @@ $name=implode(".",$words);
         }
     }
 
-    public function SyncPermission(Request $request) {
+    public function SyncPermission(Request $request)
+    {
         if (!auth()->user()->hasPermissionTo("role.update")) {
             return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
@@ -449,7 +458,8 @@ $name=implode(".",$words);
         }
     }
 
-    public function GetAllPermissions() {
+    public function GetAllPermissions()
+    {
         try {
             if (!auth()->user()->hasPermissionTo("permission.show")) {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
@@ -465,7 +475,8 @@ $name=implode(".",$words);
         }
     }
 
-    public function DeleteRole(Request $request) {
+    public function DeleteRole(Request $request)
+    {
         if (!auth()->user()->hasPermissionTo("role.delete")) {
             return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
         }
@@ -506,7 +517,9 @@ $name=implode(".",$words);
 
     public function ShowRole(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(
+            $request->all(),
+            [
                 'roleName' => 'required|exists:roles,name'
             ]
         );
