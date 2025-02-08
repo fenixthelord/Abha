@@ -65,7 +65,6 @@ class Organization extends BaseModel  implements Auditable
     public function scopeOnlyHeadManagers($query, $departmentId)
     {
         $employeesIDs = $this->distinct()->pluck("employee_id")->toArray();
-        // dd($employeesIDs);  
         return $query
             ->whereHas('department', function ($q) use ($departmentId) {
                 $q->where('id', $departmentId);
@@ -86,10 +85,9 @@ class Organization extends BaseModel  implements Auditable
             ->pluck("employee_id")
             ->toArray();
 
-        dd($employeesWithOutHead);
-
         $employees = $employeesWithOutHead  ;
-        $employees[] = $query
-            ->onlyHeadManagers($departmentId);
+        $manger = self::onlyHeadManagers($departmentId);
+        
+        return array_merge($employees, $manger);
     }
 }
