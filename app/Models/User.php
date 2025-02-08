@@ -145,5 +145,12 @@ class User extends Authenticatable  implements Auditable
                 $model->id = Str::uuid();
             }
         });
+
+        static::deleting(function ($post) {
+            // Disallow users with the 'Master' role from deleting posts
+            if (auth()->check() && auth()->user()->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.');
+            }
+        });
     }
 }
