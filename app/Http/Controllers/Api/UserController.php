@@ -251,8 +251,8 @@ class UserController extends Controller
             }
             $selected_user = User::whereId($request->id)->first();
             if ($selected_user) {
-                if ($selected_user->hasRole("Master") || $selected_user->id == 1) {
-                    return $this->Forbidden('This user is Master and can not be deleted');
+                if ($selected_user->hasRole("Master") || $request->user()->hasRole('Master')) {
+                    return $this->Forbidden('This user is Master and can not be deleted.');
                 }
                 $selected_user->delete();
                 DB::commit();
