@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ServiceResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Http\Traits\ResponseTrait;
@@ -93,9 +94,9 @@ class ServiceController extends Controller {
                 'department_id' => $department_id,
             ]);
 
-//            $data['service'] = ServiceResource::make($service);
+           $data['service'] = ServiceResource::make($service);
             DB::commit();
-            return $this->returnSuccessMessage(__('validation.custom.service.created'));
+            return $this->returnSuccessMessage($data , __('validation.custom.service.created'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
