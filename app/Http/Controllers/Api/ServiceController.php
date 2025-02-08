@@ -175,8 +175,8 @@ class ServiceController extends Controller {
             $validator = Validator::make(['id' => $id], [
                 'id' => 'required|exists:services,id',
             ], [
-                'id.required' => 'Service id is required.',
-                'id.exists' => 'Service id not found.',
+                'id.required' => __('validation.custom.service.id_required'),
+                'id.exists' => __('validation.custom.service.id_exists'),
             ]);
 
             if ($validator->fails()) {
