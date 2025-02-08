@@ -19,7 +19,7 @@ class ServiceResource extends JsonResource
             'details' => $this->getTranslations('details'),
             'image' => $this->image,
             'department' => [
-                'id' => $this->department->uuid ?? null,
+                'id' => $this->department->id ?? null,
                 'name' => $this->department->name ?? null,
             ],
         ];
