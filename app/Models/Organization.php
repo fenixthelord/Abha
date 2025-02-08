@@ -75,4 +75,21 @@ class Organization extends BaseModel  implements Auditable
             ->pluck("manager_id")
             ->toArray();
     }
+
+    public function scopeMangersAndEmployees($query, $departmentId)
+    {
+
+        $employeesWithOutHead = $query
+            ->whereHas('department', function ($q) use ($departmentId) {
+                $q->where('id', $departmentId);
+            })
+            ->pluck("employee_id")
+            ->toArray();
+
+        dd($employeesWithOutHead);
+
+        $employees = $employeesWithOutHead  ;
+        $employees[] = $query
+            ->onlyHeadManagers($departmentId);
+    }
 }

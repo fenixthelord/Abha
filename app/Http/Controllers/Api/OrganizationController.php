@@ -44,12 +44,38 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * old version
+     */
+    // public function getDepartmentEmployees(AllRequest $request)
+    // {
+
+    //     try {
+    //         $department = Department::whereId($request->get('department_id'))->pluck("id")->first();
+    //         $user = User::where("department_id", $department)->get();
+    //         $data['employees'] = UserResource::collection($user)->each->onlyName();
+    //         return $this->returnData($data);
+    //     } catch (\Exception $exception) {
+    //         return $this->handleException($exception);
+    //     }
+    // }
+
+    /**
+     * new version
+     */
     public function getDepartmentEmployees(AllRequest $request)
     {
-
         try {
-            $department = Department::whereId($request->get('department_id'))->pluck("id")->first();
-            $user = User::where("department_id", $department)->get();
+
+            $mangers = Organization::mangersAndEmployees($request->department_id);
+
+            dd($mangers);
+            $user = User::query()
+                ->whereHas("department" , function($q) use($request){
+                    $q->where("id" , $request->department_id);
+                })
+                ->whereIn('id')
+                ;
             $data['employees'] = UserResource::collection($user)->each->onlyName();
             return $this->returnData($data);
         } catch (\Exception $exception) {
