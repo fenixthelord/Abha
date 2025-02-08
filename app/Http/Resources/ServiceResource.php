@@ -14,12 +14,12 @@ class ServiceResource extends JsonResource
      */
     public function toArray(Request $request) {
         return [
-            'uuid' => $this->id,
+            'id' => $this->id,
             'name' => $this->getTranslations('name'),
             'details' => $this->getTranslations('details'),
             'image' => $this->image,
             'department' => [
-                'uuid' => $this->department->uuid ?? null,
+                'id' => $this->department->uuid ?? null,
                 'name' => $this->department->name ?? null,
             ],
         ];

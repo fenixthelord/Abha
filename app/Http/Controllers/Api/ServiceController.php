@@ -35,7 +35,7 @@ class ServiceController extends Controller {
 
             if ($departmentUuid) {
                 $query->whereHas('department', function ($q) use ($departmentUuid) {
-                    $q->where('uuid', $departmentUuid);
+                    $q->where('id', $departmentUuid);
                 });
             }
 
