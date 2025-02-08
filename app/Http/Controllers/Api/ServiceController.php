@@ -15,9 +15,19 @@ use Illuminate\Validation\Rule;
 use App\Models\Department;
 class ServiceController extends Controller {
     use ResponseTrait;
-
     public function index(Request $request) {
         try {
+            $validator = Validator::make($request->all(), [
+                'page' => ['nullable', 'integer', 'min:1'],
+                'per_page' => ['nullable', 'integer', 'min:1'],
+                'search' => ['nullable', 'string'],
+                'department_id' => ['nullable', 'exists:departments,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
             $page = intval($request->get('page', 1));
             $perPage = intval($request->get('per_page', 10));
             $search = $request->input('search', null);
@@ -45,6 +55,7 @@ class ServiceController extends Controller {
             if ($page > $results->lastPage()) {
                 $results = $query->paginate($perPage, ['*'], 'page', $results->lastPage());
             }
+
             return $this->PaginateData([
                 'services' => ServiceResource::collection($results)
             ], $results);
@@ -52,7 +63,6 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
     public function show($id) {
         try {
             if ($service = Service::where('id', $id)->first()) {
@@ -65,7 +75,6 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
     public function store(Request $request) {
         DB::beginTransaction();
         try {
@@ -74,11 +83,10 @@ class ServiceController extends Controller {
                 'name' => ['required', 'array', 'max:255'],
                 'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
                 'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],
-                'details' => ['required', 'array'],
-                'details.en' => ['required'],
-                'details.ar' => ['required'],
-                'image' => ['required', 'string'],
-
+                'details' => ['nullable', 'array'],
+                'details.en' => ['nullable'],
+                'details.ar' => ['nullable'],
+                'image' => ['nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -102,7 +110,6 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
     public function update(Request $request, $id) {
         DB::beginTransaction();
         try {
@@ -121,7 +128,7 @@ class ServiceController extends Controller {
                 'details.ar' => ['nullable', 'max:1000'],
                 'image' => ['nullable', 'string'],
                 'department_id' => ['nullable', 'exists:departments,id'],
-            ], messageValidation());
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -162,7 +169,6 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
     public function destroy($id) {
         DB::beginTransaction();
         try {
