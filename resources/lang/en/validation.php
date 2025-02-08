@@ -54,6 +54,8 @@ return [
             'updated' => 'Service updated successfully.',
             'deleted' => 'Service deleted successfully.',
             'try_again' => 'An error occurred, please try again.',
+            'id_required' => 'Service id is required.',
+            'id_exists' => 'Service id not found.',
         ],
         'departmentService' => [
             'not_found' => 'Department not found.',
