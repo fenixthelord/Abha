@@ -15,9 +15,9 @@ Route::prefix('services')->group(function () {
         });
     });
 });
-                                          /*
-                                           *  About Routes
-                                           */
+                                          /*                /*
+                                        ****  About Routes  ****
+                                           */              /*
 
 /* Route: GET /api/services/index
 * URL: GET http://your-api-url/api/services?page=1&per_page=10&search=service_name&department_id=
