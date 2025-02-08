@@ -47,8 +47,9 @@ class EventController extends Controller
         try {
             DB::beginTransaction();
             $event = Event::create($request->validated());
+            $data["event"] = EventResource::make($event);
             DB::commit();
-            return $this->returnSuccessMessage("Event Created successfully");
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

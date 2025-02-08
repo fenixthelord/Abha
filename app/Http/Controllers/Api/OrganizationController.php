@@ -44,13 +44,39 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * old version
+     */
+    // public function getDepartmentEmployees(AllRequest $request)
+    // {
+
+    //     try {
+    //         $department = Department::whereId($request->get('department_id'))->pluck("id")->first();
+    //         $user = User::where("department_id", $department)->get();
+    //         $data['employees'] = UserResource::collection($user)->each->onlyName();
+    //         return $this->returnData($data);
+    //     } catch (\Exception $exception) {
+    //         return $this->handleException($exception);
+    //     }
+    // }
+
+    /**
+     * new version
+     */
     public function getDepartmentEmployees(AllRequest $request)
     {
-
         try {
-            $department = Department::whereId($request->get('department_id'))->pluck("id")->first();
-            $user = User::where("department_id", $department)->get();
-            $data['employees'] = UserResource::collection($user)->each->onlyName();
+            $availableMangers = Organization::query()->MangersAndEmployees($request->department_id);
+            $query = User::query()->whereHas("department", function ($q) use ($request) {
+                $q->where("id", $request->department_id);
+            });
+
+            if (!empty($availableMangers)) {
+                $query->whereIn('id', $availableMangers);
+            }
+
+            $mangers = $query->get();
+            $data['employees'] = UserResource::collection($mangers)->each->onlyName();
             return $this->returnData($data);
         } catch (\Exception $exception) {
             return $this->handleException($exception);
@@ -225,8 +251,8 @@ class OrganizationController extends Controller
                 Department::whereId($request->department_id)->pluck("id")->firstOrFail()
             );
 
-            $managers = User::whereIn("id", $managersIDs)->get();
-            $data["chart"] = HeadChartOrgResource::collection($managers->load("employees"));
+            $managers = User::where("id", $managersIDs)->firstOrFail();
+            $data["chart"] = HeadChartOrgResource::make($managers->load("employees"));
 
             return $this->returnData($data);
         } catch (\Exception $e) {
