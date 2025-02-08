@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ServiceResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Http\Traits\ResponseTrait;
@@ -20,7 +21,7 @@ class ServiceController extends Controller {
             $page = intval($request->get('page', 1));
             $perPage = intval($request->get('per_page', 10));
             $search = $request->input('search', null);
-            $departmentUuid = $request->input('department_uuid', null);
+            $departmentId = $request->input('department_id', null);
 
             $query = Service::query();
 
@@ -33,9 +34,9 @@ class ServiceController extends Controller {
                 });
             }
 
-            if ($departmentUuid) {
-                $query->whereHas('department', function ($q) use ($departmentUuid) {
-                    $q->where('id', $departmentUuid);
+            if ($departmentId) {
+                $query->whereHas('department', function ($q) use ($departmentId) {
+                    $q->where('id', $departmentId);
                 });
             }
 
@@ -52,9 +53,9 @@ class ServiceController extends Controller {
         }
     }
 
-    public function show($uuid) {
+    public function show($id) {
         try {
-            if ($service = Service::where('id', $uuid)->first()) {
+            if ($service = Service::where('id', $id)->first()) {
                 $data['service'] = ServiceResource::make($service);
                 return $this->returnData($data);
             } else {
@@ -69,7 +70,7 @@ class ServiceController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'department_uuid' => ['required', 'exists:departments,id'],
+                'department_id' => ['required', 'exists:departments,id'],
                 'name' => ['required', 'array', 'max:255'],
                 'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
                 'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],
@@ -84,7 +85,7 @@ class ServiceController extends Controller {
                 return $this->returnValidationError($validator);
             }
 
-            $department_id = Department::where('id', $request->department_uuid)->value('id');
+            $department_id = Department::where('id', $request->department_id)->value('id');
 
             $service = Service::create([
                 'name' => $request->name,
@@ -93,9 +94,9 @@ class ServiceController extends Controller {
                 'department_id' => $department_id,
             ]);
 
-//            $data['service'] = ServiceResource::make($service);
+           $data['service'] = ServiceResource::make($service);
             DB::commit();
-            return $this->returnSuccessMessage(__('validation.custom.service.created'));
+            return $this->returnSuccessMessage($data , __('validation.custom.service.created'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -119,7 +120,7 @@ class ServiceController extends Controller {
                 'details.en' => ['nullable', 'max:1000'],
                 'details.ar' => ['nullable', 'max:1000'],
                 'image' => ['nullable', 'string'],
-                'department_uuid' => ['nullable', 'exists:departments,id'],
+                'department_id' => ['nullable', 'exists:departments,id'],
             ], messageValidation());
 
             if ($validator->fails()) {
@@ -127,7 +128,7 @@ class ServiceController extends Controller {
             }
 
             if ($request->filled('name')) {
-                $exists = Service::where('department_id', $service->department_id)
+                $exists = Service::where('id', '!=', $service->id)
                     ->where(function ($query) use ($request) {
                         if ($request->has('name.en')) {
                             $query->orWhere('name->en', $request->name['en']);
@@ -136,16 +137,15 @@ class ServiceController extends Controller {
                             $query->orWhere('name->ar', $request->name['ar']);
                         }
                     })
-                    ->where('id', '!=', $service->id)
-                    ->exists();
+                    ->where('department_id', $service->department_id)->exists();
 
                 if ($exists) {
                     return $this->badRequest(__('validation.custom.service.name_exists'));
                 }
             }
 
-            if ($request->filled('department_uuid')) {
-                $department_id = Department::where('uuid', $request->department_uuid)->value('id');
+            if ($request->filled('department_id')) {
+                $department_id = Department::where('id', $request->department_id)->value('id');
                 $service->department_id = $department_id;
             }
 
@@ -153,7 +153,6 @@ class ServiceController extends Controller {
             $service->details = $request->details ?? $service->details;
             $service->image = $request->image ?? $service->image;
             $service->save();
-
 
             $data['service'] = ServiceResource::make($service);
             DB::commit();
@@ -164,8 +163,7 @@ class ServiceController extends Controller {
         }
     }
 
-    public function destroy($uuid)
-    {
+    public function destroy($uuid) {
         DB::beginTransaction();
         try {
             $validator = Validator::make(['uuid' => $uuid], [

@@ -2,7 +2,7 @@
 
 return [
     'custom' => [
-        'department_id' => [
+        'department_uuid' => [
             'required' => 'The department UUID field is required.',
             'exists' => 'The selected department UUID is invalid.',
             'unique' => 'This department already exists.',
