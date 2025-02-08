@@ -46,6 +46,28 @@ return [
 
         ],
 
+        'service' => [
+            'name_exists' => 'The name already exists in this Department.',
+            'not_found' => 'Service not found.',
+            'created' => 'Service created successfully.',
+            'updated' => 'Service updated successfully.',
+            'deleted' => 'Service deleted successfully.',
+            'try_again' => 'An error occurred, please try again.',
+        ],
+        'departmentService' => [
+            'not_found' => 'Department not found.',
+            'deleted' => 'Department deleted successfully.',
+            'delete_failed' => 'An error occurred while deleting the department.',
+        ],
+
+        'validation' => [
+            'name_required' => 'Service name is required.',
+            'name_max' => 'Service name must not exceed 255 characters.',
+            'details_max' => 'Details must not exceed 1000 characters.',
+            'department_required' => 'Department is required.',
+            'image_url' => 'The image must be a valid URL.',
+        ],
+
         'userController' => [
             'user_not_found' => 'User not found',
             'invalid_page' => 'Invalid page number',

@@ -13,6 +13,8 @@ class Service extends BaseModel implements Auditable
 {
     use HasFactory, SoftDeletes, AuditingTrait, HasTranslations;
 
+    protected $table = 'services';
+
     public $translatable = ['name', 'details'];
 
     protected $fillable = [
@@ -23,7 +25,16 @@ class Service extends BaseModel implements Auditable
         'image',
     ];
 
-    public function department(): BelongsTo
+    protected $casts =['id' => 'string'];
+
+//    protected static function boot() {
+//        parent::boot();
+//        static::creating(function ($model) {
+//            $model->id = Str::uuid();
+//        });
+//    }
+
+    public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
     }

@@ -208,9 +208,17 @@ Route::group(["prefix" => "/db"], function () {
 Route::post('/extract-column', [ExcelController::class, 'extractColumn']);
 
 Route::group(["prefix" => "/event"], function () {
-   Route::get('/', [EventController::class, 'list']); 
+   Route::get('/', [EventController::class, 'list']);
 //    Route::get('/show/{id}', [EventController::class, 'showEvent']);
-   Route::post('/create', [EventController::class, 'createEvent']); 
-   Route::put('/update/{id}', [EventController::class, 'updateEvent']); 
-   Route::delete('/delete/{id}', [EventController::class, 'createEvent']); 
+   Route::post('/create', [EventController::class, 'createEvent']);
+   Route::put('/update/{id}', [EventController::class, 'updateEvent']);
+   Route::delete('/delete/{id}', [EventController::class, 'createEvent']);
+});
+
+Route::prefix('services')->group(function () {
+    Route::get('/index', [ServiceController::class, 'index']);
+    Route::get('/show/{uuid}', [ServiceController::class, 'show']); //done
+    Route::post('/add', [ServiceController::class, 'store']); //done
+    Route::put('/update/{uuid}', [ServiceController::class, 'update']); //done
+    Route::delete('/delete/{uuid}', [ServiceController::class, 'destroy']);
 });
