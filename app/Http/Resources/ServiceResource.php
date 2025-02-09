@@ -22,7 +22,7 @@ class ServiceResource extends JsonResource
                 'id' => $this->department?->id ,
                 'name' => $this->department?->getTranslations('name') ,
             ],
-            'events' => $this->events_count ?? $this->events()->count(),
+            'events' => $this->events()->count(),
         ];
     }
 }
