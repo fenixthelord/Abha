@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
+use App\Http\Traits\HasDateTimeFields;
 
 class Notification extends BaseModel   implements Auditable
 {
-    use HasFactory;
+    use HasFactory, HasDateTimeFields;
     use \OwenIt\Auditing\Auditable;
 
     protected $table = 'notifications';
@@ -25,9 +26,19 @@ class Notification extends BaseModel   implements Auditable
         'description' => 'string',
         'image' => 'string',
         'url' => 'string',
-        'schedule_at' => 'datetime',
     ];
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootHasDateTimeFields();
+    }
 
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
+        });
+    }
     public function recipients(): HasMany
     {
         return $this->hasMany(NotificationDetail::class);
