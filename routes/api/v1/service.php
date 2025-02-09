@@ -13,7 +13,7 @@ Route::prefix('services')->group(function () {
             Route::get('/show/{id}', [ServiceController::class, 'show']); //done
             Route::post('/add', [ServiceController::class, 'store']); //done
             Route::put('/update/{id}', [ServiceController::class, 'update']); //done
-            Route::delete('/delete/{id}', [ServiceController::class, 'destroy']); //done
+            Route::delete('/delete', [ServiceController::class, 'destroy']); //done
         });
     });
 });
@@ -72,7 +72,7 @@ Route::prefix('services')->group(function () {
   * department_id (اختياري): معرف القسم الذي تنتمي إليه الخدمة.
  */
 
-/* Route: DELETE /api/services/{service_id}
+/* Route: DELETE /api/services/delete -> in Body
 
-  * URL: DELETE http://your-api-url/api/services/{service_you_want_to_delete}
+  * URL: DELETE http://your-api-url/api/services/delete -> in body ->id
  */

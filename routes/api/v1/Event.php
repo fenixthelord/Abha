@@ -11,5 +11,5 @@ Route::group(["prefix" => "/event"], function () {
 //    Route::get('/show/{id}', [EventController::class, 'showEvent']);
     Route::post('/create', [EventController::class, 'createEvent']);
     Route::put('/update/{id}', [EventController::class, 'updateEvent']);
-    Route::delete('/delete/{id}', [EventController::class, 'createEvent']);
+    Route::delete('/delete', [EventController::class, 'deleteEvent']);
 });

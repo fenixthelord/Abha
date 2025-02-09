@@ -19,10 +19,10 @@ class ServiceResource extends JsonResource
             'details' => $this->getTranslations('details'),
             'image' => $this->image,
             'department' => [
-                'id' => $this->department->id ?? null,
-                'name' => $this->department->name ?? null,
+                'id' => $this->department?->id ,
+                'name' => $this->department?->getTranslations('name') ,
             ],
-            'events' => $this->events_count ?? $this->events()->count(),
+            'events' => $this->events()->count(),
         ];
     }
 }
