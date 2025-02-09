@@ -25,7 +25,12 @@ class Service extends BaseModel implements Auditable
         'image',
     ];
 
-    protected $casts =['id' => 'string'];
+    protected $casts =[
+        'id' => 'string',
+        'department_id' => 'string',
+        'name' => 'json',
+        'details' => 'json',
+        'image' => 'string'];
 
 //    protected static function boot() {
 //        parent::boot();
