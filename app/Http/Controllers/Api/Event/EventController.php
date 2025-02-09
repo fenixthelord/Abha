@@ -108,9 +108,17 @@ class EventController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
+            $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
+            
+            $validatedData = array_merge($request->validated(), [
+                "start_date" => $formateStartDate,
+                "end_date" => $formateEndDate,
+            ]);
             
             $event = Event::find($id);
-            $event->update($request->validated());
+            $event->update($validatedData);
             
             DB::commit();
             return $this->returnSuccessMessage("Event Updated successfully");
