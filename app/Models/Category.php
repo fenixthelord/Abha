@@ -17,7 +17,7 @@ class Category extends BaseModel implements Auditable
 
     protected $fillable = ["name", "parent_id", "department_id"];
     protected $casts = [
-        "name" => "string",
+        "name" => "json",
         "parent_id" => "string",
         "department_id" => "string"];
 
