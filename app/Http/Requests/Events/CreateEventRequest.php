@@ -30,13 +30,13 @@ class   CreateEventRequest extends FormRequest
             "name" => ["required", "array", "max:2", "min:2"],
             "name.ar" => ["required", "string", "max:255"],
             "name.en" => ["required", "string", "max:255"],
-            "details" => ["required", "array", "max:2", "min:2"],
+            "details" => ["nullable", "array", "max:2", "min:2"],
             "details.ar" => ["required", "string", "max:255"],
             "details.en" => ["required", "string", "max:255"],
             "start_date" => ["required", "date", "after_or_equal:today"],
             "end_date" => ["required", "date", "after_or_equal:start_date"],
             "image" => ["required", "string", "max:255"],
-            "file" => ["required", "string", "max:255"]
+            "file" => ["nullable", "string", "max:255"]
         ];
     }
 

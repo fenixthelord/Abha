@@ -24,13 +24,8 @@ class EmployeesChartOrgResource extends JsonResource
             "image" => $this->user?->image,
             "position" => $this->getTranslations("position"),
 
-            'employees' => $this->whenLoaded('employee', function () {
-                return EmployeesChartOrgResource::collection(
-                    $this
-                        ->employee
-                        ->load('employee')
-                );
-            }),
+            'employees' => $this->whenLoaded('employee', fn() => EmployeesChartOrgResource::collection($this->employee->load('employee'))),
+
         ];
     }
 }
