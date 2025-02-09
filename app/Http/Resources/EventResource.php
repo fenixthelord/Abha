@@ -19,7 +19,7 @@ class EventResource extends JsonResource
             'service_id' => $this->service_id,
             "form_id" => $this->form?->id,
             
-            'service_name' => $this->service->getTranslations("name"),
+            'service_name' => $this->service?->getTranslations("name"),
             'name' => $this->getTranslations("name"),
             'details' => $this->getTranslations("details"),
             // $this->mergeWhen($this->info, [

@@ -11,6 +11,9 @@ class DeviceToken extends BaseModel implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = ['token', 'user_id'];
+    protected $casts = [
+        'token' => 'string',
+        'user_id' => 'string'];
 
     // Relationship with user
     public function user()

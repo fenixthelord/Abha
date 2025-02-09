@@ -51,6 +51,30 @@ class User extends Authenticatable  implements Auditable
         'refresh_token',
         'refresh_token_expires_at',
     ];
+    protected $casts = [
+        'id' => 'string',
+        "department_id" => "string",
+        'first_name' => 'string',
+        'last_name' => 'string',
+        'phone' => 'string',
+        'email' => 'string',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'image' => 'string',
+        'alt' => 'string',
+        'gender' => 'string',
+        'job' => 'string',
+        'job_id' => 'string',
+        'role' => 'string',
+        'is_admin' => 'boolean',
+        'active' => 'boolean',
+        'otp_code' => 'string',
+        'otp_expires_at' => 'datetime',
+        'otp_verified' => 'boolean',
+        'verify_code' => 'string',
+        'refresh_token' => 'string',
+        'refresh_token_expires_at' => 'datetime',
+    ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
 
@@ -70,12 +94,7 @@ class User extends Authenticatable  implements Auditable
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'otp_expires_at' => 'datetime',
-        'password' => 'hashed',
-        'refresh_token_expires_at' => 'datetime',
-    ];
+
 
     public function linkedSocialAccounts()
     {

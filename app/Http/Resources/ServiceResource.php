@@ -22,6 +22,7 @@ class ServiceResource extends JsonResource
                 'id' => $this->department->id ?? null,
                 'name' => $this->department->name ?? null,
             ],
+            'events' => $this->events_count ?? $this->events()->count(),
         ];
     }
 }

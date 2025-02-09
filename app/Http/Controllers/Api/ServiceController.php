@@ -87,7 +87,7 @@ class ServiceController extends Controller {
                 'details' => ['nullable', 'array'],
                 'details.en' => ['nullable'],
                 'details.ar' => ['nullable'],
-                'image' => ['nullable', 'string'],
+                'image' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -196,6 +196,7 @@ class ServiceController extends Controller {
                     'ar' => $name['ar'] . '-' . $service->id . '-محذوف',
                 ];
                 $service->save();
+                $service->events()->delete();
                 $service->delete();
                 DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.service.deleted'));
@@ -208,5 +209,4 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
 }

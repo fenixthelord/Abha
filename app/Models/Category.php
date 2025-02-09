@@ -15,7 +15,11 @@ class Category extends BaseModel implements Auditable
 
     private $translatable = ['name'];
 
-    protected $fillable = ["name", "parent_id",  "department_id"];
+    protected $fillable = ["name", "parent_id", "department_id"];
+    protected $casts = [
+        "name" => "json",
+        "parent_id" => "string",
+        "department_id" => "string"];
 
     public function forms(): MorphMany
     {

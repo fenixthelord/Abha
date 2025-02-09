@@ -25,7 +25,12 @@ class Service extends BaseModel implements Auditable
         'image',
     ];
 
-    protected $casts =['id' => 'string'];
+    protected $casts =[
+        'id' => 'string',
+        'department_id' => 'string',
+        'name' => 'json',
+        'details' => 'json',
+        'image' => 'string'];
 
 //    protected static function boot() {
 //        parent::boot();
@@ -38,5 +43,8 @@ class Service extends BaseModel implements Auditable
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
-
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }
