@@ -49,12 +49,12 @@ class EventController extends Controller
             DB::beginTransaction();
             $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
             $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
-            
+
             $validatedData = array_merge($request->validated(), [
                 "start_date" => $formateStartDate,
                 "end_date" => $formateEndDate,
             ]);
-            
+
             $event = Event::create($validatedData);
             $data["event"] = EventResource::make($event);
             DB::commit();
@@ -65,18 +65,17 @@ class EventController extends Controller
         }
     }
 
-    public function deleteEvent($id)
+    public function deleteEvent(Request $request)
     {
         try {
-            $validation = Validator::make(
-                ["id" => $id],
-                ['id' => 'required|exists:events,id',]
+            $validation = Validator::make($request->all(),
+                ['id' => 'required|exists:events,id,deleted_at,NULL',]
             );
             if ($validation->fails()) {
                 return $this->ReturnError($validation->errors()->first());
             }
             DB::beginTransaction();
-            $event = Event::find($id);
+            $event = Event::find($request->id);
             $event->delete();
             DB::commit();
             return $this->returnSuccessMessage("Event Deleted successfully");
@@ -111,12 +110,12 @@ class EventController extends Controller
 
             $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
             $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
-            
+
             $validatedData = array_merge($request->validated(), [
                 "start_date" => $formateStartDate,
                 "end_date" => $formateEndDate,
             ]);
-            
+
             $event = Event::findOrFail($id);
             $event->update($validatedData);
             $data["event"] = EventResource::make($event);

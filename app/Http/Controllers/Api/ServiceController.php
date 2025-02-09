@@ -170,10 +170,10 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-    public function destroy($id) {
+    public function destroy(Request $request) {
         DB::beginTransaction();
         try {
-            $validator = Validator::make(['id' => $id], [
+            $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:services,id',
             ], [
                 'id.required' => __('validation.custom.service.id_required'),
@@ -184,7 +184,7 @@ class ServiceController extends Controller {
                 return $this->returnValidationError($validator);
             }
 
-            if ($service = Service::withTrashed()->where('id', $id)->first()) {
+            if ($service = Service::withTrashed()->where('id',$request->id)->first()) {
 
                 if ($service->trashed()) {
                     return $this->returnSuccessMessage(__('validation.custom.service.already_delete'));
