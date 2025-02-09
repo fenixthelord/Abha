@@ -13,6 +13,10 @@ class NotificationDetail extends BaseModel   implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = ['notification_id', 'recipient_type', 'recipient_id'];
+    protected $casts = [
+        'notification_id' => 'string',
+        'recipient_type' => 'string',
+        'recipient_id' => 'string',];
 
     public function notification(): BelongsTo
     {

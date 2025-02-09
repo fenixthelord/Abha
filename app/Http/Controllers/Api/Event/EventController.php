@@ -30,8 +30,15 @@ class EventController extends Controller
                 })
                 ->when($request->has("service_id"), function ($q) use ($request) {
                     $q->Filter($request->service_id);
+                })
+                ->when($request->filled("start_date"), function ($q) use ($request) {
+                    $q->where("start_date", ">=", $request->start_date);
+                })
+                ->when($request->filled("end_date"), function ($q) use ($request) {
+                    $q->where("end_date", "<=", $request->end_date);
                 });
-
+                
+            // date range 
             $events = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($events->lastPage() < $pageNumber) {
                 $events = $query->paginate($perPage, ['*'], 'page', 1);
