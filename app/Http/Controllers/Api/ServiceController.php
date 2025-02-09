@@ -196,6 +196,7 @@ class ServiceController extends Controller {
                     'ar' => $name['ar'] . '-' . $service->id . '-محذوف',
                 ];
                 $service->save();
+                $service->events()->delete();
                 $service->delete();
                 DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.service.deleted'));
