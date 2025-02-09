@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->foreignUuid("form_id")->nullable()->change();
-            $table->string("details" , 500)->nullable()->change();
+            $table->string("file")->nullable();
         });
     }
 
@@ -23,8 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->foreignUuid("form_id")->change();
-            $table->string("details" , 500)->require()->change();
+            $table->dropColumn("file");
         });
     }
 };
