@@ -9,6 +9,7 @@ use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -46,7 +47,15 @@ class EventController extends Controller
     {
         try {
             DB::beginTransaction();
-            $event = Event::create($request->validated());
+            $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
+            $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
+            
+            $validatedData = array_merge($request->validated(), [
+                "start_date" => $formateStartDate,
+                "end_date" => $formateEndDate,
+            ]);
+            
+            $event = Event::create($validatedData);
             $data["event"] = EventResource::make($event);
             DB::commit();
             return $this->returnData($data);
@@ -77,34 +86,42 @@ class EventController extends Controller
         }
     }
 
-    // public function showEvent($id)
-    // {
-    //     try {
-    //         $validation = Validator::make(
-    //             ["id" => $id],
-    //             ['id' => 'required|exists:events,id',]
-    //         );
-    //         if ($validation->fails()) {
-    //             return $this->ReturnError($validation->errors()->first());
-    //         }
-    //         $event = Event::find($id);
+    public function showEvent($id)
+    {
+        try {
+            $validation = Validator::make(
+                ["id" => $id],
+                ['id' => 'required|exists:events,id',]
+            );
+            if ($validation->fails()) {
+                return $this->ReturnError($validation->errors()->first());
+            }
+            $event = Event::find($id);
 
-    //         $data["event"] = EventResource::make($event)->allInfo();
-    //         return $this->returnData($data);
-    //     } catch (\Exception $e) {
-    //         return $this->handleException($e);
-    //     }
-    // }
+            $data["event"] = EventResource::make($event)->allInfo();
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
     public function updateEvent(UpdateEventRequest $request, $id)
     {
         try {
             DB::beginTransaction();
+
+            $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
+            $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
             
-            $event = Event::find($id);
-            $event->update($request->validated());
+            $validatedData = array_merge($request->validated(), [
+                "start_date" => $formateStartDate,
+                "end_date" => $formateEndDate,
+            ]);
             
+            $event = Event::findOrFail($id);
+            $event->update($validatedData);
+            $data["event"] = EventResource::make($event);
             DB::commit();
-            return $this->returnSuccessMessage("Event Updated successfully");
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
