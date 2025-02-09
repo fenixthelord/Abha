@@ -9,6 +9,7 @@ use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -46,10 +47,18 @@ class EventController extends Controller
     {
         try {
             DB::beginTransaction();
-            $event = Event::create($request->validated());
+            $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
+            $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
+            
+            $validatedData = array_merge($request->validated(), [
+                "start_date" => $formateStartDate,
+                "end_date" => $formateEndDate,
+            ]);
+            
+            $event = Event::create($validatedData);
             $data["event"] = EventResource::make($event);
             DB::commit();
-            return $this->returnData($data);
+            // return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

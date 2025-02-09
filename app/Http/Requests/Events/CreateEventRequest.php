@@ -40,6 +40,7 @@ class   CreateEventRequest extends FormRequest
         ];
     }
 
+
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
