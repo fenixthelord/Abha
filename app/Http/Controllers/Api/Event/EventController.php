@@ -58,7 +58,7 @@ class EventController extends Controller
             $event = Event::create($validatedData);
             $data["event"] = EventResource::make($event);
             DB::commit();
-            // return $this->returnData($data);
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -86,24 +86,24 @@ class EventController extends Controller
         }
     }
 
-    // public function showEvent($id)
-    // {
-    //     try {
-    //         $validation = Validator::make(
-    //             ["id" => $id],
-    //             ['id' => 'required|exists:events,id',]
-    //         );
-    //         if ($validation->fails()) {
-    //             return $this->ReturnError($validation->errors()->first());
-    //         }
-    //         $event = Event::find($id);
+    public function showEvent($id)
+    {
+        try {
+            $validation = Validator::make(
+                ["id" => $id],
+                ['id' => 'required|exists:events,id',]
+            );
+            if ($validation->fails()) {
+                return $this->ReturnError($validation->errors()->first());
+            }
+            $event = Event::find($id);
 
-    //         $data["event"] = EventResource::make($event)->allInfo();
-    //         return $this->returnData($data);
-    //     } catch (\Exception $e) {
-    //         return $this->handleException($e);
-    //     }
-    // }
+            $data["event"] = EventResource::make($event)->allInfo();
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
     public function updateEvent(UpdateEventRequest $request, $id)
     {
         try {
@@ -117,11 +117,11 @@ class EventController extends Controller
                 "end_date" => $formateEndDate,
             ]);
             
-            $event = Event::find($id);
+            $event = Event::findOrFail($id);
             $event->update($validatedData);
-            
+            $data["event"] = EventResource::make($event);
             DB::commit();
-            return $this->returnSuccessMessage("Event Updated successfully");
+            return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

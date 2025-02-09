@@ -33,13 +33,13 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             "service_id" => ["required", "uuid", "exists:services,id,deleted_at,NULL"],
-            "form_id" => ["required",   "uuid",   "exists:forms,id,deleted_at,NULL"],
+            "form_id" => ["sometimes",   "uuid",   "exists:forms,id,deleted_at,NULL"],
             "name" => ["required", "array", "max:2", "min:2"],
             "name.ar" => ["required", "string", "max:255"],
             "name.en" => ["required", "string", "max:255"],
             "details" => ["nullable", "array", "max:2", ' min:2'],
-            "details.ar" => ["required", "string", "max:255"],
-            "details.en" => ["required", "string", "max:255"],
+            "details.ar" => ["required_with:details", "string", "max:255"],
+            "details.en" => ["required_with:details", "string", "max:255"],
             "start_date" => ["required", "date", "after_or_equal:today"],
             "end_date" => ["required", "date", "after_or_equal:start_date"],
             "image" => ["required", "string", "max:255"],
