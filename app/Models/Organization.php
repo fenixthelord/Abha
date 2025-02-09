@@ -101,4 +101,22 @@ class Organization extends BaseModel  implements Auditable
 
         return array_unique(array_merge($employeeIds, $managerIds));
     }
+
+    public static function getAllChildIds($employeeId)
+    {
+        $employee = self::find($employeeId);
+        
+        if (!$employee) {
+            return [];
+        }
+        
+        $childrenIds = [];
+
+        foreach ($employee->employee as $child) {
+            $childrenIds[] = $child->id;
+            $childrenIds = array_merge($childrenIds, self::getAllChildIds($child->id));
+        }
+        
+        return $childrenIds;
+    }
 }
