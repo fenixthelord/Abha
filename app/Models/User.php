@@ -13,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable  implements Auditable
+class User extends Authenticatable implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
@@ -58,7 +58,6 @@ class User extends Authenticatable  implements Auditable
         'last_name' => 'string',
         'phone' => 'string',
         'email' => 'string',
-        'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'image' => 'string',
         'alt' => 'string',
@@ -69,11 +68,9 @@ class User extends Authenticatable  implements Auditable
         'is_admin' => 'boolean',
         'active' => 'boolean',
         'otp_code' => 'string',
-        'otp_expires_at' => 'datetime',
         'otp_verified' => 'boolean',
         'verify_code' => 'string',
         'refresh_token' => 'string',
-        'refresh_token_expires_at' => 'datetime',
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -129,6 +126,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -142,6 +140,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manager_id');
     }
+
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');
@@ -150,7 +149,7 @@ class User extends Authenticatable  implements Auditable
     public function scopeManagersInDepartment($query, $departmentId)
     {
         return $query->whereHas("managers", function ($q) use ($departmentId) {
-            $q->whereHas('department',  function ($q) use ($departmentId) {
+            $q->whereHas('department', function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
         });
@@ -159,6 +158,7 @@ class User extends Authenticatable  implements Auditable
     protected static function boot()
     {
         parent::boot();
+        static::bootHasDateTimeFields();
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = Str::uuid();
@@ -170,6 +170,12 @@ class User extends Authenticatable  implements Auditable
             if (auth()->check() && auth()->user()->hasRole('Master')) {
                 abort(403, 'You are not allowed to delete this resource.');
             }
+        });
+    }
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
         });
     }
 }
