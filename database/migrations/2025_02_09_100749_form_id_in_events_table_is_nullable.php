@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             $table->foreignUuid("form_id")->nullable()->change();
+            $table->string("details" , 500)->nullable()->change();
         });
     }
 
