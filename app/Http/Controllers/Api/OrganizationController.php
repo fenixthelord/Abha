@@ -212,7 +212,7 @@ class OrganizationController extends Controller
     public function filter(FilterOrgRequest $request)
     {
         try {
-            $managersIDs = Organization::query()->onlyHeadManagers(
+            $managersIDs = Organization::query()->getOnlyHeadManager(
                 Department::whereId($request->department_id)->pluck("id")->firstOrFail()
             );
             $managers = User::whereIn("id", $managersIDs)->get();
