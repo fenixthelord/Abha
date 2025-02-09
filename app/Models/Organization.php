@@ -25,7 +25,7 @@ class Organization extends BaseModel  implements Auditable
         "department_id" => "string",
         "manager_id" => "string",
         "employee_id" => "string",
-        "position" => "string",
+        "position" => "json",
     ];
 
     public function department()
