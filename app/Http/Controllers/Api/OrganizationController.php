@@ -173,41 +173,46 @@ class OrganizationController extends Controller
     public function index(OrgFilterRequest $request)
     {
         try {
-            $perPage = $request->input('per_page', $this->per_page);
-            $pageNumber = $request->input('page', $this->pageNumber);
-            $department_id = $request->input('department_id');
-            $manager_id = $request->input('manager_id');
-            $query  = Organization::query()
+            $perPage      = $request->input('per_page', $this->per_page);
+            $pageNumber   = $request->input('page', $this->pageNumber);
+            $departmentId = $request->input('department_id');
+            $managerId    = $request->input('manager_id');
+    
+            $query = Organization::query()
                 ->when(
-                    $department_id || $manager_id,
-                    function ($q) use ($request) {
-                        if ($request->department_id) {
-                            $department =  Department::whereId($request->department_id)->pluck('id')->first();
-                            $q->where("department_id", $department);
+                    $departmentId || $managerId,
+                    function ($q) use ($departmentId, $managerId) {
+                        if ($departmentId) {
+                            $q->whereHas("department" , function ($q) use ($departmentId) {
+                                $q->where("id", $departmentId);
+                            });
                         }
-                        if ($request->manager_id) {
-                            $manager =  User::whereId($request->manager_id)->pluck('id')->first();
-                            $q->where("manager_id", $manager);
+                        if ($managerId) {
+                            $childManagerIds = Organization::getAllChildIds($managerId);
+                            $childManagerIds[] = $managerId;                            
+                            $q->whereIn("manager_id", $childManagerIds);
                         }
-                    },
+                    }
                 )
                 ->when($request->has("search"), function ($q) use ($request) {
                     $q->withSearch($request->search);
                 });
+    
             $organization = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-
+    
             if ($request->page > $organization->lastPage()) {
                 $organization = Organization::paginate($perPage, ['*'], 'page', $pageNumber);
             }
-
-
+    
             $data["organizations"] = OrganizationResource::collection($organization);
-
+    
             return $this->PaginateData($data, $organization);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
+    
+
 
     public function filter(FilterOrgRequest $request)
     {
