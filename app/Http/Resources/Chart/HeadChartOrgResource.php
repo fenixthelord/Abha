@@ -8,6 +8,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class HeadChartOrgResource extends JsonResource
 {
+
+    private const HEAD_MANAGER_POSITION = [
+        'en' => "head manager",
+        'ar' => "رئيس القسم"
+    ];
+
     /**
      * Transform the resource into an array.
      *
@@ -15,33 +21,27 @@ class HeadChartOrgResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         /**  
          *  In this resource tou MUST pass : 
          * @param User object
          * 
          */
         return [
-            "department_name" => $this->department?->getTranslations("name"),
-            "department_id" => $this->department?->id,
-
             "id" => $this->id,
+
+            "department_id" => $this->department?->id,
+            "department_name" => $this->department?->getTranslations("name"),
+
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "image" => $this->image,
-            // "position" => $this->organization?->position?->getTranslations("position"),
-            "position" => [
-                'en' => "head manager",
-                'ar' => "الرئيس"
-            ],
+            "position" => self::HEAD_MANAGER_POSITION,
 
-            'employees' => $this->whenLoaded('employees', function () {
-                return EmployeesChartOrgResource::collection(
-                    $this
-                        ->employees
-                        ->each
-                        ->load('employee')
-                );
-            }),
+            'employees' => $this->whenLoaded(
+                'employees',
+                fn() => EmployeesChartOrgResource::collection($this->employees->transform(fn($employee) => $employee->load('employee')))
+            ),
         ];
     }
 }
