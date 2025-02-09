@@ -14,6 +14,7 @@ class Department extends BaseModel implements Auditable
 
     private $translatable = ['name'];
     protected $fillable = ['name'];
+    protected $casts = ['name' => 'json'];
 
     public function categories(): HasMany
     {

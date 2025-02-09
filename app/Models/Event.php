@@ -25,7 +25,15 @@ class Event extends BaseModel
         'file',
     ];
 
-    protected $casts = ['name' => 'json', 'details' => 'json'];
+    protected $casts = [
+        'name' => 'json',
+        'details' => 'json',
+        'service_id' => 'string',
+        'form_id' => 'string',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'file' => 'string',
+        'image' => 'string',];
 
     public function service(): BelongsTo
     {

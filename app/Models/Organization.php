@@ -21,6 +21,11 @@ class Organization extends BaseModel  implements Auditable
         "manager_id",
         "employee_id",
         "position",
+    ];    protected $casts = [
+        "department_id" => "string",
+        "manager_id" => "string",
+        "employee_id" => "string",
+        "position" => "json",
     ];
 
     public function department()
@@ -84,7 +89,7 @@ class Organization extends BaseModel  implements Auditable
             ->onlyHeadManagers($employeeIds)
             ->pluck('manager_id')
             ->toArray();
-    } 
+    }
 
     public static function getManagersAndEmployees($departmentId)
     {
