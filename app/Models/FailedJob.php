@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Http\Traits\HasDateTimeFields;
 class FailedJob extends BaseModel
 {
+    use HasDateTimeFields;
     protected $fillable = [
         'id',
         'connection',
@@ -12,8 +14,16 @@ class FailedJob extends BaseModel
         'exception',
         'failed_at'
     ];
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootHasDateTimeFields();
+    }
 
-    protected $casts = [
-        'failed_at' => 'datetime',
-    ];
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
+        });
+    }
 }
