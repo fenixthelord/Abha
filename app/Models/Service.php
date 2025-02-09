@@ -38,4 +38,8 @@ class Service extends BaseModel implements Auditable
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

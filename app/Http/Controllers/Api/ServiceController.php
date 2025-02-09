@@ -87,7 +87,7 @@ class ServiceController extends Controller {
                 'details' => ['nullable', 'array'],
                 'details.en' => ['nullable'],
                 'details.ar' => ['nullable'],
-                'image' => ['nullable', 'string'],
+                'image' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -208,5 +208,4 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-
 }
