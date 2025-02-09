@@ -184,7 +184,7 @@ class ServiceController extends Controller {
             }
 
             if (Service::where('id', $id)->onlyTrashed()->first()) {
-                return $this->badRequest(__('validation.custom.service.deleted'));
+                return $this->returnSuccessMessage(__('validation.custom.service.deleted'));
             }
 
             if ($service = Service::where('id', $id)->first()) {
