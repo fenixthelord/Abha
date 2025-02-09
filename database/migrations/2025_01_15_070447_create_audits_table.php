@@ -20,11 +20,14 @@ class CreateAuditsTable extends Migration
 
             $morphPrefix = config('audit.user.morph_prefix', 'user');
 
+            // $table->uuid('id')->primary();
             $table->bigIncrements('id');
+            // $table->uuid($morphPrefix . '_id')->nullable();
+            $table->foreignUuid($morphPrefix . '_id')->nullable()->constrained()->nullOnDelete();
             $table->string($morphPrefix . '_type')->nullable();
-            $table->unsignedBigInteger($morphPrefix . '_id')->nullable();
+            $table->string('user_full_name')->nullable();
             $table->string('event');
-            $table->morphs('auditable');
+            $table->uuidMorphs('auditable');
             $table->text('old_values')->nullable();
             $table->text('new_values')->nullable();
             $table->text('url')->nullable();

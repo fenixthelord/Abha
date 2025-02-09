@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
-use App\Models\User;
 use Illuminate\Http\Request;
 use OwenIt\Auditing\Models\Audit;
 use Carbon\Carbon;
@@ -33,7 +32,7 @@ class AuditLogController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'per_page' => 'nullable|integer|min:1|max:100', // Allow custom pagination
-            'user_uuid' => 'nullable|string', // Add validation for user_uuid
+            'user_id' => 'nullable|string', // Add validation for user_id
         ]);
         // Base query
         $query = Audit::query();
@@ -55,8 +54,7 @@ class AuditLogController extends Controller
         if ($request->filled('user_id')) {
 
 
-                $query->where('user_uuid', $request->input('user_id'));
-
+            $query->where('user_id', $request->input('user_id'));
         }
 
         // Optional: Date range filter
@@ -65,10 +63,10 @@ class AuditLogController extends Controller
                 $request->input('start_date'),
                 $request->input('end_date'),
             ]);
-        }else if($request->filled('start_date')){
-            $query->where('created_at','>=' ,$request->input('start_date'));
-        }else if($request->filled('end_date')){
-            $query->where('created_at','<=' ,$request->input('end_date'));
+        } else if ($request->filled('start_date')) {
+            $query->where('created_at', '>=', $request->input('start_date'));
+        } else if ($request->filled('end_date')) {
+            $query->where('created_at', '<=', $request->input('end_date'));
         }
 
         // Order by newest to oldest
@@ -82,14 +80,14 @@ class AuditLogController extends Controller
         $auditLogs->getCollection()->transform(function ($log) {
             $log->created_at_readable = Carbon::parse($log->created_at)->format('Y-m-d H:i:s');
             $log->updated_at_readable = Carbon::parse($log->updated_at)->format('Y-m-d H:i:s');
-            $log->uuid = $log->fullName = null;
-            if($log->user_type){
+            $log->id = $log->fullName = null;
+            if ($log->user_type) {
                 $user = new $log->user_type;
                 $details = $user->find($log->user_id);
 
                 // Check if user details were found
                 if ($details) {
-                    $log->uuid = $details->uuid;
+                    $log->id = $details->id;
                     $log->fullName = $details->first_name . " " . $details->last_name;
                 }
             }
@@ -99,5 +97,4 @@ class AuditLogController extends Controller
 
         return $this->returnData($auditLogs);
     }
-
 }

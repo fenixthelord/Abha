@@ -3,32 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
 
-class Department extends Model implements Auditable
+class Department extends BaseModel implements Auditable
 {
-    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable , HasTranslations;
-
+    use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable, HasTranslations;
 
     private $translatable = ['name'];
-    protected $fillable = [
-        'name',
-        'uuid',
-    ];
-    protected static function boot()
-    {
-        parent::boot();
+    protected $fillable = ['name'];
+    protected $casts = ['name' => 'json'];
 
-        static::creating(function ($model) {
-            $model->uuid = Str::uuid();
-        });
-    }
-
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(Category::class, "department_id");
     }
@@ -44,8 +32,14 @@ class Department extends Model implements Auditable
             $category->deleteWithChildren();
         });
     }
-    public function employees()
+
+    public function employees(): HasMany
     {
         return $this->hasMany(User::class, "department_id");
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
     }
 }

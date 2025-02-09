@@ -16,21 +16,16 @@ class EmployeesChartOrgResource extends JsonResource
     {
         return [
             "department_name" => $this->department?->getTranslations("name"),
-            "department_uuid" => $this->department?->uuid,
+            "department_id" => $this->department?->id,
 
-            "uuid" => $this->user?->uuid,
+            "id" => $this->user?->id,
             "first_name" => $this->user?->first_name,
             "last_name" => $this->user?->last_name,
             "image" => $this->user?->image,
             "position" => $this->getTranslations("position"),
 
-            'employees' => $this->whenLoaded('employee', function () {
-                return EmployeesChartOrgResource::collection(
-                    $this
-                        ->employee
-                        ->load('employee')
-                );
-            }),
+            'employees' => $this->whenLoaded('employee', fn() => EmployeesChartOrgResource::collection($this->employee->load('employee'))),
+
         ];
     }
 }

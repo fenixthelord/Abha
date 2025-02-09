@@ -22,7 +22,7 @@ class UpdateCategoriesRequest extends FormRequest
     // protected function prepareForValidation(): void
     // {
     //     $this->merge([
-    //         'department_uuid' => $this->department_uuid,
+    //         'department_id' => $this->department_id,
     //     ]);
     // }
     /**
@@ -33,16 +33,16 @@ class UpdateCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => [
+            'department_id' => [
                 'required',
                 'uuid',
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
+                Rule::exists("departments", "id")->where("deleted_at", null)
 
             ],
-            "category_uuid" => [
+            "category_id" => [
                 'required',
                 'uuid',
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
+                Rule::exists("categories", "id")->where("deleted_at", null)
             ],
             "name" => ["required", "array"],
             "name.en" => [
@@ -87,10 +87,10 @@ class UpdateCategoriesRequest extends FormRequest
 
             // Validate child structure
             $childValidator = Validator::make($child, [
-                'category_uuid' => [
+                'category_id' => [
                     'sometimes',
                     'uuid',
-                    Rule::exists("categories", "uuid")->where("deleted_at", null)
+                    Rule::exists("categories", "id")->where("deleted_at", null)
                 ],
                 'name' => 'required|array',
                 'name.en' => 'required|string|min:2|max:255',

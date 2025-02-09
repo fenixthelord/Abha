@@ -9,7 +9,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 
-class Organization extends Model  implements Auditable
+class Organization extends BaseModel  implements Auditable
 
 {
     use HasFactory, SoftDeletes, HasTranslations, \OwenIt\Auditing\Auditable;
@@ -18,43 +18,37 @@ class Organization extends Model  implements Auditable
 
     protected $fillable = [
         "department_id",
-        "manger_id",
+        "manager_id",
         "employee_id",
         "position",
+    ];    protected $casts = [
+        "department_id" => "string",
+        "manager_id" => "string",
+        "employee_id" => "string",
+        "position" => "json",
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = Str::uuid();
-        });
-    }
 
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
 
-    // The relation with User Table , my manger
-    public function manger()
+    // The relation with User Table , my manager
+    public function manager()
     {
-        return $this->belongsTo(User::class, 'manger_id');
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
     // Self Join : my Employees in Organization Table
     public function employee()
     {
-        return $this->hasMany(Organization::class, 'manger_id');
+        return $this->hasMany(Organization::class, 'manager_id');
     }
 
-    public function User() {
+    public function User()
+    {
         return $this->belongsTo(User::class, 'employee_id');
-    
     }
-
-    // public function 
 
     public function scopeWithSearch($query, $value)
     {
@@ -63,7 +57,7 @@ class Organization extends Model  implements Auditable
             ->orWhereHas('department', function ($query) use ($value) {
                 $query->where('name', 'like', '%' . $value . '%');
             })
-            ->orWhereHas('manger', function ($query) use ($value) {
+            ->orWhereHas('manager', function ($query) use ($value) {
                 $query->where('first_name', 'like', '%' . $value . '%')
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             })
@@ -72,18 +66,39 @@ class Organization extends Model  implements Auditable
                     ->orWhere('last_name', 'like', '%' . $value . '%');
             });
     }
-    public function scopeOnlyHeadMangers($query, $departmentId)
-    {
 
-        $employeesIDs = $this->distinct()->pluck("employee_id")->toArray();
-        // dd($employeesIDs);  
-        return $query
-            ->whereHas('department', function ($q) use ($departmentId) {
-                $q->where('id', $departmentId);
-            })
-            ->distinct()
-            ->whereNotIn("manger_id", $employeesIDs)
-            ->pluck("manger_id")
+    // Scope to filter by department.
+    public function scopeForDepartment($query, $departmentId)
+    {
+        return $query->whereHas('department', function ($q) use ($departmentId) {
+            $q->where('id', $departmentId);
+        });
+    }
+
+    public function scopeOnlyHeadManagers($query, array $employeeIds)
+    {
+        return $query->whereNotIn('manager_id', $employeeIds)->distinct();
+    }
+
+    public static function getOnlyHeadManager($departmentId) {
+        $employeeIds = static::forDepartment($departmentId)
+            ->pluck('employee_id')
             ->toArray();
+
+        return static::forDepartment($departmentId)
+            ->onlyHeadManagers($employeeIds)
+            ->pluck('manager_id')
+            ->toArray();
+    }
+
+    public static function getManagersAndEmployees($departmentId)
+    {
+        $employeeIds = static::forDepartment($departmentId)
+            ->pluck('employee_id')
+            ->toArray();
+
+        $managerIds = static::getOnlyHeadManager($departmentId);
+
+        return array_unique(array_merge($employeeIds, $managerIds));
     }
 }
