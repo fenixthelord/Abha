@@ -53,7 +53,7 @@ return [
             'created' => 'Service created successfully.',
             'updated' => 'Service updated successfully.',
             'deleted' => 'Service deleted successfully.',
-            'success_delete' => 'The service has already been deleted',
+            'already_delete' => 'This service has already been deleted',
             'try_again' => 'An error occurred, please try again.',
             'id_required' => 'Service id is required.',
             'id_exists' => 'Service id not found.',
