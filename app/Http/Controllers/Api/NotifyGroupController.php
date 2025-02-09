@@ -16,14 +16,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Traits\Paginate;
+use Illuminate\Support\Facades\Http;
 class NotifyGroupController extends Controller {
     use Firebase, ResponseTrait, Paginate;
 
     // Create a new notify group
     public function createNotifyGroup(Request $request) {
-        DB::beginTransaction();
+       // DB::beginTransaction();
         try {
-            $request->validate([
+            /*$request->validate([
                 'name' => 'required|array|max:255',
                 'name.en' => 'required|string|unique:notify_groups,name->en',
                 'name.ar' => 'required|string|unique:notify_groups,name->ar',
@@ -44,8 +45,15 @@ class NotifyGroupController extends Controller {
         } catch (Exception $e) {
             DB::rollBack();
             return $this->badRequest($e->getMessage());
-        }
-    }
+        }*/
+           /* $url = trim(env('NOTIFY_SERV'), '/') . '/group/add';
+            dd(env('NOTIFY_SERV'));*/
+            $req=$request->all();
+            return   (Http::post("http://smartabha-notification.test/api/group/add",$req))->json();
+        } catch (Exception $e) {
+
+            return $this->handleException($e);}}
+
 
     // Add users to a notify group
     public function addUsersToNotifyGroup(Request $request, $notifyGroupUuid) {
