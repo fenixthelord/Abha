@@ -15,6 +15,11 @@ class NotifyGroup extends BaseModel   implements Auditable
 
     private $translatable = ['name', 'description'];
     protected $fillable = ['name', 'description', 'model'];
+    protected $casts = [
+        'name' => 'string',
+        'description' => 'string',
+        'model' => 'string',
+        ];
 
     public function getTransAble()
     {
