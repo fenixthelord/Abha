@@ -12,11 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('linked_social_accounts', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->comment('');
-            $table->bigIncrements('id');
             $table->string('provider_id');
             $table->string('provider_name');
-            $table->unsignedBigInteger('user_id')
+            $table->foreignUuid('user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
                 ->index('linked_social_accounts_user_id_foreign');
             $table->timestamps();
         });

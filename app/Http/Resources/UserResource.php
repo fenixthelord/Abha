@@ -16,12 +16,12 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
+            'id' => $this->id,
             'name' => $this->first_name . ' ' . $this->last_name,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             $this->mergeWhen(!$this->merge, [
-                "department_uuid" => $this->department?->uuid,
+                "department_id" => $this->department?->id,
                 "department_name" => $this->department?->getTranslations("name"),
                 'email' => $this->email,
                 'phone' => $this->phone,
@@ -37,7 +37,8 @@ class UserResource extends JsonResource
             ]),
         ];
     }
-    public function onlyName() {
+    public function onlyName()
+    {
         $this->merge = true;
 
         return $this;

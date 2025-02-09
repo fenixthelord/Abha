@@ -27,13 +27,13 @@ class ListOfCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
+            "department_id" => [
                 "nullable",
-                Rule::exists("departments", "uuid")->whereNull("deleted_at")
+                Rule::exists("departments", "id")->whereNull("deleted_at")
             ],
-            "categories_uuid" => [
+            "categories_id" => [
                 "nullable",
-                Rule::exists("categories", "uuid")->whereNull("deleted_at")
+                Rule::exists("categories", "id")->whereNull("deleted_at")
             ]
         ];
     }

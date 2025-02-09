@@ -26,10 +26,10 @@ class ChartOrgRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "department_uuid" => [
+            "department_id" => [
                 "required",
                 "uuid",
-                "exists:departments,uuid,deleted_at,NULL"
+                "exists:departments,id,deleted_at,NULL"
             ],
         ];
     }

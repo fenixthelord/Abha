@@ -87,7 +87,7 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
             }
-            $user->gender = $request->gender;
+            $user->gender = $request->gender ? $request->gender : $user->gender;
             $user->alt = $request->alt ? $request->alt : $user->alt;
             $user->job = $request->job ? $request->job : $user->job;
             $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
@@ -123,12 +123,12 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
+                'id' => 'required|string|exists:users,id',
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->first()) {
+            if ($user = User::whereId($request->id)->first()) {
                 if ($user->hasRole("Master")) {
                     return $this->Forbidden('This user is Master account and can not be updated');
                 }
@@ -161,7 +161,7 @@ class UserController extends Controller
                     $user->phone = $request->phone;
                     $user->otp_verified = false;
                 }
-                $user->gender = $request->gender;
+                $user->gender = $request->gender ? $request->gender : $user->gender;
                 $user->alt = $request->alt ? $request->alt : $user->alt;
                 $user->job = $request->job ? $request->job : $user->job;
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
@@ -202,19 +202,18 @@ class UserController extends Controller
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
         }
 
-
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
+                'id' => 'required|string|exists:users,id',
                 'active' => 'required|in:0,1',
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if (User::whereuuid($request->uuid)->onlyTrashed()->first()) {
+            if (User::whereId($request->id)->onlyTrashed()->first()) {
                 return $this->badRequest('This user is deleted');
             } else {
-                if ($user = User::whereuuid($request->uuid)->first()) {
+                if ($user = User::whereId($request->id)->first()) {
                     if ($user->hasRole("Master")) {
                         return $this->Forbidden('This user is Master account , it can not be activated or deactivated');
                     }
@@ -244,16 +243,16 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
+                'id' => 'required|string|exists:users,id',
             ], messageValidation());
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $selected_user = User::whereuuid($request->uuid)->first();
-            if ($selected_user){
-                if ($selected_user->hasRole("Master") || $selected_user->id == 1) {
-                    return $this->Forbidden('This user is Master and can not be deleted');
+            $selected_user = User::whereId($request->id)->first();
+            if ($selected_user) {
+                if ($selected_user->hasRole("Master") || $request->user()->hasRole('Master')) {
+                    return $this->Forbidden('This user is Master and can not be deleted.');
                 }
                 $selected_user->delete();
                 DB::commit();
@@ -267,7 +266,8 @@ class UserController extends Controller
         }
     }
 
-    public function oldSearch(Request $request) {
+    public function oldSearch(Request $request)
+    {
         DB::beginTransaction();
         try {
             $pageNumber = request()->input('page', 1);
@@ -275,7 +275,6 @@ class UserController extends Controller
             $search = $request->search;
             if ($users = User::where(function ($query) use ($search) {
                 $query->where('id', 'like', "%$search%")
-                    ->orWhere('uuid', 'like', "%$search%")
                     ->orWhere('first_name', 'like', "%$search%")
                     ->orWhere('last_name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
@@ -298,7 +297,8 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
-    public function searchUser(Request $request) {
+    public function searchUser(Request $request)
+    {
         try {
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
@@ -322,7 +322,8 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
-    public function showDeleteUser() {
+    public function showDeleteUser()
+    {
 
         try {
             $user = auth()->user();
@@ -344,7 +345,8 @@ class UserController extends Controller
         }
     }
 
-    public function restoreUser(Request $request) {
+    public function restoreUser(Request $request)
+    {
         $user = auth()->user();
         if (!$user->hasPermissionTo('user.restore')) {
             return $this->Forbidden(__('validation.custom.userController.permission_denied'));
@@ -352,12 +354,12 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'uuid' => 'required|string|exists:users,uuid',
+                'id' => 'required|string|exists:users,id',
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            if ($user = User::whereuuid($request->uuid)->onlyTrashed()->first()) {
+            if ($user = User::whereId($request->id)->onlyTrashed()->first()) {
                 $user->restore();
                 DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.userController.user_restore'));
@@ -369,7 +371,8 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
-    public function addImage(Request $request) {
+    public function addImage(Request $request)
+    {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -400,7 +403,8 @@ class UserController extends Controller
                 return $this->returnSuccessMessage('OTP send successfully');
             }
         }*/
-    public function sendOtp() {
+    public function sendOtp()
+    {
         DB::beginTransaction();
         try {
             $user = auth()->user();
@@ -451,7 +455,8 @@ class UserController extends Controller
         }
     }
 
-    public function user_profile() {
+    public function userProfile()
+    {
         $user = auth()->user();
         $data = [
             'user' => UserResource::make($user),

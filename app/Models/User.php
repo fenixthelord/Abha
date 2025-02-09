@@ -19,7 +19,8 @@ class User extends Authenticatable  implements Auditable
     use \OwenIt\Auditing\Auditable;
     use HasAutoPermissions;
 
-
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -27,26 +28,52 @@ class User extends Authenticatable  implements Auditable
      * @var array<int, string>
      */
     protected $fillable = [
-        'email',
-        'password',
+        'id',
+        "department_id",
         'first_name',
         'last_name',
         'phone',
+        'email',
+        'email_verified_at',
+        'password',
         'image',
         'alt',
         'gender',
-        'uuid',
-        'otp_code',
         'job',
         'job_id',
         'role',
-        'verify_code',
         'is_admin',
         'active',
+        'otp_code',
         'otp_expires_at',
+        'otp_verified',
+        'verify_code',
         'refresh_token',
         'refresh_token_expires_at',
-        "department_id"
+    ];
+    protected $casts = [
+        'id' => 'string',
+        "department_id" => "string",
+        'first_name' => 'string',
+        'last_name' => 'string',
+        'phone' => 'string',
+        'email' => 'string',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'image' => 'string',
+        'alt' => 'string',
+        'gender' => 'string',
+        'job' => 'string',
+        'job_id' => 'string',
+        'role' => 'string',
+        'is_admin' => 'boolean',
+        'active' => 'boolean',
+        'otp_code' => 'string',
+        'otp_expires_at' => 'datetime',
+        'otp_verified' => 'boolean',
+        'verify_code' => 'string',
+        'refresh_token' => 'string',
+        'refresh_token_expires_at' => 'datetime',
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -67,11 +94,7 @@ class User extends Authenticatable  implements Auditable
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'refresh_token_expires_at' => 'datetime',
-    ];
+
 
     public function linkedSocialAccounts()
     {
@@ -81,7 +104,7 @@ class User extends Authenticatable  implements Auditable
     public function transformAudit(array $data): array
     {
         // Include user details in the audit metadata
-        $data['user_uuid'] = $this->uuid; // Store the user's UUID
+        $data['user_id'] = $this->id; // Store the user's UUID
         $data['user_full_name'] = "{$this->first_name} {$this->last_name}"; // Store the user's full name
 
         // Include additional details (optional)
@@ -91,15 +114,6 @@ class User extends Authenticatable  implements Auditable
         return $data;
     }
 
-    // Automatically generate UUID when creating a new NotifyGroup
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = Str::uuid();
-        });
-    }
     protected $auditExclude = [
         'password',
     ];
@@ -107,7 +121,7 @@ class User extends Authenticatable  implements Auditable
     // Relationship with notify groups
     public function groups()
     {
-        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_uuid', 'notify_group_uuid', 'uuid', 'uuid');
+        return $this->belongsToMany(NotifyGroup::class, 'notify_group_user', 'user_id', 'notify_group_id', 'id', 'id');
     }
 
     // Relationship with device tokens
@@ -120,26 +134,42 @@ class User extends Authenticatable  implements Auditable
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    // public function mangers()
+    // public function managers()
     // {
-    //     return $this->hasMany(Organization::class, 'manger_id');
+    //     return $this->hasMany(Organization::class, 'manager_id');
     // }
     public function employees()
     {
-        return $this->hasMany(Organization::class, 'manger_id');
+        return $this->hasMany(Organization::class, 'manager_id');
     }
-    public function organization() {
+    public function organization()
+    {
         return $this->hasOne(Organization::class, 'employee_id');
     }
 
-    public function scopeMangersInDepartment($query, $departmentId)
+    public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("mangers", function ($q) use ($departmentId) {
+        return $query->whereHas("managers", function ($q) use ($departmentId) {
             $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
         });
     }
 
-    
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = Str::uuid();
+            }
+        });
+
+        static::deleting(function ($post) {
+            // Disallow users with the 'Master' role from deleting posts
+            if (auth()->check() && auth()->user()->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.');
+            }
+        });
+    }
 }

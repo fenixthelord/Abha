@@ -2,11 +2,12 @@
 
 return [
     'custom' => [
-        'department_uuid' => [
-            'required' => 'The department UUID field is required.',
-            'exists' => 'The selected department UUID is invalid.',
+
+        'department_id' => [
+            'required' => 'The department ID field is required.',
+            'exists' => 'The selected department ID is invalid.',
             'unique' => 'This department already exists.',
-            'uuid' => 'The UUID is invalid.',
+            'id' => 'The ID is invalid.',
         ],
 
         'roleAndPerm' => [
@@ -44,6 +45,31 @@ return [
             'master_permission_cannot_be_assigned' => 'Master permission cannot be assigned',
             'validation_error' => 'Validation error',
 
+        ],
+
+        'service' => [
+            'name_exists' => 'The name already exists in this Department.',
+            'not_found' => 'Service not found.',
+            'created' => 'Service created successfully.',
+            'updated' => 'Service updated successfully.',
+            'deleted' => 'Service deleted successfully.',
+            'already_delete' => 'This service has already been deleted',
+            'try_again' => 'An error occurred, please try again.',
+            'id_required' => 'Service id is required.',
+            'id_exists' => 'Service id not found.',
+        ],
+        'departmentService' => [
+            'not_found' => 'Department not found.',
+            'deleted' => 'Department deleted successfully.',
+            'delete_failed' => 'An error occurred while deleting the department.',
+        ],
+
+        'validation' => [
+            'name_required' => 'Service name is required.',
+            'name_max' => 'Service name must not exceed 255 characters.',
+            'details_max' => 'Details must not exceed 1000 characters.',
+            'department_required' => 'Department is required.',
+            'image_url' => 'The image must be a valid URL.',
         ],
 
         'userController' => [
@@ -208,7 +234,8 @@ return [
         ],
         'image' => [
             'required' => 'Image is required.',
-            'image' => 'Image must be an image.', 'mimes' => 'Image must be a file of type: jpeg, jpg, png.',
+            'image' => 'Image must be an image.',
+            'mimes' => 'Image must be a file of type: jpeg, jpg, png.',
             'max' => 'Image must be less than 2MB.',
         ],
         'type' => [
@@ -252,13 +279,13 @@ return [
             'notfound' => 'department not found.',
             'try' => 'try again.',
             'done' => 'department added successfully.',
-            'deleted' =>'department already deleted.',
+            'deleted' => 'department already deleted.',
             'delete' => 'department deleted successfully.',
         ],
     ],
 
     'attributes' => [
-        'department_uuid' => 'Department UUID',
+        'department_id' => 'Department UUID',
         'name' => 'Name',
         'name.en' => 'English Name',
         'name.ar' => 'Arabic Name',

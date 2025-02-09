@@ -27,14 +27,14 @@ class IndexCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_uuid' => [
+            'department_id' => [
                 'sometimes',
-                Rule::exists("departments", "uuid")->where("deleted_at", null)
+                Rule::exists("departments", "id")->where("deleted_at", null)
 
             ],
-            'parent_category_uuid' => [
+            'parent_category_id' => [
                 'sometimes',
-                Rule::exists("categories", "uuid")->where("deleted_at", null)
+                Rule::exists("categories", "id")->where("deleted_at", null)
 
             ],
             'per_page' => 'sometimes|integer|min:1|max:100',
