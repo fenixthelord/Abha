@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\Department;
+
 class ServiceController extends Controller {
     use ResponseTrait;
     public function index(Request $request) {
@@ -183,11 +184,12 @@ class ServiceController extends Controller {
                 return $this->returnValidationError($validator);
             }
 
-            if (Service::where('id', $id)->onlyTrashed()->first()) {
-                return $this->badRequest(__('validation.custom.service.deleted'));
-            }
+            if ($service = Service::withTrashed()->where('id', $id)->first()) {
 
-            if ($service = Service::where('id', $id)->first()) {
+                if ($service->trashed()) {
+                    return $this->returnSuccessMessage(__('validation.custom.service.already_delete'));
+                }
+
                 $name = $service->getTranslations("name");
                 $service->name = [
                     'en' => $name['en'] . '-' . $service->id . '-deleted',
@@ -195,9 +197,9 @@ class ServiceController extends Controller {
                 ];
                 $service->save();
                 $service->delete();
-
                 DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.service.deleted'));
+
             } else {
                 return $this->badRequest(__('validation.custom.service.not_found'));
             }
@@ -206,4 +208,5 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
+
 }
