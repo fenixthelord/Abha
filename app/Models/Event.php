@@ -39,7 +39,6 @@ class Event extends BaseModel
         static::bootHasDateTimeFields();
     }
 
-    // دالة لتهيئة التريت
     protected static function bootHasDateTimeFields()
     {
         static::registerModelEvent('booting', function ($model) {
