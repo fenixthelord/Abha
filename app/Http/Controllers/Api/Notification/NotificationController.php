@@ -38,20 +38,22 @@ class NotificationController extends Controller
             $newUserIds = collect($userIds)->when(
                 isset($userIds[0]) && $userIds[0] === '*',
                 function ($collection) {
-                    return collect(['user_id' => '*']);
+                    return collect([['user_id' => '*']]); // Ensure correct structure
                 },
                 function ($collection) {
                     $users = \App\Models\User::whereIn('id', $collection->all())
                         ->get()
                         ->keyBy('id');
+
                     return $collection->map(function ($userId) use ($users) {
                         return [
                             'user_id'       => $userId,
                             'department_id' => $users->has($userId) ? $users[$userId]->department_id : null,
                         ];
-                    });
+                    })->values(); // Reset keys to maintain a clean array structure
                 }
             )->toArray();
+
           $data['user_ids'] = $newUserIds;
 
             // Prepare the notification data
@@ -71,7 +73,7 @@ class NotificationController extends Controller
            // Use current time if not provided
 
             ];
-dd($notificationData);
+
             // Send the notification using the NotificationService
             $response = $this->notificationService->postCall('/send-notification', $notificationData);
 
