@@ -464,4 +464,19 @@ class UserController extends Controller
         ];
         return $this->returnData($data);
     }
-}
+    public function show(Request $request){
+      try{  $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+        $user=User::where('id',$request->user_id)->first();
+
+       return $this->returnData(UserResource::make($user));
+
+    }
+    catch(\Exception $e){
+          return $this->handleException($e);
+    }
+}}
