@@ -37,16 +37,8 @@ class HeadChartOrgResource extends JsonResource
             "last_name" => $this->last_name,
             "image" => $this->image,
             "position" => self::HEAD_MANAGER_POSITION,
-
-            'employees' => $this->whenLoaded(
-                'employees',
-                function () {
-                    return EmployeesChartOrgResource::collection($this->employees->load("employees"));
-                }
-
-                // fn() => EmployeesChartOrgResource::collection($this->employees->each->load('employee'))
-                // fn() => EmployeesChartOrgResource::collection($this->employees->transform(fn($employee) => $employee->load('employee')))
-            ),
+            
+            'employees' => $this->whenLoaded('employees', fn() => EmployeesChartOrgResource::collection($this->employees->load('employees'))),
         ];
     }
 }
