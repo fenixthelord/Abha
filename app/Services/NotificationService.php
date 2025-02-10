@@ -18,13 +18,16 @@ class NotificationService
         $response = Http::WithHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-        ])->post("http://smartabha-notification.test/api".$method,$params);
+        ])->post("http://smartabha-notification.test/api/".$method,$params);
 
         return $response->json();
     }
     public function Getcall($method,$params)
     {
-        $response = Http::get("{$this->baseUrl}/$method",$params);
+        $response = Http::WithHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->get("http://smartabha-notification.test/api/".$method,$params);
 
         return $response->json();
     }
