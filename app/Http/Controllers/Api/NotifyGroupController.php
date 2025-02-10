@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\GroupResource;
+use App\Http\Resources\Group\GroupResource;
 use App\Http\Resources\UserResource;
 use App\Models\DeviceToken;
 use App\Models\NotifyGroup;
@@ -148,9 +148,20 @@ class NotifyGroupController extends Controller
             $params = $request->all();
 
             $method = 'group/';
-            return ($this->notificationService->Getcall($method, $params));
+
+           $response=$this->notificationService->Getcall($method, $params);
+
+
+            if (!is_array($response) || !isset($response['data']['groups']) || !is_array($response['data']['groups'])) {
+                return $this->badRequest("group not found");
+            }
+
+            $data['group'] = GroupResource::collection($response['data']['groups']);
+
+            return $this->returnData($data);
+
         } catch (\Exception $e) {
-            return $this->returnError(__('validation.custom.notifyGroup.failed_to_retrieve_groups : ') . $e->getMessage());
+            return $this->handleException($e);
         }
     }
 
