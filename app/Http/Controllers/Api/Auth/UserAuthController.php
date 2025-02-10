@@ -11,6 +11,7 @@ use App\Http\Traits\ResponseTrait;
 use App\Models\Department;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -166,7 +167,18 @@ class UserAuthController extends Controller
         DB::beginTransaction();
         try {
 
-            $request->user()->currentAccessToken()->delete();
+            $user=auth('sanctum')->user();
+
+            $notificationService = new NotificationService();
+            $response = $notificationService->deleteCall('/device-tokens/delete/force', [
+                'token_device' => $request->token,
+            ]);
+
+            if (isset($response['error'])) {
+                return $this->badRequest($response['error']);
+            }
+
+            $user->currentAccessToken()->delete();
             DB::commit();
             return $this->returnSuccessMessage(__('validation.custom.auth.logout'));
         } catch (\Exception $ex) {
