@@ -9,6 +9,7 @@ use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
+use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,8 +38,8 @@ class EventController extends Controller
                 ->when($request->filled("end_date"), function ($q) use ($request) {
                     $q->where("end_date", "<=", $request->end_date);
                 });
-                
-            // date range 
+
+            // date range
             $events = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             if ($events->lastPage() < $pageNumber) {
                 $events = $query->paginate($perPage, ['*'], 'page', 1);
@@ -72,22 +73,36 @@ class EventController extends Controller
         }
     }
 
-    public function deleteEvent($id)
+    public function deleteEvent(Request $request)
     {
         try {
-            $validation = Validator::make(
-                ["id" => $id],
-                ['id' => 'required|exists:events,id',]
-            );
-            if ($validation->fails()) {
-                return $this->ReturnError($validation->errors()->first());
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:events,id',
+            ], [
+                'id.required' => __('validation.custom.event.id_required'),
+                'id.exists' => __('validation.custom.event.id_exists'),
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
             }
+
+            $event = Event::withTrashed()->where('id', $request->id)->first();
+
+            if ($event && $event->trashed()) {
+                return $this->returnSuccessMessage(__('validation.custom.event.already_deleted'));
+            }
+//            if (!$event) {
+//                return $this->ReturnError(__('validation.custom.event.not_found'));
+//            }
+
             DB::beginTransaction();
-            $event = Event::find($id);
+//            $event = Event::find($request->id);
             $event->delete();
             DB::commit();
-            return $this->returnSuccessMessage("Event Deleted successfully");
-        } catch (\Exception $e) {
+            return $this->returnSuccessMessage(__('validation.custom.event.success_deleted'));
+        } catch
+        (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
@@ -98,7 +113,7 @@ class EventController extends Controller
         try {
             $validation = Validator::make(
                 ["id" => $id],
-                ['id' => 'required|exists:events,id',]
+                ['id' => 'required|exists:events,id']
             );
             if ($validation->fails()) {
                 return $this->ReturnError($validation->errors()->first());

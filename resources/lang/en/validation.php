@@ -58,6 +58,14 @@ return [
             'id_required' => 'Service id is required.',
             'id_exists' => 'Service id not found.',
         ],
+
+        'event' => [
+            'already_deleted' => 'This Event has already been deleted',
+            'success_deleted' => 'Event Deleted successfully',
+            'id_required' => 'Event id is required.',
+            'id_exists' => 'Event id not found.',
+        ],
+
         'departmentService' => [
             'not_found' => 'Department not found.',
             'deleted' => 'Department deleted successfully.',
