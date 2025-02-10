@@ -46,6 +46,13 @@ class DepartmentsControllers extends Controller
     public function show($id)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['required', 'exists:departments,id']
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $id = $request->input('id');
             if ($department = Department::find($id)) {
                 $data['department'] = DepartmentResource::make($department);
                 return $this->returnData($data);
