@@ -253,7 +253,6 @@ class OrganizationController extends Controller
             $managerID = Organization::getOnlyHeadManager($request->department_id);
 
             $manager = User::findOrFail($managerID);
-            // dd($manager);
             $data["chart"] = HeadChartOrgResource::make($manager->load("employees"));
             return $this->returnData($data);
         } catch (\Exception $e) {
