@@ -43,7 +43,7 @@ class DepartmentsControllers extends Controller
     }
 
 
-    public function show($id)
+    public function show(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -90,11 +90,17 @@ class DepartmentsControllers extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         DB::beginTransaction();
         try {
-
+            $validator = Validator::make($request->all(), [
+                'id' => ['required', 'exists:departments,id']
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $id = $request->input('id');
             if ($department = Department::find($id)) {
                 $validator = Validator::make($request->all(), [
                     'name' => ['nullable', 'array'],
@@ -118,11 +124,11 @@ class DepartmentsControllers extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         DB::beginTransaction();
         try {
-            $validator = Validator::make(['id' => $id], [
+            $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:departments,id',
             ], [
                 'id.required' => 'Department id is required.',
@@ -131,6 +137,7 @@ class DepartmentsControllers extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
+            $id = $request->input('id');
             if (Department::onlyTrashed()->find($id)) {
                 return $this->badRequest(__('validation.custom.department.deleted'));
             } else {
