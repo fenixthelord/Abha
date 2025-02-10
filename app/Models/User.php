@@ -167,8 +167,8 @@ class User extends Authenticatable  implements Auditable
 
         static::deleting(function ($post) {
             // Disallow users with the 'Master' role from deleting posts
-            if (auth()->check() && auth()->user()->hasRole('Master')) {
-                abort(403, 'You are not allowed to delete this resource.');
+            if (auth()->check() && $post->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.5555');
             }
         });
     }
