@@ -51,6 +51,7 @@ class Organization extends BaseModel  implements Auditable
         return $this->belongsTo(User::class, 'employee_id');
     }
 
+
     public function scopeWithSearch($query, $value)
     {
         return $query
@@ -76,32 +77,39 @@ class Organization extends BaseModel  implements Auditable
         });
     }
 
-    public function scopeOnlyHeadManagers($query, array $employeeIds)
+    public function scopeOnlyHeadManagers($query, $departmentId)
     {
-        return $query->whereNotIn('manager_id', $employeeIds)->distinct();
+        return $query
+            ->where('manager_id', null)
+            ->whereHas('department', fn($q) => $q->where('id', $departmentId));
     }
 
     public static function getOnlyHeadManager($departmentId)
     {
-        $employeeIds = static::forDepartment($departmentId)
-            ->pluck('employee_id')
-            ->toArray();
+        // $employeeIds = static::forDepartment($departmentId)
+        //     ->pluck('employee_id')
+        //     ->toArray();
 
-        return static::forDepartment($departmentId)
-            ->onlyHeadManagers($employeeIds)
-            ->pluck('manager_id')
-            ->first();
+        // return static::forDepartment($departmentId)
+        //     ->onlyHeadManagers($employeeIds)
+        //     ->pluck('manager_id')
+        //     ->first();
+        // return static::OnlyHeadManager($departmentId)->pluck("employee_id");
+
     }
 
     public static function getManagersAndEmployees($departmentId)
     {
-        $employeeIds = static::forDepartment($departmentId)
+        return static::forDepartment($departmentId)
             ->pluck('employee_id')
             ->toArray();
+        // $employeeIds = static::forDepartment($departmentId)
+        //     ->pluck('employee_id')
+        //     ->toArray();
 
-        $managerIds = static::getOnlyHeadManager($departmentId);
+        // $managerIds = static::getOnlyHeadManager($departmentId);
 
-        return array_unique(array_merge($employeeIds, $managerIds));
+        // return array_unique(array_merge($employeeIds, $managerIds));
     }
 
     public static function getAllChildIds($employeeId)

@@ -23,10 +23,14 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-
 class OrganizationController extends Controller
 {
     use ResponseTrait;
+
+    private const HEAD_MANAGER_POSITION = [
+        'en' => "head manager",
+        'ar' => "رئيس القسم"
+    ];
 
     public function getDepartmentManagers(ManagerRequest $request)
     {
@@ -69,8 +73,7 @@ class OrganizationController extends Controller
         try {
             $availableManagers = Organization::getManagersAndEmployees($request->department_id);
             $query = User::query();
-
-            if (!empty($availableMangers)) {
+            if (!empty($availableManagers)) {
                 $query->whereIn('id', $availableManagers);
             }
 
@@ -86,6 +89,7 @@ class OrganizationController extends Controller
     public function AddEmployee(AddOrgRequest $request)
     {
         try {
+            DB::beginTransaction();
             if ($request->user_id == $request->manager_id) {
                 return $this->badRequest('manager and employee must not be the same');
             }
@@ -114,6 +118,16 @@ class OrganizationController extends Controller
             if ($user_dep != $manager_dep) {
                 return $this->badRequest("employee and the manager must be in the same Department");
             }
+            $headManager = Organization::where('employee_id', $manager)->first();
+            if(!$headManager) {
+                Organization::create([
+                    'department_id' => $department,
+                    'manager_id' => NULL,
+                    'employee_id' => $manager,
+                    'position' => Self::HEAD_MANAGER_POSITION
+                ]);
+            }
+            
             $orgUser = Organization::create([
                 'department_id' => $department,
                 'manager_id' => $manager,
@@ -121,8 +135,10 @@ class OrganizationController extends Controller
                 'position' => $request->position
             ]);
             $data['organization'] = new OrganizationResource($orgUser);
+            DB::commit();
             return $this->returnData($data);
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->handleException($exception);
         }
     }
@@ -178,19 +194,19 @@ class OrganizationController extends Controller
             $pageNumber   = $request->input('page', $this->pageNumber);
             $departmentId = $request->input('department_id');
             $managerId    = $request->input('manager_id');
-    
+
             $query = Organization::query()
                 ->when(
                     $departmentId || $managerId,
                     function ($q) use ($departmentId, $managerId) {
                         if ($departmentId) {
-                            $q->whereHas("department" , function ($q) use ($departmentId) {
+                            $q->whereHas("department", function ($q) use ($departmentId) {
                                 $q->where("id", $departmentId);
                             });
-                        }
+                        }   
                         if ($managerId) {
                             $childManagerIds = Organization::getAllChildIds($managerId);
-                            $childManagerIds[] = $managerId;                            
+                            $childManagerIds[] = $managerId;
                             $q->whereIn("manager_id", $childManagerIds);
                         }
                     }
@@ -198,21 +214,21 @@ class OrganizationController extends Controller
                 ->when($request->has("search"), function ($q) use ($request) {
                     $q->withSearch($request->search);
                 });
-    
+
             $organization = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-    
+
             if ($request->page > $organization->lastPage()) {
                 $organization = Organization::paginate($perPage, ['*'], 'page', $pageNumber);
             }
-    
+
             $data["organizations"] = OrganizationResource::collection($organization);
-    
+
             return $this->PaginateData($data, $organization);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
-    
+
 
 
     public function filter(FilterOrgRequest $request)
