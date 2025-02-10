@@ -11,6 +11,7 @@ use App\Http\Requests\Organization\FilterOrgRequest;
 use App\Http\Requests\Organization\ManagerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\Chart\HeadChartOrgResource;
+use App\Http\Resources\Org\ChartOrgResource;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ResponseTrait;
@@ -22,10 +23,14 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-
 class OrganizationController extends Controller
 {
     use ResponseTrait;
+
+    private const HEAD_MANAGER_POSITION = [
+        'en' => "head manager",
+        'ar' => "رئيس القسم"
+    ];
 
     public function getDepartmentManagers(ManagerRequest $request)
     {
@@ -68,8 +73,7 @@ class OrganizationController extends Controller
         try {
             $availableManagers = Organization::getManagersAndEmployees($request->department_id);
             $query = User::query();
-
-            if (!empty($availableMangers)) {
+            if (!empty($availableManagers)) {
                 $query->whereIn('id', $availableManagers);
             }
 
@@ -85,6 +89,7 @@ class OrganizationController extends Controller
     public function AddEmployee(AddOrgRequest $request)
     {
         try {
+            DB::beginTransaction();
             if ($request->user_id == $request->manager_id) {
                 return $this->badRequest('manager and employee must not be the same');
             }
@@ -113,6 +118,16 @@ class OrganizationController extends Controller
             if ($user_dep != $manager_dep) {
                 return $this->badRequest("employee and the manager must be in the same Department");
             }
+            $headManager = Organization::where('employee_id', $manager)->first();
+            if(!$headManager) {
+                Organization::create([
+                    'department_id' => $department,
+                    'manager_id' => NULL,
+                    'employee_id' => $manager,
+                    'position' => Self::HEAD_MANAGER_POSITION
+                ]);
+            }
+            
             $orgUser = Organization::create([
                 'department_id' => $department,
                 'manager_id' => $manager,
@@ -120,8 +135,10 @@ class OrganizationController extends Controller
                 'position' => $request->position
             ]);
             $data['organization'] = new OrganizationResource($orgUser);
+            DB::commit();
             return $this->returnData($data);
         } catch (\Exception $exception) {
+            DB::rollBack();
             return $this->handleException($exception);
         }
     }
@@ -173,33 +190,36 @@ class OrganizationController extends Controller
     public function index(OrgFilterRequest $request)
     {
         try {
-            $perPage = $request->input('per_page', $this->per_page);
-            $pageNumber = $request->input('page', $this->pageNumber);
-            $department_id = $request->input('department_id');
-            $manager_id = $request->input('manager_id');
-            $query  = Organization::query()
+            $perPage      = $request->input('per_page', $this->per_page);
+            $pageNumber   = $request->input('page', $this->pageNumber);
+            $departmentId = $request->input('department_id');
+            $managerId    = $request->input('manager_id');
+
+            $query = Organization::query()
                 ->when(
-                    $department_id || $manager_id,
-                    function ($q) use ($request) {
-                        if ($request->department_id) {
-                            $department =  Department::whereId($request->department_id)->pluck('id')->first();
-                            $q->where("department_id", $department);
+                    $departmentId || $managerId,
+                    function ($q) use ($departmentId, $managerId) {
+                        if ($departmentId) {
+                            $q->whereHas("department", function ($q) use ($departmentId) {
+                                $q->where("id", $departmentId);
+                            });
+                        }   
+                        if ($managerId) {
+                            $childManagerIds = Organization::getAllChildIds($managerId);
+                            $childManagerIds[] = $managerId;
+                            $q->whereIn("manager_id", $childManagerIds);
                         }
-                        if ($request->manager_id) {
-                            $manager =  User::whereId($request->manager_id)->pluck('id')->first();
-                            $q->where("manager_id", $manager);
-                        }
-                    },
+                    }
                 )
                 ->when($request->has("search"), function ($q) use ($request) {
                     $q->withSearch($request->search);
                 });
+
             $organization = $query->paginate($perPage, ['*'], 'page', $pageNumber);
 
             if ($request->page > $organization->lastPage()) {
                 $organization = Organization::paginate($perPage, ['*'], 'page', $pageNumber);
             }
-
 
             $data["organizations"] = OrganizationResource::collection($organization);
 
@@ -209,12 +229,12 @@ class OrganizationController extends Controller
         }
     }
 
+
+
     public function filter(FilterOrgRequest $request)
     {
         try {
-            $managersIDs = Organization::query()->getOnlyHeadManager(
-                Department::whereId($request->department_id)->pluck("id")->firstOrFail()
-            );
+            $managersIDs = Organization::getManagersAndEmployees($request->department_id);
             $managers = User::whereIn("id", $managersIDs)->get();
             $data["managers"] = UserResource::collection($managers)->each->onlyName();
             return $this->returnData($data);
@@ -248,9 +268,8 @@ class OrganizationController extends Controller
         try {
             $managerID = Organization::getOnlyHeadManager($request->department_id);
 
-            $manager = User::where("id", $managerID)->firstOrFail();
+            $manager = User::findOrFail($managerID);
             $data["chart"] = HeadChartOrgResource::make($manager->load("employees"));
-
             return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);

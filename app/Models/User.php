@@ -149,7 +149,7 @@ class User extends Authenticatable  implements Auditable
 
     public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("managers", function ($q) use ($departmentId) {
+        return $query->whereHas("employees", function ($q) use ($departmentId) {
             $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
