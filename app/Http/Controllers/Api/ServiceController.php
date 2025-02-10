@@ -22,7 +22,7 @@ class ServiceController extends Controller {
                 'page' => ['nullable', 'integer', 'min:1'],
                 'per_page' => ['nullable', 'integer', 'min:1'],
                 'search' => ['nullable', 'string'],
-                'department_id' => ['nullable', 'exists:departments,id'],
+                'department_id' => ['nullable', 'exists:departments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -92,7 +92,7 @@ class ServiceController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'department_id' => ['required', 'exists:departments,id'],
+                'department_id' => ['required', 'exists:departments,id,deleted_at,NULL'],
                 'name' => ['required', 'array', 'max:255'],
                 'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
                 'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],
@@ -135,7 +135,7 @@ class ServiceController extends Controller {
                 'details.en' => ['nullable', 'max:1000'],
                 'details.ar' => ['nullable', 'max:1000'],
                 'image' => ['nullable', 'string'],
-                'department_id' => ['nullable', 'exists:departments,id'],
+                'department_id' => ['nullable', 'exists:departments,id,deleted_at,NULL'],
             ], [
                 'id.required' => __('validation.custom.service.id_required'),
                 'id.exists' => __('validation.custom.service.id_exists'),
