@@ -19,10 +19,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/save-device-token', [DeviceTokenController::class, 'saveDeviceToken']);
 
         Route::prefix('notify-groups')->group(function () {
-//            Route::get('/', [NotifyGroupController::class, 'allGroup']);
-//            Route::get('/{groupId}/show', [NotifyGroupController::class, 'groupDetail']);
-//            Route::post('/{groupId}/edit', [NotifyGroupController::class, 'editGroup']);
-//            Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
+          Route::get('/', [NotifyGroupController::class, 'allGroup']);
+          Route::get('/{groupId}/show', [NotifyGroupController::class, 'groupDetail']);
+         Route::post('/{groupId}/edit', [NotifyGroupController::class, 'editGroup']);
+           Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 //            Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
 //            Route::delete('/{notifyGroupId}/users', [NotifyGroupController::class, 'removeUsersFromNotifyGroup']);
             Route::post('/send-notification', [\App\Http\Controllers\Api\Notification\NotificationController::class, 'sendNotification']);

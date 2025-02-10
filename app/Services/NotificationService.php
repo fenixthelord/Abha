@@ -95,7 +95,8 @@ class NotificationService
     protected function sendRequest($type, $method, $params = [])
     {
         try {
-            $url = "{$this->baseUrl}/api{$method}";
+          //  $url = "{$this->baseUrl}/api{$method}";
+            $url = "http://smartabha-notification.test/api{$method}";
 
             // Prepare request
             $response = Http::withHeaders([

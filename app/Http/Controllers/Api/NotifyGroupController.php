@@ -50,8 +50,13 @@ class NotifyGroupController extends Controller
 
             ];
             $method = '/group/add';
-            return ($this->notificationService->Postcall($method, $params));
+            $response=$this->notificationService->Postcall($method, $params);
 
+            if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
+                return $this->badRequest("group not found");
+            }
+$data['group']=GroupResource::make($response['data']['group']);
+            return  $this->returnData($data);
 
         } catch (Exception $e) {
 
@@ -147,10 +152,9 @@ class NotifyGroupController extends Controller
         try {
             $params = $request->all();
 
-            $method = 'group/';
+            $method = '/group/';
 
-           $response=$this->notificationService->Getcall($method, $params);
-
+           $response=$this->notificationService->getCall($method, $params);
 
             if (!is_array($response) || !isset($response['data']['groups']) || !is_array($response['data']['groups'])) {
                 return $this->badRequest("group not found");
@@ -169,10 +173,15 @@ class NotifyGroupController extends Controller
     {
         try {
          $params = [
-             'group_uuid' => $groupUuid,
+             'group_id' => $groupUuid,
          ];
-          $method='group/show';
-            return ($this->notificationService->Postcall($method, $params));
+          $method='/group/show';
+            $response=$this->notificationService->postCall($method, $params);
+            if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
+                return $this->badRequest("group not found");
+            }
+            $data['group'] = GroupResource::make($response['data']['group']);
+            return $this->returnData($data);
         } catch (Exception $e) {
             return $this->badRequest($e->getMessage());
         }
@@ -197,8 +206,14 @@ class NotifyGroupController extends Controller
 
 
             ];
-            $method = '/group/edit';
-            return ($this->notificationService->Postcall($method, $params));
+            $method = '/group/update';
+            $response=$this->notificationService->Postcall($method, $params);
+            dd($response);
+            if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
+                return $this->badRequest("group not found");
+            }
+            $data['group'] = GroupResource::make($response['data']['group']);
+            return $this->returnData($data);
 
         } catch (Exception $e) {
             DB::rollBack();

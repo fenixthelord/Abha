@@ -13,7 +13,8 @@ class MemberResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
-    {       $firstName = $this->resource['user']['data']['first_name'] ?? '';
+    {
+        $firstName = $this->resource['user']['data']['first_name'] ?? '';
         $lastName = $this->resource['user']['data']['last_name'] ?? '';
         $fullName = trim("{$firstName}.{$lastName}", '.');
         return [
