@@ -21,7 +21,8 @@ class Organization extends BaseModel  implements Auditable
         "manager_id",
         "employee_id",
         "position",
-    ];    protected $casts = [
+    ];
+    protected $casts = [
         "department_id" => "string",
         "manager_id" => "string",
         "employee_id" => "string",
@@ -42,7 +43,7 @@ class Organization extends BaseModel  implements Auditable
     // Self Join : my Employees in Organization Table
     public function employees()
     {
-        return $this->hasMany(Organization::class , "manager_id", 'employee_id');
+        return $this->hasMany(Organization::class, "manager_id", 'employee_id');
     }
 
     public function User()
@@ -80,7 +81,8 @@ class Organization extends BaseModel  implements Auditable
         return $query->whereNotIn('manager_id', $employeeIds)->distinct();
     }
 
-    public static function getOnlyHeadManager($departmentId) {
+    public static function getOnlyHeadManager($departmentId)
+    {
         $employeeIds = static::forDepartment($departmentId)
             ->pluck('employee_id')
             ->toArray();
@@ -88,7 +90,7 @@ class Organization extends BaseModel  implements Auditable
         return static::forDepartment($departmentId)
             ->onlyHeadManagers($employeeIds)
             ->pluck('manager_id')
-            ->toArray();
+            ->first();
     }
 
     public static function getManagersAndEmployees($departmentId)
@@ -105,18 +107,18 @@ class Organization extends BaseModel  implements Auditable
     public static function getAllChildIds($employeeId)
     {
         $employee = self::find($employeeId);
-        
+
         if (!$employee) {
             return [];
         }
-        
+
         $childrenIds = [];
 
         foreach ($employee->employees as $child) {
             $childrenIds[] = $child->id;
             $childrenIds = array_merge($childrenIds, self::getAllChildIds($child->id));
         }
-        
+
         return $childrenIds;
     }
 }

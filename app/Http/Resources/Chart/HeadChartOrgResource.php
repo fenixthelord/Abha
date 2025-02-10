@@ -41,7 +41,7 @@ class HeadChartOrgResource extends JsonResource
             'employees' => $this->whenLoaded(
                 'employees',
                 function () {
-                    return EmployeesChartOrgResource::collection($this->employees->each->load("employee"));
+                    return EmployeesChartOrgResource::collection($this->employees->load("employees"));
                 }
 
                 // fn() => EmployeesChartOrgResource::collection($this->employees->each->load('employee'))
@@ -49,5 +49,4 @@ class HeadChartOrgResource extends JsonResource
             ),
         ];
     }
-
 }
