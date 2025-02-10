@@ -40,9 +40,9 @@ class Organization extends BaseModel  implements Auditable
     }
 
     // Self Join : my Employees in Organization Table
-    public function employee()
+    public function employees()
     {
-        return $this->hasMany(Organization::class, 'manager_id');
+        return $this->hasMany(Organization::class , "manager_id", 'employee_id');
     }
 
     public function User()
@@ -112,7 +112,7 @@ class Organization extends BaseModel  implements Auditable
         
         $childrenIds = [];
 
-        foreach ($employee->employee as $child) {
+        foreach ($employee->employees as $child) {
             $childrenIds[] = $child->id;
             $childrenIds = array_merge($childrenIds, self::getAllChildIds($child->id));
         }

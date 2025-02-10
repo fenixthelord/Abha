@@ -40,8 +40,14 @@ class HeadChartOrgResource extends JsonResource
 
             'employees' => $this->whenLoaded(
                 'employees',
-                fn() => EmployeesChartOrgResource::collection($this->employees->transform(fn($employee) => $employee->load('employee')))
+                function () {
+                    return EmployeesChartOrgResource::collection($this->employees->each->load("employee"));
+                }
+
+                // fn() => EmployeesChartOrgResource::collection($this->employees->each->load('employee'))
+                // fn() => EmployeesChartOrgResource::collection($this->employees->transform(fn($employee) => $employee->load('employee')))
             ),
         ];
     }
+
 }

@@ -11,6 +11,7 @@ use App\Http\Requests\Organization\FilterOrgRequest;
 use App\Http\Requests\Organization\ManagerRequest;
 use App\Http\Requests\Organization\OrgFilterRequest;
 use App\Http\Resources\Chart\HeadChartOrgResource;
+use App\Http\Resources\Org\ChartOrgResource;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ResponseTrait;
@@ -250,10 +251,8 @@ class OrganizationController extends Controller
     {
         try {
             $managerID = Organization::getOnlyHeadManager($request->department_id);
-
-            $manager = User::where("id", $managerID)->firstOrFail();
-            $data["chart"] = HeadChartOrgResource::make($manager->load("employees"));
-
+            $manager = Organization::where("manager_id" , $managerID)->first();
+            $data["chart"] = ChartOrgResource::make($manager->load("employees"));
             return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);
