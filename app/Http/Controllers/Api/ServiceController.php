@@ -64,18 +64,35 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-    public function show($id) {
+    public function show(Request $request) {
+        DB::beginTransaction();
         try {
-            if ($service = Service::where('id', $id)->first()) {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:services,id',
+            ], [
+                'id.required' => __('validation.custom.service.id_required'),
+                'id.exists' => __('validation.custom.service.id_exists'),
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $id = $request->id;
+
+            if ($service = Service::where('id', $request->id)->first()) {
                 $data['service'] = ServiceResource::make($service);
+                DB::commit();
                 return $this->returnData($data);
             } else {
                 return $this->badRequest(__('validation.custom.service.not_found'));
             }
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->handleException($e);
         }
     }
+
     public function store(Request $request) {
         DB::beginTransaction();
         try {
@@ -111,16 +128,11 @@ class ServiceController extends Controller {
             return $this->handleException($e);
         }
     }
-    public function update(Request $request, $id) {
+    public function update(Request $request) {
         DB::beginTransaction();
         try {
-            $service = Service::where('id', $id)->first();
-
-            if (!$service) {
-                return $this->badRequest(__('validation.custom.service.not_found'));
-            }
-
             $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:services,id',
                 'name' => ['nullable', 'array'],
                 'name.en' => ['nullable', 'max:255'],
                 'name.ar' => ['nullable', 'max:255'],
@@ -129,23 +141,30 @@ class ServiceController extends Controller {
                 'details.ar' => ['nullable', 'max:1000'],
                 'image' => ['nullable', 'string'],
                 'department_id' => ['nullable', 'exists:departments,id'],
+            ], [
+                'id.required' => __('validation.custom.service.id_required'),
+                'id.exists' => __('validation.custom.service.id_exists'),
             ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
+            $id = $request->id;
+            $service = Service::where('id', $id)->first();
+            if (!$service) {
+                return $this->badRequest(__('validation.custom.service.not_found'));
+            }
+
             if ($request->filled('name')) {
-                $exists = Service::where('id', '!=', $service->id)
-                    ->where(function ($query) use ($request) {
-                        if ($request->has('name.en')) {
-                            $query->orWhere('name->en', $request->name['en']);
-                        }
-                        if ($request->has('name.ar')) {
+                $exists = Service::where('id', '!=', $service->id)->where(function ($query) use ($request) {
+                    if ($request->has('name.en')) {
+                        $query->orWhere('name->en', $request->name['en']);
+                    }
+                    if ($request->has('name.ar')) {
                             $query->orWhere('name->ar', $request->name['ar']);
-                        }
-                    })
-                    ->where('department_id', $service->department_id)->exists();
+                    }
+                })->where('department_id', $service->department_id)->exists();
 
                 if ($exists) {
                     return $this->badRequest(__('validation.custom.service.name_exists'));
@@ -185,7 +204,6 @@ class ServiceController extends Controller {
             }
 
             if ($service = Service::withTrashed()->where('id',$request->id)->first()) {
-
                 if ($service->trashed()) {
                     return $this->returnSuccessMessage(__('validation.custom.service.already_delete'));
                 }
