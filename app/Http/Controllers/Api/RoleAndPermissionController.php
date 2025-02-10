@@ -245,7 +245,7 @@ class RoleAndPermissionController extends Controller
                     return $this->Forbidden(__('validation.custom.roleAndPerm.master_role_cannot_remove_from_Master'));
                 }
             }
-            if (!$user->roles()->where('name', $request->roleآame)->exists()) {
+            if (!$user->roles()->where('name', $request->roleName)->exists()) {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.role_not_exist'));
             }
             // Check if the user has the role before removing it
