@@ -37,12 +37,7 @@ class ServiceController extends Controller {
             $query = Service::query();
 
             if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name->en', 'LIKE', '%' . $search . '%')
-                        ->orWhere('name->ar', 'LIKE', '%' . $search . '%')
-                        ->orWhere('details->en', 'LIKE', '%' . $search . '%')
-                        ->orWhere('details->ar', 'LIKE', '%' . $search . '%');
-                });
+                $query->whereAny(['name->en', 'name->ar', 'details->en', 'details->ar'], $search);
             }
 
             if ($departmentId) {

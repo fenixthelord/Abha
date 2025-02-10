@@ -9,8 +9,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
 use Spatie\Translatable\HasTranslations;
 
-class Service extends BaseModel implements Auditable
-{
+class Service extends BaseModel implements Auditable {
     use HasFactory, SoftDeletes, AuditingTrait, HasTranslations;
 
     protected $table = 'services';
@@ -30,14 +29,8 @@ class Service extends BaseModel implements Auditable
         'department_id' => 'string',
         'name' => 'json',
         'details' => 'json',
-        'image' => 'string'];
-
-//    protected static function boot() {
-//        parent::boot();
-//        static::creating(function ($model) {
-//            $model->id = Str::uuid();
-//        });
-//    }
+        'image' => 'string'
+    ];
 
     public function department()
     {
