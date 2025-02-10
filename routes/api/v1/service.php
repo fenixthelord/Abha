@@ -10,69 +10,41 @@ Route::prefix('services')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
-            Route::get('/show/{id}', [ServiceController::class, 'show']); //done
+            Route::get('/show', [ServiceController::class, 'show']); //done
             Route::post('/add', [ServiceController::class, 'store']); //done
-            Route::put('/update/{id}', [ServiceController::class, 'update']); //done
+            Route::match(['put', 'patch'], '/update', [ServiceController::class, 'update']); //done
             Route::delete('/delete', [ServiceController::class, 'destroy']); //done
         });
     });
 });
-                                             /*             /*
+
+/*
+
                                         ****  About Routes  ****
-                                          */              /*
 
-/* Route: GET /api/services/index
-* URL: GET http://your-api-url/api/services?page=1&per_page=10&search=service_name&department_id=
-* page (اختياري): رقم الصفحة للنتائج، الافتراضي هو 1.
-* per_page (اختياري): عدد النتائج لكل صفحة، الافتراضي هو 10.
-* search (اختياري): نص البحث للبحث في أسماء أو تفاصيل الخدمات.
-* department_id (اختياري): تحديد القسم الذي ينتمي إليه الخدمات.
+
+1. Route: GET /services/index
+المطلوب: لا أحتاج اضافة في الـ request، لكن يمكن إرسال معلمات
+ (مثل page, per_page, search, department_id) لفلترة والبحث عن بيانات حسب القسم أو تحديد عدد العناصر في الصفحة.
+
+2. Route: GET /services/show
+ لعرض تفاصيل خدمة معينة بناءً على الـ id.
+المطلوب: إرسال id في الـ query string ( مثل : ?id=123).
+
+3. Route: POST /services/add
+ لإضافة خدمة جديدة.
+المطلوب: department_id (القسم).
+name (اسم الخدمة باللغتين الإنجليزية والعربية).
+details
+image
+
+4. Route: PUT/PATCH /services/update
+ لتحديث معلومات خدمة موجودة.
+id ( الخدمة التي اريد  تحديثها) :مطلوب
+البيانات اللي اريد تحديثها... ( name, details, image, department_id).
+
+5. Route: DELETE /services/delete
+ لحذف خدمة معينة.
+المطلوب: id (معرف الخدمةالتي اريد حذفها).
+
 */
-
-/* Route: GET /api/services/show
- *  URL: GET /api/services/show/{id}
- */
-
-/* Route: POST /api/services/add
-                                   store
-  *  URL: POST /api/services/add
- * department_id: معرف القسم الذي تنتمي إليه الخدمة (يجب أن يكون موجودًا في جدول الأقسام).
- * name: اسم الخدمة بلغتين (إنجليزية وعربية):
- * name.en: الاسم باللغة الإنجليزية.
- * name.ar: الاسم باللغة العربية.
- * details: تفاصيل الخدمة بلغتين (إنجليزية وعربية):
- * details.en: التفاصيل باللغة الإنجليزية.
- * details.ar: التفاصيل باللغة العربية.
- * image: رابط الصورة أو اسم الملف المرتبط بالخدمة.
- * Example:
-  {
-  "department_id": 1,
-  "name": {
-    "en": "Service Name in English",
-    "ar": "اسم الخدمة بالعربية"
-  },
-  "details": {
-    "en": "Service details in English",
-    "ar": "تفاصيل الخدمة بالعربية"
-  },
-  "image": "image_url_or_name"
-}
- */
-
-/* Route: PUT /api/services/{service_id}
-                                  update
-  * URL: PUT /api/services/{id}
-  * name (اختياري): اسم الخدمة بلغتين (إنجليزية وعربية).
-  * name.en: الاسم باللغة الإنجليزية.
-  * name.ar: الاسم باللغة العربية.
-  * details (اختياري): تفاصيل الخدمة بلغتين (إنجليزية وعربية).
-  * details.en: التفاصيل باللغة الإنجليزية.
-  * details.ar: التفاصيل باللغة العربية.
-  * image (اختياري): رابط الصورة أو اسم الملف المرتبط بالخدمة.
-  * department_id (اختياري): معرف القسم الذي تنتمي إليه الخدمة.
- */
-
-/* Route: DELETE /api/services/delete -> in Body
-
-  * URL: DELETE http://your-api-url/api/services/delete -> in body ->id
- */

@@ -149,7 +149,7 @@ class User extends Authenticatable  implements Auditable
 
     public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("managers", function ($q) use ($departmentId) {
+        return $query->whereHas("employees", function ($q) use ($departmentId) {
             $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
@@ -167,8 +167,8 @@ class User extends Authenticatable  implements Auditable
 
         static::deleting(function ($post) {
             // Disallow users with the 'Master' role from deleting posts
-            if (auth()->check() && auth()->user()->hasRole('Master')) {
-                abort(403, 'You are not allowed to delete this resource.');
+            if (auth()->check() && $post->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.5555');
             }
         });
     }
