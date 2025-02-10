@@ -17,9 +17,11 @@ Route::prefix('services')->group(function () {
         });
     });
 });
-                                             /*             /*
+
+/*
+
                                         ****  About Routes  ****
-                                          */              /*
+
 
 1. Route: GET /services/index
 المطلوب: لا أحتاج اضافة في الـ request، لكن يمكن إرسال معلمات
@@ -44,3 +46,5 @@ id ( الخدمة التي اريد  تحديثها) :مطلوب
 5. Route: DELETE /services/delete
  لحذف خدمة معينة.
 المطلوب: id (معرف الخدمةالتي اريد حذفها).
+
+*/
