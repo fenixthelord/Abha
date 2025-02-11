@@ -15,7 +15,7 @@ class FormResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'category_id' => $this->category_id,
-            'category_name' => $this->whenLoaded('category', fn() => $is_list ? $this->category?->name : $this->category?->getTranslations('name')),
+            'category_name' => $this->whenLoaded('category', fn() => $this->category?->getTranslations('name')),
             'fields' => FormFieldResource::collection($this->whenLoaded('fields')),
         ];
     }
