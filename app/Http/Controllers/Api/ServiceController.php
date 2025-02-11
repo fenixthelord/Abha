@@ -187,7 +187,7 @@ class ServiceController extends Controller {
             if ($service = Service::withTrashed()->where('id',$request->id)->first()) {
 
                 if ($service->trashed()) {
-                    return $this->returnSuccessMessage(__('validation.custom.service.already_delete'));
+                    return $this->badRequest(__('validation.custom.service.already_delete'));
                 }
 
                 $name = $service->getTranslations("name");
