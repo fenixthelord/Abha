@@ -26,7 +26,7 @@ class DeviceTokenController extends Controller
                 'owner_id'      => $request->input('user_id'),
                 'owner_type'   => 'user',
                 'owner_service' => 'user_service',
-                'channel' =>'fcm'
+                'channel' => 'fcm'
             ];
 
             // Send a POST request using the NotificationService
@@ -46,4 +46,42 @@ class DeviceTokenController extends Controller
         }
     }
 
+
+    public function getReceivedNotifications()
+    {
+        try {
+            $data = [
+                'receiver_id' => Request()->user()->id,
+            ];
+
+            $response = $this->notificationService->getCall('/notifications', $data);
+
+            if (isset($response['error'])) {
+                return $this->returnError($response['error']);
+            }
+
+            return $this->returnData('notifications', $response['data']);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function getSentNotifications()
+    {
+        try {
+            $data = [
+                'sender_id' => Request()->user()->id,
+            ];
+
+            $response = $this->notificationService->getCall('/notifications', $data);
+
+            if (isset($response['error'])) {
+                return $this->returnError($response['error']);
+            }
+
+            return $this->returnData('notifications', $response['data']);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 }
