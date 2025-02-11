@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\DeviceToken;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeviceToken\SaveDeviceTokenRequest;
+use App\Http\Resources\Notifications\NotificationResource;
 use App\Http\Traits\ResponseTrait;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class DeviceTokenController extends Controller
                 'owner_id'      => $request->input('user_id'),
                 'owner_type'   => 'user',
                 'owner_service' => 'user_service',
-                'channel' =>'fcm'
+                'channel' => 'fcm'
             ];
 
             // Send a POST request using the NotificationService
@@ -46,4 +47,70 @@ class DeviceTokenController extends Controller
         }
     }
 
+    public function getReceivedNotifications()
+    {
+        try {
+            $requestData = [
+                'receiver_id' => request()->user()->id,
+            ];
+
+            $response = $this->notificationService->getCall('/notifications', $requestData);
+            $response = json_decode(json_encode($response, true));
+            // dd($response->data->current_page, 123);
+            if (isset($response->error)) {
+                return $this->returnError($response->error);
+            }
+
+            $response =  $response->data;
+
+            $details =  collect($response->notifications)->pluck("details")->collapse();
+            $notificationsCollection = NotificationResource::collection($details);
+
+            $data = [
+                "notifications"  => $notificationsCollection,
+                "current_page"   => $response->current_page,
+                "next_page"      => $response->next_page,
+                "previous_page"  => $response->previous_page,
+                "total_pages"    => $response->total_pages,
+            ];
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+
+    public function getSentNotifications()
+    {
+        try {
+            $requestData = [
+                'sender_id' => Request()->user()->id,
+            ];
+
+            $response = $this->notificationService->getCall('/notifications', $requestData);
+            $response = json_decode(json_encode($response, true));
+            // dd($response->data->current_page, 123);
+            if (isset($response->error)) {
+                return $this->returnError($response->error);
+            }
+
+            $response =  $response->data;
+
+            $details =  collect($response->notifications)->pluck("details")->collapse();
+            $notificationsCollection = NotificationResource::collection($details);
+
+            $data = [
+                "notifications"  => $notificationsCollection,
+                "current_page"   => $response->current_page,
+                "next_page"      => $response->next_page,
+                "previous_page"  => $response->previous_page,
+                "total_pages"    => $response->total_pages,
+            ];
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 }
