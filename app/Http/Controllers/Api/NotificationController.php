@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\NotificationResource;
+use App\Http\Resources\Notifications\NotificationResource;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Notification;
