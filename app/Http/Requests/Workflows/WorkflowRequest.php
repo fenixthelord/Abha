@@ -28,11 +28,11 @@ class WorkflowRequest extends FormRequest
             ];
         else if ($is_update)
             return [
-                'name' => 'sometimes|array', // Optional
-                'description' => 'nullable|array', // Optional
-                'blocks' => 'sometimes|array', // Optional
-                'blocks.*.type' => 'sometimes|required|in:start,end,action', // Optional
-                'blocks.*.config' => 'sometimes|required|array', // Optional
+                'name' => 'sometimes|array',
+                'description' => 'nullable|array',
+                'blocks' => 'sometimes|array',
+                'blocks.*.type' => 'sometimes|required|in:start,end,action',
+                'blocks.*.config' => 'sometimes|required_if:blocks.*.type,start|array',
             ];
         else return [];
     }

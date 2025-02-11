@@ -37,9 +37,6 @@ class WorkflowController extends Controller
             DB::rollBack();
             return $this->handleException($e);
         }
-
-
-        return response()->json($workflow->load('blocks'), 201);
     }
 
     public function show(Workflow $workflow)
@@ -49,16 +46,28 @@ class WorkflowController extends Controller
 
     public function update(WorkflowRequest $request, Workflow $workflow)
     {
+        try {
+            DB::beginTransaction();
+            $validated = $request->validated();
+
+            $workflow->update($validated);
+
+            if ($request->has('blocks')) {
+                $workflow->blocks()->delete();
+                foreach ($request->blocks as $block) {
+                    $workflow->blocks()->create($block);
+                }
+            }
+            $data['workflow'] =  $workflow->load('blocks');
+            DB::commit();
+            return $this->returnData($data, "Form created successfully");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
         $validated = $request->validated();
 
         $workflow->update($validated);
-
-        if ($request->has('blocks')) {
-            $workflow->blocks()->delete();
-            foreach ($request->blocks as $block) {
-                $workflow->blocks()->create($block);
-            }
-        }
 
         return response()->json($workflow->load('blocks'));
     }
