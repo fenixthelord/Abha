@@ -33,7 +33,7 @@ class AddGroupRequest extends FormRequest
             'description.ar' => 'required|string',
             'icon' => 'string',
             'type' => 'required|string',
-            'member_type' => 'required|string',
+
 
             'department_id' => 'uuid|exists:departments,id',
 

@@ -37,7 +37,7 @@ class editGroupRequest extends FormRequest
             'department_id' => 'nullable|uuid',
             'group_service' => 'sometimes|string',
             'user_id' => 'sometimes|array',
-            'member_type' => 'sometimes|string',
+
 
         ];
     }
