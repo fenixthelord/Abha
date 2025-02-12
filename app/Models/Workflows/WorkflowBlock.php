@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class WorkflowBlock extends BaseModel
 {
     use SoftDeletes;
-    protected $fillable = ['workflow_id', 'type', 'config'];
+    protected $fillable = ['workflow_id', 'type', 'order', 'config'];
 
     protected $casts = ['config' => 'array'];
 

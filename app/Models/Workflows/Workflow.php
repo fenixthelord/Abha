@@ -19,7 +19,24 @@ class Workflow extends BaseModel
 
     public function blocks(): HasMany
     {
-        return $this->hasMany(WorkflowBlock::class);
+        return $this->hasMany(WorkflowBlock::class)->orderBy('order', 'asc');
+    }
+
+    public function scopeOrderByAll($query, $sortBy, $sortType)
+    {
+        if ($sortBy == 'name' && $sortType)
+            $query->orderBy($sortBy, $sortType);
+        else
+            $query->orderBy('created_at', 'desc');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            });
+        });
     }
 
     protected static function boot()
