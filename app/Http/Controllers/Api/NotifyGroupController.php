@@ -52,7 +52,7 @@ class NotifyGroupController extends Controller
 
 
             ];
-            $method = 'group/add';
+            $method = 'api/group/add';
             $response = $this->notificationService->postCall($method, $params);
 
 
@@ -156,7 +156,7 @@ class NotifyGroupController extends Controller
         try {
             $params = $request->all();
 
-            $method = 'group/';
+            $method = 'api/group/';
 
             $response = $this->notificationService->getCall($method, $params);
 
@@ -179,7 +179,7 @@ class NotifyGroupController extends Controller
             $params = [
                 'group_id' => $request->input('id'),
             ];
-            $method = 'group/show';
+            $method = 'api/group/show';
             $response = $this->notificationService->postCall($method, $params);
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
@@ -211,7 +211,7 @@ class NotifyGroupController extends Controller
 
             ];
 
-            $method = 'group/update';
+            $method = 'api/group/update';
             $response = $this->notificationService->putCall($method, $params);
 
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
@@ -232,7 +232,7 @@ class NotifyGroupController extends Controller
             $params = [
                 'group_id' => $request->group_id,
             ];
-            $method = 'group/delete';
+            $method = 'api/group/delete';
            $response= $this->notificationService->deleteCall($method, $params);
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
