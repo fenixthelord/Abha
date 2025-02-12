@@ -21,7 +21,8 @@ class Organization extends BaseModel  implements Auditable
         "manager_id",
         "employee_id",
         "position",
-    ];    protected $casts = [
+    ];
+    protected $casts = [
         "department_id" => "string",
         "manager_id" => "string",
         "employee_id" => "string",
@@ -40,15 +41,16 @@ class Organization extends BaseModel  implements Auditable
     }
 
     // Self Join : my Employees in Organization Table
-    public function employee()
+    public function employees()
     {
-        return $this->hasMany(Organization::class, 'manager_id');
+        return $this->hasMany(Organization::class, "manager_id", 'employee_id');
     }
 
     public function User()
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
+
 
     public function scopeWithSearch($query, $value)
     {
@@ -75,30 +77,56 @@ class Organization extends BaseModel  implements Auditable
         });
     }
 
-    public function scopeOnlyHeadManagers($query, array $employeeIds)
+    public function scopeOnlyHeadManagers($query, $departmentId)
     {
-        return $query->whereNotIn('manager_id', $employeeIds)->distinct();
+        return $query
+            ->where('manager_id', null)
+            ->whereHas('department', fn($q) => $q->where('id', $departmentId));
     }
 
-    public static function getOnlyHeadManager($departmentId) {
-        $employeeIds = static::forDepartment($departmentId)
-            ->pluck('employee_id')
-            ->toArray();
+    public static function getOnlyHeadManager($departmentId)
+    {
+        // $employeeIds = static::forDepartment($departmentId)
+        //     ->pluck('employee_id')
+        //     ->toArray();
 
-        return static::forDepartment($departmentId)
-            ->onlyHeadManagers($employeeIds)
-            ->pluck('manager_id')
-            ->toArray();
+        // return static::forDepartment($departmentId)
+        //     ->onlyHeadManagers($employeeIds)
+        //     ->pluck('manager_id')
+        //     ->first();
+        // return static::OnlyHeadManager($departmentId)->pluck("employee_id");
+
     }
 
     public static function getManagersAndEmployees($departmentId)
     {
-        $employeeIds = static::forDepartment($departmentId)
+        return static::forDepartment($departmentId)
             ->pluck('employee_id')
             ->toArray();
+        // $employeeIds = static::forDepartment($departmentId)
+        //     ->pluck('employee_id')
+        //     ->toArray();
 
-        $managerIds = static::getOnlyHeadManager($departmentId);
+        // $managerIds = static::getOnlyHeadManager($departmentId);
 
-        return array_unique(array_merge($employeeIds, $managerIds));
+        // return array_unique(array_merge($employeeIds, $managerIds));
+    }
+
+    public static function getAllChildIds($employeeId)
+    {
+        $employee = self::find($employeeId);
+
+        if (!$employee) {
+            return [];
+        }
+
+        $childrenIds = [];
+
+        foreach ($employee->employees as $child) {
+            $childrenIds[] = $child->id;
+            $childrenIds = array_merge($childrenIds, self::getAllChildIds($child->id));
+        }
+
+        return $childrenIds;
     }
 }

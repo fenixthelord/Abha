@@ -12,16 +12,15 @@ class ServiceResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request) {
+    public function toArray(Request $request)
+    {
         return [
             'id' => $this->id,
             'name' => $this->getTranslations('name'),
             'details' => $this->getTranslations('details'),
             'image' => $this->image,
-            'department' => [
-                'id' => $this->department?->id ,
-                'name' => $this->department?->getTranslations('name') ,
-            ],
+            'department_id' => $this->department?->id,
+            'department_name' => $this->department?->getTranslations('name'),
             'events' => $this->events()->count(),
         ];
     }

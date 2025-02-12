@@ -13,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
@@ -58,6 +58,7 @@ class User extends Authenticatable implements Auditable
         'last_name' => 'string',
         'phone' => 'string',
         'email' => 'string',
+        'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'image' => 'string',
         'alt' => 'string',
@@ -68,9 +69,11 @@ class User extends Authenticatable implements Auditable
         'is_admin' => 'boolean',
         'active' => 'boolean',
         'otp_code' => 'string',
+        'otp_expires_at' => 'datetime',
         'otp_verified' => 'boolean',
         'verify_code' => 'string',
         'refresh_token' => 'string',
+        'refresh_token_expires_at' => 'datetime',
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
 
@@ -148,8 +151,8 @@ class User extends Authenticatable implements Auditable
 
     public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("managers", function ($q) use ($departmentId) {
-            $q->whereHas('department', function ($q) use ($departmentId) {
+        return $query->whereHas("employees", function ($q) use ($departmentId) {
+            $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
         });
@@ -167,8 +170,8 @@ class User extends Authenticatable implements Auditable
 
         static::deleting(function ($post) {
             // Disallow users with the 'Master' role from deleting posts
-            if (auth()->check() && auth()->user()->hasRole('Master')) {
-                abort(403, 'You are not allowed to delete this resource.');
+            if (auth()->check() && $post->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.5555');
             }
         });
     }

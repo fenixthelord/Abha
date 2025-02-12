@@ -17,7 +17,6 @@ class Event extends BaseModel
     protected $translatable = ['name', 'details'];
     protected $fillable = [
         'service_id',
-        'form_id',
         'name',
         'details',
         'image',
@@ -49,11 +48,6 @@ class Event extends BaseModel
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
-    }
-
-    public function forms(): MorphMany
-    {
-        return $this->morphMany(Form::class, 'formable');
     }
 
     public function scopeSearch($query, $search)
