@@ -47,7 +47,7 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
-                'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
+                'department_id' => ["nullable", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
