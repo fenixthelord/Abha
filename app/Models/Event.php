@@ -8,11 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
-use App\Http\Traits\HasDateTimeFields;
 
 class Event extends BaseModel
 {
-    use HasFactory, SoftDeletes, HasTranslations, HasDateTimeFields;
+    use HasFactory, SoftDeletes, HasTranslations;
 
     protected $translatable = ['name', 'details'];
     protected $fillable = [
@@ -32,19 +31,6 @@ class Event extends BaseModel
         'form_id' => 'string',
         'file' => 'string',
         'image' => 'string',];
-    protected static function boot()
-    {
-        parent::boot();
-        static::bootHasDateTimeFields();
-    }
-
-    protected static function bootHasDateTimeFields()
-    {
-        static::registerModelEvent('booting', function ($model) {
-            $model->initializeHasDateTimeFields();
-        });
-    }
-
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);

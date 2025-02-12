@@ -27,18 +27,6 @@ class Notification extends BaseModel   implements Auditable
         'image' => 'string',
         'url' => 'string',
     ];
-    protected static function boot()
-    {
-        parent::boot();
-        static::bootHasDateTimeFields();
-    }
-
-    protected static function bootHasDateTimeFields()
-    {
-        static::registerModelEvent('booting', function ($model) {
-            $model->initializeHasDateTimeFields();
-        });
-    }
     public function recipients(): HasMany
     {
         return $this->hasMany(NotificationDetail::class);

@@ -14,16 +14,4 @@ class FailedJob extends BaseModel
         'exception',
         'failed_at'
     ];
-    protected static function boot()
-    {
-        parent::boot();
-        static::bootHasDateTimeFields();
-    }
-
-    protected static function bootHasDateTimeFields()
-    {
-        static::registerModelEvent('booting', function ($model) {
-            $model->initializeHasDateTimeFields();
-        });
-    }
 }
