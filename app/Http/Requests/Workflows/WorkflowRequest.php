@@ -24,6 +24,7 @@ class WorkflowRequest extends FormRequest
                 'description' => 'nullable|array',
                 'blocks' => 'required|array',
                 'blocks.*.type' => 'required|in:start,end,action',
+                'blocks.*.order' => 'required|integer|min:1',
                 'blocks.*.config' => 'required_if:blocks.*.type,start|array',
             ];
         else if ($is_update)
@@ -32,6 +33,7 @@ class WorkflowRequest extends FormRequest
                 'description' => 'nullable|array',
                 'blocks' => 'sometimes|array',
                 'blocks.*.type' => 'sometimes|required|in:start,end,action',
+                'blocks.*.order' => 'required|integer|min:1',
                 'blocks.*.config' => 'sometimes|required_if:blocks.*.type,start|array',
             ];
         else return [];
