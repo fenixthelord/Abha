@@ -26,7 +26,6 @@ class   CreateEventRequest extends FormRequest
     {
         return [
             "service_id" => ["required", "uuid", "exists:services,id,deleted_at,NULL"],
-            "form_id" => ["sometimes",   "uuid",   "exists:forms,id,deleted_at,NULL"],
             "name" => ["required", "array", "max:2", "min:2"],
             "name.ar" => ["required", "string", "max:255"],
             "name.en" => ["required", "string", "max:255"],
