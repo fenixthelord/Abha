@@ -41,14 +41,14 @@ class NotifyGroupController extends Controller
             $params = [
                 'owner_id' => $owner = auth('sanctum')->user()->getAuthIdentifier(),
                 'group_type' => $request->type,
-                'group_service' => $request->type . "service",
+                'group_service' => $request->type . "_service",
                 'name' => $request->name,
                 'description' => $request->description,
                 'icon' => $request->icon,
                 'department_id' => $request->department_id,
-                'member_type' => $request->member_type,
+                'member_type' => $request->type,
                 'user_id' => $request->user_id,
-                'member_service' => $request->member_type . "service"
+                'member_service' => $request->type . "_service"
 
 
             ];
@@ -156,7 +156,7 @@ class NotifyGroupController extends Controller
         try {
             $params = $request->all();
 
-            $method = '/group/';
+            $method = 'group/';
 
             $response = $this->notificationService->getCall($method, $params);
 
@@ -177,9 +177,9 @@ class NotifyGroupController extends Controller
     {
         try {
             $params = [
-                'group_id' => $request->input('group_id'),
+                'group_id' => $request->input('id'),
             ];
-            $method = '/group/show';
+            $method = 'group/show';
             $response = $this->notificationService->postCall($method, $params);
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
@@ -204,14 +204,14 @@ class NotifyGroupController extends Controller
                 'description' => $request->description,
                 'icon' => $request->icon,
                 'department_id' => $request->department_id,
-                'member_type' => $request->member_type,
+                'member_type' => $request->type,
                 'user_id' => $request->user_id,
-                'member_service' => $request->member_type . "_service"
+                'member_service' => $request->type . "_service"
 
 
             ];
 
-            $method = '/group/update';
+            $method = 'group/update';
             $response = $this->notificationService->putCall($method, $params);
 
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
@@ -232,8 +232,13 @@ class NotifyGroupController extends Controller
             $params = [
                 'group_id' => $request->group_id,
             ];
-            $method = '/group/delete';
-            return ($this->notificationService->deleteCall($method, $params));
+            $method = 'group/delete';
+           $response= $this->notificationService->deleteCall($method, $params);
+            if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
+                return $this->badRequest("group not found");
+            }
+            return $this->returnSuccessMessage('the group deleted successfully');
+
         } catch (Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

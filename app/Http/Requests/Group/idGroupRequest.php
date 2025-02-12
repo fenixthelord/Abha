@@ -24,7 +24,7 @@ class idGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id'=>'required'
+            'id'=>'required'
         ];
     }
     public function failedValidation($validator)
