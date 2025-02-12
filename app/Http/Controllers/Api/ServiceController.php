@@ -92,7 +92,7 @@ class ServiceController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'department_id' => ['nullable', 'exists:departments,id,deleted_at,NULL'],
+                'department_id' => ['required', 'exists:departments,id,deleted_at,NULL'],
                 'name' => ['required', 'array', 'max:255'],
                 'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
                 'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],

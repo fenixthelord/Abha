@@ -52,7 +52,7 @@ class UserAuthController extends Controller
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $department = Department::where("id", $request->department_id)->firstorFail();
+      //      $department = Department::where("id", $request->department_id)->firstorFail();
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -67,7 +67,7 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
-                'department_id' => $department->id,
+                'department_id' => $request->department_id,
 
             ]);
             if (!$request->role) {
