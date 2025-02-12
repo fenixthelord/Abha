@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Group\AddGroupRequest;
+use App\Http\Requests\Group\editGroupRequest;
+use App\Http\Requests\Group\idGroupRequest;
 use App\Http\Resources\Group\GroupResource;
 use App\Http\Resources\UserResource;
 use App\Models\DeviceToken;
@@ -31,32 +34,33 @@ class NotifyGroupController extends Controller
     }
 
     // Create a new notify group
-    public function createNotifyGroup(Request $request)
+    public function createNotifyGroup(AddGroupRequest $request)
     {
 
         try {
             $params = [
                 'owner_id' => $owner = auth('sanctum')->user()->getAuthIdentifier(),
-                'group_model' => $request->model,
-                'group_service' => $request->model . "service",
+                'group_type' => $request->type,
+                'group_service' => $request->type . "service",
                 'name' => $request->name,
                 'description' => $request->description,
                 'icon' => $request->icon,
                 'department_id' => $request->department_id,
-                'member_model' => $request->model,
+                'member_type' => $request->member_type,
                 'user_id' => $request->user_id,
-                'member_service' => $request->model . "service"
+                'member_service' => $request->member_type . "service"
 
 
             ];
-            $method = '/group/add';
-            $response=$this->notificationService->Postcall($method, $params);
+            $method = 'group/add';
+            $response = $this->notificationService->postCall($method, $params);
+
 
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
             }
-$data['group']=GroupResource::make($response['data']['group']);
-            return  $this->returnData($data);
+            $data['group'] = GroupResource::make($response['data']['group']);
+            return $this->returnData($data);
 
         } catch (Exception $e) {
 
@@ -154,7 +158,7 @@ $data['group']=GroupResource::make($response['data']['group']);
 
             $method = '/group/';
 
-           $response=$this->notificationService->getCall($method, $params);
+            $response = $this->notificationService->getCall($method, $params);
 
             if (!is_array($response) || !isset($response['data']['groups']) || !is_array($response['data']['groups'])) {
                 return $this->badRequest("group not found");
@@ -169,14 +173,14 @@ $data['group']=GroupResource::make($response['data']['group']);
         }
     }
 
-    public function groupDetail($groupUuid)
+    public function groupDetail(idGroupRequest $request)
     {
         try {
-         $params = [
-             'group_id' => $groupUuid,
-         ];
-          $method='/group/show';
-            $response=$this->notificationService->postCall($method, $params);
+            $params = [
+                'group_id' => $request->input('group_id'),
+            ];
+            $method = '/group/show';
+            $response = $this->notificationService->postCall($method, $params);
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
             }
@@ -187,28 +191,29 @@ $data['group']=GroupResource::make($response['data']['group']);
         }
     }
 
-    public function editGroup(Request $request, $groupUuid)
+    public function editGroup(editGroupRequest $request)
     {
         DB::beginTransaction();
         try {
             $params = [
-                'group_id' => $groupUuid,
-                'owner_id' => $owner = auth('sanctum')->user()->getAuthIdentifier(),
-                'group_model' => $request->model,
-                'group_service' => $request->model . "service",
+                'group_id' => $request->group_id,
+                'owner_id' =>auth('sanctum')->user()->getAuthIdentifier(),
+                'group_type' => $request->type,
+                'group_service' => $request->type . "_service",
                 'name' => $request->name,
                 'description' => $request->description,
                 'icon' => $request->icon,
                 'department_id' => $request->department_id,
-                'member_model' => $request->model,
+                'member_type' => $request->member_type,
                 'user_id' => $request->user_id,
-                'member_service' => $request->model . "service"
+                'member_service' => $request->member_type . "_service"
 
 
             ];
+
             $method = '/group/update';
-            $response=$this->notificationService->Postcall($method, $params);
-            dd($response);
+            $response = $this->notificationService->putCall($method, $params);
+
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
             }
@@ -221,14 +226,14 @@ $data['group']=GroupResource::make($response['data']['group']);
         }
     }
 
-    public function deleteNotifyGroup(Request $request, $notifyGroupUuid)
+    public function deleteNotifyGroup(idGroupRequest $request)
     {
         try {
-      $params = [
-          'group_uuid' => $notifyGroupUuid,
-      ];
-      $method = '/group/delete';
-      return ($this->notificationService->Postcall($method, $params));
+            $params = [
+                'group_id' => $request->group_id,
+            ];
+            $method = '/group/delete';
+            return ($this->notificationService->deleteCall($method, $params));
         } catch (Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
