@@ -33,6 +33,7 @@ class NotificationService
      */
     public function postCall($method, $params)
     {
+
         return $this->sendRequest('POST', $method, $params);
     }
 
@@ -95,8 +96,10 @@ class NotificationService
     protected function sendRequest($type, $method, $params = [])
     {
         try {
-          //  $url = "{$this->baseUrl}/api{$method}";
-            $url = "http://smartabha-notification.test/api{$method}";
+           // $url = "{$this->baseUrl}/{$method}";
+
+            $url = "http://smartabha-notification.test/api/{$method}";
+
 
             // Prepare request
             $response = Http::withHeaders([
