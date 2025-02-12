@@ -52,10 +52,10 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException();
+            return $this->handleException($e);
         }
     }
 }
