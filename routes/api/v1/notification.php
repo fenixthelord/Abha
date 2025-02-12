@@ -20,13 +20,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('notify-groups')->group(function () {
           Route::get('/', [NotifyGroupController::class, 'allGroup']);
-          Route::get('/{groupId}/show', [NotifyGroupController::class, 'groupDetail']);
-         Route::post('/{groupId}/edit', [NotifyGroupController::class, 'editGroup']);
+          Route::post('/show', [NotifyGroupController::class, 'groupDetail']);
+         Route::put('/edit', [NotifyGroupController::class, 'editGroup']);
            Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
 //            Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
 //            Route::delete('/{notifyGroupId}/users', [NotifyGroupController::class, 'removeUsersFromNotifyGroup']);
             Route::post('/send-notification', [\App\Http\Controllers\Api\Notification\NotificationController::class, 'sendNotification']);
-//            Route::delete('/{notifyGroupId}/delete', [NotifyGroupController::class, 'deleteNotifyGroup']);
+           Route::delete('/delete', [NotifyGroupController::class, 'deleteNotifyGroup']);
         });
     });
 });
