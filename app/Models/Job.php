@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Models;
+use App\Http\Traits\HasDateTimeFields;
 
 class Job extends BaseModel
 {
+    use HasDateTimeFields;
     protected $fillable = [
         'id',
         'queue',
@@ -12,11 +14,5 @@ class Job extends BaseModel
         'reserved_at',
         'available_at',
         'created_at'
-    ];
-
-    protected $casts = [
-        'reserved_at' => 'datetime',
-        'available_at' => 'datetime',
-        'created_at' => 'datetime',
     ];
 }

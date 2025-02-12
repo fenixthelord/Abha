@@ -129,6 +129,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -142,6 +143,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manager_id');
     }
+
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');
@@ -159,6 +161,7 @@ class User extends Authenticatable  implements Auditable
     protected static function boot()
     {
         parent::boot();
+        static::bootHasDateTimeFields();
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = Str::uuid();
@@ -170,6 +173,12 @@ class User extends Authenticatable  implements Auditable
             if (auth()->check() && $post->hasRole('Master')) {
                 abort(403, 'You are not allowed to delete this resource.5555');
             }
+        });
+    }
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
         });
     }
 }
