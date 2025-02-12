@@ -39,6 +39,14 @@ class WorkflowRequest extends FormRequest
         else return [];
     }
 
+    public function messages()
+    {
+        return [
+            'blocks.*.order.required' => 'The order field is required.',
+            'blocks.*.order.integer' => 'The order must be an integer.',
+            'blocks.*.order.min' => 'The order must be at least 1.',
+        ];
+    }
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
