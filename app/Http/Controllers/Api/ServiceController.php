@@ -22,7 +22,7 @@ class ServiceController extends Controller {
                 'page' => ['nullable', 'integer', 'min:1'],
                 'per_page' => ['nullable', 'integer', 'min:1'],
                 'search' => ['nullable', 'string'],
-                'department_id' => ['nullable', 'exists:departments,id'],
+                'department_id' => ['nullable', 'exists:departments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -37,12 +37,7 @@ class ServiceController extends Controller {
             $query = Service::query();
 
             if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name->en', 'LIKE', '%' . $search . '%')
-                        ->orWhere('name->ar', 'LIKE', '%' . $search . '%')
-                        ->orWhere('details->en', 'LIKE', '%' . $search . '%')
-                        ->orWhere('details->ar', 'LIKE', '%' . $search . '%');
-                });
+                $query->whereAny(['name->en', 'name->ar', 'details->en', 'details->ar'], $search);
             }
 
             if ($departmentId) {
@@ -97,7 +92,7 @@ class ServiceController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'department_id' => ['required', 'exists:departments,id'],
+                'department_id' => ['required', 'exists:departments,id,deleted_at,NULL'],
                 'name' => ['required', 'array', 'max:255'],
                 'name.en' => ['required', 'string', 'max:255', Rule::unique('services', 'name->en')],
                 'name.ar' => ['required', 'string', 'max:255', Rule::unique('services', 'name->ar')],
@@ -140,7 +135,7 @@ class ServiceController extends Controller {
                 'details.en' => ['nullable', 'max:1000'],
                 'details.ar' => ['nullable', 'max:1000'],
                 'image' => ['nullable', 'string'],
-                'department_id' => ['nullable', 'exists:departments,id'],
+                'department_id' => ['nullable', 'exists:departments,id,deleted_at,NULL'],
             ], [
                 'id.required' => __('validation.custom.service.id_required'),
                 'id.exists' => __('validation.custom.service.id_exists'),
@@ -205,7 +200,7 @@ class ServiceController extends Controller {
 
             if ($service = Service::withTrashed()->where('id',$request->id)->first()) {
                 if ($service->trashed()) {
-                    return $this->returnSuccessMessage(__('validation.custom.service.already_delete'));
+                    return $this->badRequest(__('validation.custom.service.already_delete'));
                 }
 
                 $name = $service->getTranslations("name");
