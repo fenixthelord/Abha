@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api\Workflows;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Workflows\StoreWorkflowRequest;
 use App\Http\Requests\Workflows\WorkflowRequest;
+use App\Http\Resources\Workflows\WorkflowResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Workflows\Workflow;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,9 +15,32 @@ class WorkflowController extends Controller
 {
     use ResponseTrait;
 
-    public function index()
+    public function index(Request $request)
     {
-        return Workflow::with('blocks')->get();
+        try {
+            $pageNumber = $request->input('page', 1);
+            $perPage = $request->input('perPage', 10);
+            $forms = Workflow::orderByAll($request->sortBy, $request->sortType)
+                ->filter($request->only('search'))
+                ->with(['blocks']);
+            $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
+
+            $data['workflows'] =  WorkflowResource::collection($form);
+            return $this->PaginateData($data, $form);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $workflow = Workflow::with('blocks')->findOrFail($id);
+            $data['workflow'] =  WorkflowResource::make($workflow);
+            return $this->returnData($data);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     public function store(WorkflowRequest $request)
@@ -24,57 +48,58 @@ class WorkflowController extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-
             $workflow = Workflow::create($validated);
-
             foreach ($validated['blocks'] as $block) {
                 $workflow->blocks()->create($block);
             }
-            $data['workflow'] =  $workflow->load('blocks');
+            $workflow = Workflow::with('blocks')->findOrFail($workflow->id);
+            $data['workflow'] =  WorkflowResource::make($workflow);
             DB::commit();
-            return $this->returnData($data, "Form created successfully");
-        } catch (\Exception $e) {
+            return $this->returnData($data, "Workflow created successfully");
+        } catch (Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
     }
 
-    public function show(Workflow $workflow)
-    {
-        return $workflow->load('blocks');
-    }
-
-    public function update(WorkflowRequest $request, Workflow $workflow)
+    public function update(WorkflowRequest $request, $id)
     {
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-
+            $workflow = Workflow::findOrFail($id);
             $workflow->update($validated);
-
             if ($request->has('blocks')) {
-                $workflow->blocks()->delete();
+                $workflow->blocks()->forceDelete();
                 foreach ($request->blocks as $block) {
                     $workflow->blocks()->create($block);
                 }
             }
-            $data['workflow'] =  $workflow->load('blocks');
+            $workflow = Workflow::with('blocks')->findOrFail($workflow->id);
+            $data['workflow'] =  WorkflowResource::make($workflow);
             DB::commit();
             return $this->returnData($data, "Form created successfully");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
         }
         $validated = $request->validated();
-
         $workflow->update($validated);
-
         return response()->json($workflow->load('blocks'));
     }
 
-    public function destroy(Workflow $workflow)
+    public function destroy($id)
     {
-        $workflow->delete();
-        return response()->json(null, 204);
+        DB::beginTransaction();
+        try {
+
+            $workflow = Workflow::findOrFail($id);
+            $workflow->forceDelete();
+            DB::commit();
+            return $this->returnSuccessMessage('Workflow deleted successfully');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
     }
 }
