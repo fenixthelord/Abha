@@ -29,11 +29,8 @@ class Event extends BaseModel
         'details' => 'json',
         'service_id' => 'string',
         'form_id' => 'string',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
         'file' => 'string',
         'image' => 'string',];
-
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
