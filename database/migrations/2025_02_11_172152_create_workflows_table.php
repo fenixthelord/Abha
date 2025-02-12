@@ -20,6 +20,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('workflow_id')->constrained('workflows')->onDelete('cascade');
             $table->enum('type', ['start', 'end', 'action', 'scheduled', 'system', 'conditional']);
+            $table->integer('order');
             $table->json('config')->nullable();
             $table->softDeletes();
             $table->timestamps();
