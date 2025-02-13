@@ -67,7 +67,7 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
-                'department_id' => $request->department_id,
+                'department_id' => $department->id,
 
             ]);
             if (!$request->role) {
