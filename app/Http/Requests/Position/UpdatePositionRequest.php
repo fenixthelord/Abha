@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class CreatePositionRequest extends FormRequest
+class UpdatePositionRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -26,21 +26,12 @@ class CreatePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "parent_id" => "required|uuid|exists:positions,id",
+            "id" => "required|uuid|exists:positions,id",
             "name" => "required|array",
-            "name.en" => ["required", "string", "unique:positions,name->en"],
-            "name.ar" => ["required", "string", "unique:positions,name->ar"],
+            "name.en" => ["required", "string", Rule::unique('positions', 'name->en')->ignore($this->id)],
+            "name.en" => ["required", "string", Rule::unique('positions', 'name->ar')->ignore($this->id)],
         ];
     }
-
-    // protected function withValidator($validator)
-    // {
-    //     $validator->after(function ($validator) {
-
-    //         $chields = $this->input('chields', []);
-    //         $this->validateChields($validator, $chields, 'chields');
-    //     });
-    // }}
 
     public function failedValidation($validator)
     {

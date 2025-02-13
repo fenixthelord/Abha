@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Position;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Position\CreatePositionRequest;
+use App\Http\Requests\Position\DeletePositionRequest;
+use App\Http\Requests\Position\UpdatePositionRequest;
+use App\Http\Resources\Position\PositionChieldResource;
+use App\Http\Resources\Position\PositionChildResource;
 use App\Http\Resources\Position\PositionResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Position;
@@ -48,11 +52,31 @@ class PositionController extends Controller
         }
     }
 
-    public function update()
+    public function update(UpdatePositionRequest $request)
     {
         try {
             DB::beginTransaction();
-
+            $potions = Position::findOrFail($request->id);
+            $potions->update($request->validated());
+            $data["positions"] = PositionResource::make($potions);
+            DB::commit();
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+    public function delete(DeletePositionRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+            $potions = Position::findOrFail($request->id);
+            if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
+                $shouldDelete = PositionChildResource::make($potions);
+            }
+            $potions->delete();
+            DB::commit();
+            return $this->returnSuccessMessage(__("Position deleted successfully"));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);

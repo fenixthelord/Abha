@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Postition;
+namespace App\Http\Requests\Position;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePositionRequest extends FormRequest
+class DeletePositionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**

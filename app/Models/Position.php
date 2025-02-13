@@ -16,4 +16,21 @@ class Position extends BaseModel
         "name",
         "parent_id"
     ];
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($position) {
+            if ($position->users()->count() > 0) {
+                throw new \Exception('Cannot delete position because it has associated users.');
+            }
+        });
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
