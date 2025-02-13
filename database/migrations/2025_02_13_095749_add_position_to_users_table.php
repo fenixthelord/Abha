@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('device_tokens');
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignUuid("position_id")->after("id")->nullable()->constrained("positions")->onDelete('cascade');
+        });
     }
 
     /**
@@ -19,11 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::create('device_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('owner_uuid');
-            $table->string('token');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(["position_id"]);
+            $table->dropColumn("position_id");
         });
     }
 };
