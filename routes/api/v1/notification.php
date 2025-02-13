@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotifyGroupController;
+use App\Http\Controllers\Api\DeviceToken\DeviceTokenController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('activeVerify')->group(function () {
@@ -15,17 +16,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
 
-        Route::post('/save-device-token', [NotificationController::class, 'saveDeviceToken']);
+        Route::post('/save-device-token', [DeviceTokenController::class, 'saveDeviceToken']);
 
         Route::prefix('notify-groups')->group(function () {
-            Route::get('/', [NotifyGroupController::class, 'allGroup']);
-            Route::get('/{groupId}/show', [NotifyGroupController::class, 'groupDetail']);
-            Route::post('/{groupId}/edit', [NotifyGroupController::class, 'editGroup']);
-            Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
-            Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
-            Route::delete('/{notifyGroupId}/users', [NotifyGroupController::class, 'removeUsersFromNotifyGroup']);
-            Route::post('/{notifyGroupId}/send-notification', [NotifyGroupController::class, 'sendNotificationToNotifyGroup']);
-            Route::delete('/{notifyGroupId}/delete', [NotifyGroupController::class, 'deleteNotifyGroup']);
+          Route::get('/', [NotifyGroupController::class, 'allGroup']);
+          Route::post('/show', [NotifyGroupController::class, 'groupDetail']);
+         Route::put('/edit', [NotifyGroupController::class, 'editGroup']);
+           Route::post('/create', [NotifyGroupController::class, 'createNotifyGroup']);
+//            Route::post('/{notifyGroupId}/users', [NotifyGroupController::class, 'addUsersToNotifyGroup']);
+//            Route::delete('/{notifyGroupId}/users', [NotifyGroupController::class, 'removeUsersFromNotifyGroup']);
+            Route::post('/send-notification', [\App\Http\Controllers\Api\Notification\NotificationController::class, 'sendNotification']);
+           Route::delete('/delete', [NotifyGroupController::class, 'deleteNotifyGroup']);
         });
     });
 });
