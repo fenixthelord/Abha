@@ -32,7 +32,7 @@ class User extends Authenticatable  implements Auditable
      * @var array<int, string>
      */
     protected $fillable = [
-        'id',
+
         "department_id",
         'first_name',
         'last_name',
@@ -147,6 +147,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manager_id');
     }
+
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\NotifyGroupController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DeviceToken\DeviceTokenController;
 use App\Http\Controllers\Api\Notification\NotificationController;
