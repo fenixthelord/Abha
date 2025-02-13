@@ -44,7 +44,7 @@ class UpdatePositionRequest extends FormRequest
             ],
             "name" => "required|array",
             "name.en" => ["required", "string", Rule::unique('positions', 'name->en')->ignore($this->id)],
-            "name.en" => ["required", "string", Rule::unique('positions', 'name->ar')->ignore($this->id)],
+            "name.ar" => ["required", "string", Rule::unique('positions', 'name->ar')->ignore($this->id)],
         ];
     }
 
