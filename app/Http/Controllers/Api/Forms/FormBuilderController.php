@@ -13,6 +13,7 @@ use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
 use App\Models\Forms\FormFieldDataSource;
 use App\Models\Forms\FormFieldOption;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -57,13 +58,34 @@ class FormBuilderController extends Controller
                 'formable_type' => $request->formable_type,
                 'formable_id' => $request->formable_id
             ]);
-            if ($request->formable_type === 'category') {
-                $category = Category::findOrfail($request->formable_id);
-                $category->forms()->save($form);
-            } else {
-                $event = Event::findOrfail($request->formable_id);
-                $event->forms()->save($form);
-            }
+
+            // Get models dynamically
+            $models = [
+                'category' => Category::class,
+                'employee' => User::class,
+            ];
+
+
+            $formableModel = app($models[$request->formable_type])::
+                // Insure that the id belongs to an EMPLOYEE
+            when($request->formable_type == 'employee', function ($query){
+                return $query->where('role', 'employee');
+            })
+            ->findOrFail($request->formable_id);
+
+            $formableModel->forms()->save($form);
+
+            //Review before deletion
+//            if ($request->formable_type === 'category') {
+//                $category = Category::find($request->formable_id);
+//                $category->forms()->save($form);
+//            }elseif ($request->formable_type === 'employee'){
+//                $employees = User::find($request->formable_id);
+//                $employees->forms()->save($form);
+//            } else {
+//                $event = Event::findOrfail($request->formable_id);
+//                $event->forms()->save($form);
+//            }
 
             foreach ($request['fields'] as $field_data) {
                 $form_field = $form->fields()->create($field_data);
