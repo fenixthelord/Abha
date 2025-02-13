@@ -7,19 +7,12 @@ use App\Http\Requests\Group\AddGroupRequest;
 use App\Http\Requests\Group\editGroupRequest;
 use App\Http\Requests\Group\idGroupRequest;
 use App\Http\Resources\Group\GroupResource;
-use App\Http\Resources\UserResource;
-use App\Models\DeviceToken;
-use App\Models\NotifyGroup;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use App\Http\Traits\Paginate;
-use Illuminate\Support\Facades\Http;
 use App\Services\NotificationService;
 
 class NotifyGroupController extends Controller

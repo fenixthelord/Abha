@@ -21,11 +21,9 @@ return new class extends Migration
     {
         Schema::create('device_tokens', function (Blueprint $table) {
             $table->id();
-            $table->uuid('user_id');
+            $table->uuid('owner_uuid');
             $table->string('token');
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 };
