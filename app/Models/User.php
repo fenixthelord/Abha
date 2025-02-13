@@ -14,12 +14,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
+use App\Http\Traits\HasDateTimeFields;
+
 
 class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasAutoPermissions;
+    use HasAutoPermissions, HasDateTimeFields;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -131,6 +133,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -166,6 +169,7 @@ class User extends Authenticatable  implements Auditable
     protected static function boot()
     {
         parent::boot();
+        static::bootHasDateTimeFields();
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = Str::uuid();
@@ -177,6 +181,12 @@ class User extends Authenticatable  implements Auditable
             if (auth()->check() && $post->hasRole('Master')) {
                 abort(403, 'You are not allowed to delete this resource.5555');
             }
+        });
+    }
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
         });
     }
 

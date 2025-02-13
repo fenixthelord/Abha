@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Http\Traits\HasDateTimeFields;
 class FailedJob extends BaseModel
 {
+    use HasDateTimeFields;
     protected $fillable = [
         'id',
         'connection',
@@ -11,9 +13,5 @@ class FailedJob extends BaseModel
         'payload',
         'exception',
         'failed_at'
-    ];
-
-    protected $casts = [
-        'failed_at' => 'datetime',
     ];
 }

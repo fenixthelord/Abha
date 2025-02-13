@@ -14,6 +14,8 @@ class FormResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'category_id' => $this->category_id,
+            'category_name' => $this->whenLoaded('category', fn() => $this->category?->getTranslations('name')),
             'formable_id' => $this->formable_id,
             'formable_type' => $this->formable_type,
             'formable' => $this->whenLoaded('formable', function () use ($is_list) {
