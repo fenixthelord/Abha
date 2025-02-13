@@ -72,6 +72,10 @@ return [
             'delete_failed' => 'An error occurred while deleting the department.',
         ],
 
+        'upload_file' => [
+            'upload_file_success' => 'File uploaded successfully'
+        ],
+
         'validation' => [
             'name_required' => 'Service name is required.',
             'name_max' => 'Service name must not exceed 255 characters.',
@@ -127,7 +131,7 @@ return [
             'users_removed' => 'Users removed from notify group successfully',
             'notifications_sent' => 'Notifications sent successfully',
             'failed_to_send_notifications' => 'Failed to send notifications',
-            'group_deleted' => 'Notify group deleted successfully',
+            'group_deleted' => 'Group deleted successfully',
             'failed_to_retrieve_groups' => 'Failed to retrieve notify groups: ',
             'no_users_in_group' => 'Group does not have users',
             'no_device_tokens' => 'No device tokens found for this notify group',
@@ -139,6 +143,7 @@ return [
         ],
 
         'notification' => [
+            'user_not_authenticate' => 'User not authenticated',
             'notification_sent_success' => 'Notifications sent successfully!',
             'notification_sent_fail' => 'Failed to send notifications.',
             'device_token_saved' => 'Device Token saved successfully.',

@@ -27,7 +27,8 @@ class UploadFileController extends Controller
         try {
             $filePath = $this->uploadFile($file, 'documents');
 
-            return $this->returnData($filePath,  'File uploaded successfully');
+            return $this->returnData($filePath,  __('validation.custom.upload_file.upload_file_success'));
+
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

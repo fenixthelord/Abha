@@ -129,11 +129,16 @@ return [
             'validation_failed' => 'فشل التحقق من البيانات',
         ],
 
+        'upload_file' => [
+            'upload_file_success' => 'تم تحميل الملف بنجاح.'
+        ],
+
         'language' => [
             'lang_success' => 'تم تغيير اللغة بنجاح',
         ],
 
         'notification' => [
+            'user_not_authenticate' => 'لم تتم مصادقة المستخدم.',
             'notification_sent_success' => 'تم إرسال الإشعارات بنجاح!',
             'notification_sent_fail' => 'فشل في إرسال الإشعارات.',
             'device_token_saved' => 'تم حفظ رمز الجهاز بنجاح.',
