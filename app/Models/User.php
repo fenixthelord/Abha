@@ -12,12 +12,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
+use App\Http\Traits\HasDateTimeFields;
+
 
 class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasAutoPermissions;
+    use HasAutoPermissions, HasDateTimeFields;
 
     protected $keyType = 'string';
     public $incrementing = false;
