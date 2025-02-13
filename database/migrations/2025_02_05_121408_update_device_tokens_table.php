@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('device_tokens', function (Blueprint $table) {
-
+            $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');
-
             $table->uuid('owner_uuid');
         });
     }
@@ -26,7 +25,8 @@ return new class extends Migration
     {
         Schema::table('device_tokens', function (Blueprint $table) {
             $table->dropColumn('owner_uuid');
-            $table->unsignedBigInteger('user_id');
+            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
+
         });
     }
 };
