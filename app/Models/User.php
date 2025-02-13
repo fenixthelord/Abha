@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Http\Traits\HasAutoPermissions;
 use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -151,7 +152,12 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasOne(Organization::class, 'employee_id');
     }
-        
+
+    public function forms(): MorphMany
+    {
+        return $this->morphMany(Form::class, 'formable');
+    }
+
     public function scopeManagersInDepartment($query, $departmentId)
     {
         return $query->whereHas("employees", function ($q) use ($departmentId) {
@@ -183,5 +189,10 @@ class User extends Authenticatable  implements Auditable
         static::registerModelEvent('booting', function ($model) {
             $model->initializeHasDateTimeFields();
         });
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

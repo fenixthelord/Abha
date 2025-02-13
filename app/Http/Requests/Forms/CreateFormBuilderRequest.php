@@ -19,7 +19,7 @@ class CreateFormBuilderRequest extends FormRequest
     {
         return [
             'formable_id' => 'required|uuid',
-            'formable_type' => 'required|in:category,event',
+            'formable_type' => 'required|in:category,event,employee',
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
@@ -90,7 +90,7 @@ class CreateFormBuilderRequest extends FormRequest
             'formable_id.required' => 'The formable id is required.',
             'formable_id.uuid' => 'The formable id must be correct uuid.',
             'formable_type.required' => 'The formable type is required.',
-            'formable_type.in' => 'Invalid formable type. Allowed types: category,event.',
+            'formable_type.in' => 'Invalid formable type. Allowed types: category,event,employee.',
             'name.required' => 'The form name is required.',
             'name.required.en' => 'The form English name is required.',
             'name.en.unique' => 'The English name already exists in this ' . $this->formale_type . '.',
