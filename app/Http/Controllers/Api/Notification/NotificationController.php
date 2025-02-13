@@ -71,7 +71,7 @@ class NotificationController extends Controller
            // Use current time if not provided
 
             ];
-dd($notificationData);
+//dd($notificationData);
             // Send the notification using the NotificationService
             $response = $this->notificationService->postCall('/send-notification', $notificationData);
 
