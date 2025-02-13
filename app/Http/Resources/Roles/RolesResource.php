@@ -25,7 +25,8 @@ class RolesResource extends JsonResource
 
             'id' => $this->id,
             'name' => $this->name,
-            'displaying'=>$this->getTranslations("displaying"),
+            'displaying'=>$this->            $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            ("displaying"),
             'description'=>$this->getTranslations("description"),
             'permissions' => $this->permissions->groupBy('group')->map(function ($permissions, $group) {
                 return [
