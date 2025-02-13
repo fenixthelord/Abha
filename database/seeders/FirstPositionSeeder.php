@@ -15,11 +15,12 @@ class FirstPositionSeeder extends Seeder
     public function run(): void
     {
         $data = [
+            'id' => "ad02d43b-0e34-4689-885f-b0958c9c900c",
             "name" => ["en" => "first position", "ar" => "الرئيس"],
             "parent_id" => null,
         ];
 
-        if (!Position::where("parent_id" , null)->first()){
+        if (!Position::where("parent_id", null)->first()) {
             Position::create($data);
         }
     }
