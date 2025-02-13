@@ -6,7 +6,7 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class DeletePositionRequest extends FormRequest
+class ListOfPositionsRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -25,11 +25,14 @@ class DeletePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => "nullable|exists:positions,id,deleted_at,NULL"
+            'id' => "nullable|exists:positions,id,deleted_at,NULL",
+            'page' => "nullable|int",
+            'per_page' => "nullable|int",
         ];
     }
     public function failedValidation($validator)
     {
         throw new HttpResponseException($this->returnValidationError($validator));
+    }
 
-    }}
+}

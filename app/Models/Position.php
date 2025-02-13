@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,5 +42,28 @@ class Position extends BaseModel
     public function parent()
     {
         return $this->belongsTo(Position::class, 'parent_id');
+    }
+
+    /**
+     * Return all children ids "Recursively"
+     * @param $Id
+     * @return array
+     * @throws Exception
+     */
+    public static function getChildrenIds($id): array
+    {
+        $position = Position::find($id);
+
+        if (!$position) {
+            throw new Exception("Position not found");
+        }
+
+        $childrenIds = [$position->id];
+
+        foreach ($position->children as $child) {
+            $childrenIds = array_merge($childrenIds, static::getChildrenIds($child->id));
+        }
+
+        return $childrenIds;
     }
 }

@@ -26,21 +26,13 @@ class CreatePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "parent_id" => "required|uuid|exists:positions,id",
+            "parent_id" => "required|uuid|exists:positions,id,deleted_at,NULL",
             "name" => "required|array",
             "name.en" => ["required", "string", "unique:positions,name->en"],
             "name.ar" => ["required", "string", "unique:positions,name->ar"],
+            
         ];
     }
-
-    // protected function withValidator($validator)
-    // {
-    //     $validator->after(function ($validator) {
-
-    //         $chields = $this->input('chields', []);
-    //         $this->validateChields($validator, $chields, 'chields');
-    //     });
-    // }}
 
     public function failedValidation($validator)
     {

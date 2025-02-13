@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Position;
 
 use App\Http\Traits\ResponseTrait;
+use App\Models\Position;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,21 @@ class UpdatePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "id" => "required|uuid|exists:positions,id",
+            "id" => "required|uuid|exists:positions,id,deleted_at,NULL",
+            "parent_id" => [
+                "required",
+                "uuid",
+                "exists:positions,id,deleted_at,NULL",
+                function ($attribute, $value, $fail) {
+                    if ($value === $this->id) {
+                        $fail('Position cannot be a parent of itself.');
+                    }
+                    $chieldsID = Position::getChildrenIds($this->id);
+                    if (in_array($value, $chieldsID)) {
+                        $fail('Position cannot be a parent of his child.');
+                    }
+                }
+            ],
             "name" => "required|array",
             "name.en" => ["required", "string", Rule::unique('positions', 'name->en')->ignore($this->id)],
             "name.en" => ["required", "string", Rule::unique('positions', 'name->ar')->ignore($this->id)],

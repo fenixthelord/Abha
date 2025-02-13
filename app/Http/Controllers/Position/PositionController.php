@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Position;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Position\CreatePositionRequest;
 use App\Http\Requests\Position\DeletePositionRequest;
+use App\Http\Requests\Position\ListOfPositionsRequest;
 use App\Http\Requests\Position\UpdatePositionRequest;
 use App\Http\Resources\Position\PositionChieldResource;
 use App\Http\Resources\Position\PositionChildResource;
@@ -20,10 +21,10 @@ class PositionController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param Request $request
+     * @param ListOfPositionsRequest $request
      * @return ResponseTrait
      */
-    public function index(Request $request)
+    public function index(ListOfPositionsRequest $request)
     {
         try {
             $perPage = $request->input('per_page', $this->per_page);
@@ -33,6 +34,11 @@ class PositionController extends Controller
 
             if ($request->has("search")) {
                 $query->where("name", "LIKE", "%" . $request->search . "%");
+            }
+
+            // Do not return his children , if request has id .
+            if ($request->has('id')) {
+                $query->whereNotIn("id", Position::getChildrenIds($request->id));
             }
 
             $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
