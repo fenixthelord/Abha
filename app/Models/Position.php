@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -33,8 +34,12 @@ class Position extends BaseModel
     {
         return $this->hasMany(User::class);
     }
-    public function children()
+    public function children(): HasMany
     {
-        return $this->hasMany(Position::class, 'parent_id');
+        return $this->hasMany(Position::class, 'parent_id', 'id');
+    }
+    public function parent()
+    {
+        return $this->belongsTo(Position::class, 'parent_id');
     }
 }

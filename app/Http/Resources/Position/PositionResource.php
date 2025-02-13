@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Position;
 
+use App\Models\Position;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +17,8 @@ class PositionResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "name" => $this->getTranslations("name"), 
-        ] ;
+            "name" => $this->getTranslations("name"),
+            "children"  => $this->whenLoaded("children", fn() => PositionResource::collection($this->children->loadMissing('children')))
+        ];
     }
 }

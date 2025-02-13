@@ -45,6 +45,17 @@ class PositionController extends Controller
         }
     }
 
+    public function chart()
+    {
+        try {
+            $headPositionPosition = Position::with("children")->whereNull("parent_id")->firstOrFail();
+            $data["positions"] = PositionResource::make($headPositionPosition);
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
     /**
      * creating a new position.
      *
