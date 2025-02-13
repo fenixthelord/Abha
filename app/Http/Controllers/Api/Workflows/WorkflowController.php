@@ -102,4 +102,9 @@ class WorkflowController extends Controller
             return $this->handleException($e);
         }
     }
+
+    public function testSytemError()
+    {
+        throw new Exception("This is a test system error.");
+    }
 }

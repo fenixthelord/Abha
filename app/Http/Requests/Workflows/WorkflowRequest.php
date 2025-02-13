@@ -89,9 +89,19 @@ class WorkflowRequest extends FormRequest
     protected function validateActionBasedTrigger($validator, $config, $index)
     {
         $actionType = $config['action_type'] ?? null;
+        $base_table = $config['base_table'] ?? null;
+        $base_field = $config['base_field'] ?? null;
 
         if (!in_array($actionType, ['data_creation', 'data_deletion', 'field_change'])) {
             $validator->errors()->add("blocks.{$index}.config.action_type", "Invalid action type: {$actionType}");
+        }
+
+        if (!in_array($base_table, ['categories', 'events'])) {
+            $validator->errors()->add("blocks.{$index}.config.base_table", "Base table is required");
+        }
+
+        if (!isset($base_field) && $actionType === 'field_change') {
+            $validator->errors()->add("blocks.{$index}.config.base_field", "Base field is required");
         }
     }
 

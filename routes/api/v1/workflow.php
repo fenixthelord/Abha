@@ -7,6 +7,7 @@ Route::group(["prefix" => "/"], function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
             Route::apiResource('workflows', WorkflowController::class);
+            Route::get('testSytemError', [WorkflowController::class, 'testSytemError']);
         });
     });
 });
