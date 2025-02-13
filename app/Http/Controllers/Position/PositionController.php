@@ -45,6 +45,12 @@ class PositionController extends Controller
         }
     }
 
+    /**
+     * Display a chart of positions.
+     *
+     * @param Request $request
+     * @return ResponseTrait
+     */
     public function chart()
     {
         try {
