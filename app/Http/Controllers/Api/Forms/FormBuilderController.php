@@ -63,8 +63,10 @@ class FormBuilderController extends Controller
             $models = [
                 'category' => Category::class,
                 'employee' => User::class,
+                'event' => Event::class,
             ];
 
+            if(isset($models[$request->formable_type]))
 
             $formableModel = app($models[$request->formable_type])::
                 // Insure that the id belongs to an EMPLOYEE
@@ -72,6 +74,7 @@ class FormBuilderController extends Controller
                 return $query->where('role', 'employee');
             })
             ->findOrFail($request->formable_id);
+
 
             $formableModel->forms()->save($form);
 
