@@ -16,8 +16,7 @@ class PositionResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "name" => $this->getTranslations("name"),
-            
+            "name" => $this->getTranslations("name"), 
         ] ;
     }
 }

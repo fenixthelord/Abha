@@ -23,8 +23,8 @@ class Position extends BaseModel
         parent::boot();
 
         static::deleting(function ($position) {
-            if ($position->users()->count() > 0) {
-                throw new \Exception('Cannot delete position because it has associated users.');
+            if ($position->users()->count() > 0 || $position->children()->count() > 0) {
+                throw new \Exception('Cannot delete position because it has associated users or sub positions.');
             }
         });
     }
@@ -32,5 +32,9 @@ class Position extends BaseModel
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+    public function children()
+    {
+        return $this->hasMany(Position::class, 'parent_id');
     }
 }

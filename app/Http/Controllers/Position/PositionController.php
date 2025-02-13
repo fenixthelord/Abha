@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\DB;
 class PositionController extends Controller
 {
     use ResponseTrait;
+    /**
+     * Display a listing of the resource.
+     *
+     * @param Request $request
+     * @return ResponseTrait
+     */
     public function index(Request $request)
     {
         try {
@@ -38,6 +44,13 @@ class PositionController extends Controller
             return $this->handleException($e);
         }
     }
+
+    /**
+     * creating a new position.
+     *
+     * @param CreatePositionRequest $request
+     * @return ResponseTrait
+     */
     public function create(CreatePositionRequest $request)
     {
         try {
@@ -52,6 +65,12 @@ class PositionController extends Controller
         }
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  UpdatePositionRequest $request
+     * @return ResponseTrait
+     */
     public function update(UpdatePositionRequest $request)
     {
         try {
@@ -66,13 +85,21 @@ class PositionController extends Controller
             return $this->handleException($e);
         }
     }
+
+    /**
+     * Delete the specified resource in storage.
+     *
+     * @param  DeletePositionRequest $request
+     * @return ResponseTrait
+     */
     public function delete(DeletePositionRequest $request)
     {
         try {
             DB::beginTransaction();
             $potions = Position::findOrFail($request->id);
             if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
-                $shouldDelete = PositionChildResource::make($potions);
+                $data["chields"] = PositionChildResource::make($potions);
+                return $this->returnData($data, "you can not delete this position because it has associated users or sub positions.");
             }
             $potions->delete();
             DB::commit();

@@ -147,12 +147,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasOne(Organization::class, 'employee_id');
     }
-
-    public function form()
-    {
-        return $this->morphMany(Form::class, "formable");
-    }
-    
+        
     public function scopeManagersInDepartment($query, $departmentId)
     {
         return $query->whereHas("employees", function ($q) use ($departmentId) {

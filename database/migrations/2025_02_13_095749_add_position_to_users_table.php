@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignUuid("position_id")->after("id")->nullable()->constrained("positions")->onDelete('cascade');
-            $table->foreignUuid("form_id")->after("id")->nullable()->constrained("forms")->onDelete('cascade');
         });
     }
 
@@ -25,9 +24,6 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(["position_id"]);
             $table->dropColumn("position_id");
-
-            $table->dropForeign(["form_id"]);
-            $table->dropColumn("form_id");
         });
     }
 };
