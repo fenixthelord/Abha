@@ -47,12 +47,12 @@ class UserAuthController extends Controller
                 'image' => 'nullable|string',
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
-                'department_id' => ["nullable", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
+                'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-      //      $department = Department::where("id", $request->department_id)->firstorFail();
+            $department = Department::where("id", $request->department_id)->firstorFail();
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -67,7 +67,7 @@ class UserAuthController extends Controller
                 'image' => $request->image,
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
-                'department_id' => $request->department_id,
+                'department_id' => $department->id,
 
             ]);
             if (!$request->role) {
