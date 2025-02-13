@@ -11,8 +11,8 @@ use Spatie\Translatable\HasTranslations;
 class Position extends BaseModel
 {
     use HasFactory, SoftDeletes, HasTranslations;
-
-    protected $translatable = ['name'];
+    
+    const MASTER_ID = 'ad02d43b-0e34-4689-885f-b0958c9c900c';
 
     protected $fillable = [
         "name",

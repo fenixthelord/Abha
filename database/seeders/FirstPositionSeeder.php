@@ -15,7 +15,7 @@ class FirstPositionSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'id' => "ad02d43b-0e34-4689-885f-b0958c9c900c",
+            'id' => Position::MASTER_ID,
             "name" => ["en" => "first position", "ar" => "الرئيس"],
             "parent_id" => null,
         ];

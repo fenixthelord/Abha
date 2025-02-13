@@ -97,6 +97,7 @@ class PositionController extends Controller
     public function update(UpdatePositionRequest $request)
     {
         try {
+            dd($request->validated);
             DB::beginTransaction();
             $potions = Position::findOrFail($request->id);
             $potions->update($request->validated());

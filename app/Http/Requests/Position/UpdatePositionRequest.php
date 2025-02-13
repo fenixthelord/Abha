@@ -25,27 +25,40 @@ class UpdatePositionRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-            "id" => "required|uuid|exists:positions,id,deleted_at,NULL",
-            "parent_id" => [
-                "required",
-                "uuid",
-                "exists:positions,id,deleted_at,NULL",
+    {    // Base rules that always apply.
+        $rules = [
+            'id' => 'required|uuid|exists:positions,id,deleted_at,NULL',
+            'name' => 'required|array',
+            'name.en' => [
+                'required',
+                'string',
+                Rule::unique('positions', 'name->en')->ignore($this->id),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                Rule::unique('positions', 'name->ar')->ignore($this->id),
+            ],
+        ];
+
+        if ($this->id !== Position::MASTER_ID) {
+            $rules['parent_id'] = [
+                'required',
+                'uuid',
+                'exists:positions,id,deleted_at,NULL',
                 function ($attribute, $value, $fail) {
                     if ($value === $this->id) {
                         $fail('Position cannot be a parent of itself.');
                     }
-                    $chieldsID = Position::getChildrenIds($this->id);
-                    if (in_array($value, $chieldsID)) {
-                        $fail('Position cannot be a parent of his child.');
+                    $childrenIDs = Position::getChildrenIds($this->id);
+                    if (in_array($value, $childrenIDs)) {
+                        $fail('Position cannot be a parent of its child.');
                     }
                 }
-            ],
-            "name" => "required|array",
-            "name.en" => ["required", "string", Rule::unique('positions', 'name->en')->ignore($this->id)],
-            "name.ar" => ["required", "string", Rule::unique('positions', 'name->ar')->ignore($this->id)],
-        ];
+            ];
+        }
+
+        return $rules;
     }
 
     public function failedValidation($validator)
