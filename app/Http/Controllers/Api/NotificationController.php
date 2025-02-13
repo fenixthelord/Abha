@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\NotificationResource;
+use App\Http\Resources\Notifications\NotificationResource;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Notification;
@@ -32,6 +32,7 @@ class NotificationController extends Controller
                 'data' => 'nullable|array',
                 'group_id' => 'nullable|exists:notify_groups,id',
                 'user_ids' => 'nullable|array',
+
                 //'user_ids.*' => 'exists:users,id',
             ]);
 
@@ -85,61 +86,9 @@ class NotificationController extends Controller
         }
     }
 
-    public function saveDeviceToken(Request $request)
-    {
-        DB::beginTransaction();
-        $request->validate([
-            'token' => 'required|string',
-            'user_id' => 'nullable|exists:users,id',
-        ]);
 
-        try {
-            $user = User::whereId($request->input('user_id'))->first();
-            DeviceToken::firstOrCreate([
-                'token' => $request->input('token'),
-                'user_id' => $user->id,
-            ]);
-            DB::commit();
-            return $this->returnSuccessMessage(__('validation.custom.notification.device_token_saved'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->handleException($e);
-        }
-    }
 
-    public function allNotification(Request $request)
-    {
-        try {
-            /*            $pageNumber = $request->input('page', 1);
-            $perPage = $request->input("perPage", 10);
 
-            $validator = Validator::make($request->all(), [
-                "perPage" => 'nullable|integer|min:9'
-            ]);
-            if ($validator->fails()) {
-                return $this->returnValidationError($validator);
-            }
-            $customer = $request->user();
-            $notifications = Notification::paginate($perPage, ['*'], 'page', $pageNumber);
-            if ($pageNumber > $notifications->lastPage()) {
-                return $this->badRequest('Invalid page number');
-            }
-
-            $data = [
-                "notification" => NotificationResource::collection($notifications),
-                'current_page' => $notifications->currentPage(),
-                'next_page' => $notifications->nextPageUrl(),
-                'previous_page' => $notifications->previousPageUrl(),
-                'total_pages' => $notifications->lastPage(),
-            ];*/
-            $fields = ['title', 'description'];
-            $notification = $this->allWithSearch(new Notification(), $fields, $request);
-            $data['notification'] = NotificationResource::collection($notification);
-            return $this->PaginateData($data, $notification);
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
 
     public function store(Request $request)
     {
@@ -250,6 +199,39 @@ class NotificationController extends Controller
             } else {
                 return $this->badRequest(__('validation.custom.notification.user_not_found'));
             }
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+    public function allNotification(Request $request)
+    {
+        try {
+            /*            $pageNumber = $request->input('page', 1);
+            $perPage = $request->input("perPage", 10);
+
+            $validator = Validator::make($request->all(), [
+                "perPage" => 'nullable|integer|min:9'
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $customer = $request->user();
+            $notifications = Notification::paginate($perPage, ['*'], 'page', $pageNumber);
+            if ($pageNumber > $notifications->lastPage()) {
+                return $this->badRequest('Invalid page number');
+            }
+
+            $data = [
+                "notification" => NotificationResource::collection($notifications),
+                'current_page' => $notifications->currentPage(),
+                'next_page' => $notifications->nextPageUrl(),
+                'previous_page' => $notifications->previousPageUrl(),
+                'total_pages' => $notifications->lastPage(),
+            ];*/
+            $fields = ['title', 'description'];
+            $notification = $this->allWithSearch(new Notification(), $fields, $request);
+            $data['notification'] = NotificationResource::collection($notification);
+            return $this->PaginateData($data, $notification);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
