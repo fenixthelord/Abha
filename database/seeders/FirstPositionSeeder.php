@@ -16,7 +16,7 @@ class FirstPositionSeeder extends Seeder
     {
         $data = [
             'id' => Position::MASTER_ID,
-            "name" => ["en" => "first position", "ar" => "الرئيس"],
+            "name" => ['en'=>'first position', 'ar'=>'الرئيس'],
             "parent_id" => null,
         ];
 

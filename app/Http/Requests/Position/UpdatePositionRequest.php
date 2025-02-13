@@ -25,7 +25,7 @@ class UpdatePositionRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {    // Base rules that always apply.
+    {   
         $rules = [
             'id' => 'required|uuid|exists:positions,id,deleted_at,NULL',
             'name' => 'required|array',

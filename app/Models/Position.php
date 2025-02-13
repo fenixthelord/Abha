@@ -14,6 +14,8 @@ class Position extends BaseModel
     
     const MASTER_ID = 'ad02d43b-0e34-4689-885f-b0958c9c900c';
 
+    protected $translatable = ['name'];
+
     protected $fillable = [
         "name",
         "parent_id"
