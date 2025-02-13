@@ -17,7 +17,6 @@ class EventResource extends JsonResource
         return [
             'id' => $this->id,
             'service_id' => $this->service_id,
-            
             'service_name' => $this->service?->getTranslations("name"),
             'name' => $this->getTranslations("name"),
             'details' => $this->getTranslations("details"),
@@ -25,9 +24,9 @@ class EventResource extends JsonResource
             'file' => $this->file,
             'image' => $this->image,
             'start_date' => $this->start_date,
+            'start_date_hijri' => $this->hijri['start_date_hijri'],
+            'end_date_hijri' => $this->hijri['end_date_hijri'],
             'end_date' => $this->end_date
-            // ])
-
         ];
     }
 
