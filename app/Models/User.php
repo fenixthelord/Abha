@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Http\Traits\HasAutoPermissions;
+use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -147,6 +148,11 @@ class User extends Authenticatable  implements Auditable
         return $this->hasOne(Organization::class, 'employee_id');
     }
 
+    public function form()
+    {
+        return $this->morphMany(Form::class, "formable");
+    }
+    
     public function scopeManagersInDepartment($query, $departmentId)
     {
         return $query->whereHas("employees", function ($q) use ($departmentId) {
