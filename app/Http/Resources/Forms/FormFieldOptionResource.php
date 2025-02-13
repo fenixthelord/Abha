@@ -13,7 +13,7 @@ class FormFieldOptionResource extends JsonResource
         return [
             'id' => $this->id,
             'order' => $this->order,
-            'label' => $is_list ? $this->label : $this->getTranslations("label"),
+            'label' =>  $this->getTranslations("label"),
             'selected' => $this->selected,
         ];
     }

@@ -129,6 +129,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -142,6 +143,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manager_id');
     }
+
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');
@@ -149,7 +151,7 @@ class User extends Authenticatable  implements Auditable
 
     public function scopeManagersInDepartment($query, $departmentId)
     {
-        return $query->whereHas("managers", function ($q) use ($departmentId) {
+        return $query->whereHas("employees", function ($q) use ($departmentId) {
             $q->whereHas('department',  function ($q) use ($departmentId) {
                 $q->where("id", $departmentId);
             });
@@ -159,6 +161,7 @@ class User extends Authenticatable  implements Auditable
     protected static function boot()
     {
         parent::boot();
+        static::bootHasDateTimeFields();
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = Str::uuid();
@@ -167,9 +170,15 @@ class User extends Authenticatable  implements Auditable
 
         static::deleting(function ($post) {
             // Disallow users with the 'Master' role from deleting posts
-            if (auth()->check() && auth()->user()->hasRole('Master')) {
-                abort(403, 'You are not allowed to delete this resource.');
+            if (auth()->check() && $post->hasRole('Master')) {
+                abort(403, 'You are not allowed to delete this resource.5555');
             }
+        });
+    }
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
         });
     }
 }

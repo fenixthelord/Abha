@@ -13,7 +13,7 @@ class FormFieldResource extends JsonResource
         return [
             'id' => $this->id,
             'order' => $this->order,
-            'label' => $is_list ? $this->label : $this->getTranslations("label"),
+            'label' =>  $this->getTranslations("label"),
             'placeholder' => $this->placeholder,
             'type' => $this->type,
             'required' => $this->required,

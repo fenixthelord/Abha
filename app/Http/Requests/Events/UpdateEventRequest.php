@@ -18,12 +18,12 @@ class UpdateEventRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'id' => $this->id,
-        ]);
-    }
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'id' => $this->id,
+    //     ]);
+    // }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,8 +32,8 @@ class UpdateEventRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "id" => ["required", "uuid", "exists:events,id,deleted_at,NULL"],
             "service_id" => ["required", "uuid", "exists:services,id,deleted_at,NULL"],
-            "form_id" => ["sometimes",   "uuid",   "exists:forms,id,deleted_at,NULL"],
             "name" => ["required", "array", "max:2", "min:2"],
             "name.ar" => ["required", "string", "max:255"],
             "name.en" => ["required", "string", "max:255"],
@@ -47,14 +47,9 @@ class UpdateEventRequest extends FormRequest
         ];
     }
 
-    protected function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            $valid = Validator::make($this->all(), [
-                "id" => ["required", "uuid", "exists:events,id,deleted_at,NULL"],
-            ]);
-        });
-    }
+    // protected function withValidator($validator)
+    // {
+    // }
 
     public function failedValidation($validator)
     {
