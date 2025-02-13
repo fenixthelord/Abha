@@ -15,6 +15,7 @@ RUN docker-php-ext-install zip
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install exif
 RUN docker-php-ext-install -j$(nproc) gd 
+RUN docker-php-ext-install calendar
 
 #RUN docker-php-ext-install php-redis
 RUN echo 'memory_limit = -1' >> /usr/local/etc/php/conf.d/docker-php-ram-limit.ini
