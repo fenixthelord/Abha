@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Traits;
+use Carbon\Carbon;
+
 trait HasDateTimeFields
 {
     protected $datetimeFields = [
@@ -14,7 +16,10 @@ trait HasDateTimeFields
         'available_at',
         'created_at',
         'failed_at',
+        'updated_at',
+        'deleted_at',
     ];
+
 
     protected function initializeHasDateTimeFields()
     {
@@ -38,4 +43,20 @@ trait HasDateTimeFields
 
         return $value;
     }
+    public function getHijriAttribute()
+    {
+        $attributes = [];
+        foreach ($this->datetimeFields as $dateField) {
+            if (!empty($this->$dateField)) {
+                $date = Carbon::parse($this->$dateField);
+                $attributes[$dateField . '_hijri'] =  \Alkoumi\LaravelHijriDate\Hijri::Date('l d F Y', $date);
+            }
+        }
+        return $attributes;
+    }
+    public function setHijriAttribute($value)
+    {
+        $this->customField = $value;
+    }
+
 }

@@ -73,10 +73,10 @@ class NotificationController extends Controller
            // Use current time if not provided
 
             ];
-
+//dd($notificationData);
             // Send the notification using the NotificationService
             $response = $this->notificationService->postCall('/send-notification', $notificationData);
-// 
+//
             // Return an error response if one exists in the service response
             if (isset($response['error'])) {
                 return $this->returnError($response['error']);
