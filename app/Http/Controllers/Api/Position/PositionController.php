@@ -42,7 +42,7 @@ class PositionController extends Controller
 
             // $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
             $category = $query->get();
-            
+
             $data["positions"] = PositionResource::collection($category);
 
             return $this->returnData($data);
@@ -78,10 +78,10 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-          
+
             $potions = Position::create($request->validated());
             $data["positions"] = PositionResource::make($potions);
-          
+
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -100,11 +100,11 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $potions = Position::findOrFail($request->id);
             $potions->update($request->validated());
             $data["positions"] = PositionResource::make($potions);
-            
+
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -123,14 +123,19 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-           
+
             $potions = Position::findOrFail($request->id);
             if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
                 $data["chields"] = PositionChildResource::make($potions);
-                return $this->returnData($data, "you can not delete this position because it has associated users or sub positions.");
+                return $this->apiResponse(
+                    data: $data,
+                    status: true,
+                    message: "you can not delete this position because it has associated users or sub positions.",
+                    statusCode: 400
+                );
             }
             $potions->delete();
-           
+
             DB::commit();
             return $this->returnSuccessMessage(__("Position deleted successfully"));
         } catch (\Exception $e) {
