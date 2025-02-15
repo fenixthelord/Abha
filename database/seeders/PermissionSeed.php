@@ -129,6 +129,7 @@ class PermissionSeed extends Seeder
                     // Create Master User
                     $masterUser = User::Create(
                         [
+                            'id' => '11953802-99ad-4961-b7a6-bed53b1004ea',
                             'email' => "masteracount@gmail.com",
                             'password' => Hash::make('master123'),
                             'first_name' => "master",
