@@ -63,4 +63,7 @@ return [
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
         'redirect' => 'http://example.com/callback-url',
     ],
+
+    'notify_serv' => env('NOTIFY_SERV', 'http://smartabha-notification.test'),
+
 ];

@@ -126,7 +126,7 @@ class EventController extends Controller
             return $this->handleException($e);
         }
     }
-    public function updateEvent(UpdateEventRequest $request, $id)
+    public function updateEvent(UpdateEventRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -139,7 +139,7 @@ class EventController extends Controller
                 "end_date" => $formateEndDate,
             ]);
 
-            $event = Event::findOrFail($id);
+            $event = Event::findOrFail($request->id);
             $event->update($validatedData);
             $data["event"] = EventResource::make($event);
             DB::commit();

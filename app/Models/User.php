@@ -4,7 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Http\Traits\HasAutoPermissions;
+use App\Models\Forms\Form;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,12 +14,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Str;
+use App\Http\Traits\HasDateTimeFields;
+
 
 class User extends Authenticatable  implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, softDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
-    use HasAutoPermissions;
+    use HasAutoPermissions, HasDateTimeFields;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -28,7 +32,7 @@ class User extends Authenticatable  implements Auditable
      * @var array<int, string>
      */
     protected $fillable = [
-        'id',
+
         "department_id",
         'first_name',
         'last_name',
@@ -129,6 +133,7 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -142,9 +147,15 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->hasMany(Organization::class, 'manager_id');
     }
+
     public function organization()
     {
         return $this->hasOne(Organization::class, 'employee_id');
+    }
+
+    public function forms(): MorphMany
+    {
+        return $this->morphMany(Form::class, 'formable');
     }
 
     public function scopeManagersInDepartment($query, $departmentId)
@@ -159,6 +170,7 @@ class User extends Authenticatable  implements Auditable
     protected static function boot()
     {
         parent::boot();
+        static::bootHasDateTimeFields();
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = Str::uuid();
@@ -171,5 +183,16 @@ class User extends Authenticatable  implements Auditable
                 abort(403, 'You are not allowed to delete this resource.5555');
             }
         });
+    }
+    protected static function bootHasDateTimeFields()
+    {
+        static::registerModelEvent('booting', function ($model) {
+            $model->initializeHasDateTimeFields();
+        });
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

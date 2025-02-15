@@ -129,11 +129,16 @@ return [
             'validation_failed' => 'فشل التحقق من البيانات',
         ],
 
+        'upload_file' => [
+            'upload_file_success' => 'تم تحميل الملف بنجاح.'
+        ],
+
         'language' => [
             'lang_success' => 'تم تغيير اللغة بنجاح',
         ],
 
         'notification' => [
+            'user_not_authenticate' => 'لم تتم مصادقة المستخدم.',
             'notification_sent_success' => 'تم إرسال الإشعارات بنجاح!',
             'notification_sent_fail' => 'فشل في إرسال الإشعارات.',
             'device_token_saved' => 'تم حفظ رمز الجهاز بنجاح.',
@@ -165,9 +170,12 @@ return [
         'chields' => [
             'required' => 'حقل الأبناء مطلوب.',
             'array' => 'يجب أن تكون الأبناء مصفوفة.',
-        ],
-        'uuid' => [
-            'required' => 'حقل المعرف الفريد مطلوب.',
+            'parent_id' => [
+                'required' => 'حقل parent_id مطلوب.',
+                'uuid'     => 'يجب أن يكون parent_id بصيغة UUID صالحة.',
+                'exists'   => 'المعرف المحدد في parent_id غير موجود أو محذوف.',
+            ],
+
             'exists' => 'المعرف الفريد المحدد غير صالح أو تم حذفه.',
             'unique' => 'هذا المعرف الفريد موجود بالفعل.',
             'uuid' => 'المعرف الفريد غير صالح.',
@@ -294,7 +302,19 @@ return [
             "required" => "معرف الفئة مطلوب ",
             "uuid" => "معرف الفئة غير صحيح",
             "exists" => "معرف الفئة غير صحيح"
-        ]
+        ],
+        'page' => [
+            'int' => 'يجب أن يكون رقم الصفحة رقمًا صحيحًا.',
+        ],
+        'per_page' => [
+            'int' => 'يجب أن يكون عدد العناصر في الصفحة رقمًا صحيحًا.',
+        ],
+        'parent_id' => [
+            'required' => 'حقل parent_id مطلوب.',
+            'uuid'     => 'يجب أن يكون parent_id بصيغة UUID صالحة.',
+            'exists'   => 'المعرف المحدد في parent_id غير موجود أو محذوف.',
+        ],
+
     ],
     'forget_password' => [
         'sent_code' => 'تم ارسال الكود',
@@ -342,6 +362,9 @@ return [
         'description' => 'الوصف',
         'permission' => 'الصلاحية',
         'role' => 'الدور',
-        "category_id" => "معرف الفئة"
+        "category_id" => "معرف الفئة",
+        'page'     => 'رقم الصفحة',
+        'per_page' => 'عدد العناصر في الصفحة',
+        'parent_id' => "الاب",
     ]
 ];

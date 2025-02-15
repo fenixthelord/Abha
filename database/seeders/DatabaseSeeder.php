@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             PermissionSeed::class,
-
+            FirstPositionSeeder::class
         ]);
+
     }
 }
