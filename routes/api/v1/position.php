@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Position\PositionController;
+use App\Http\Controllers\Api\Position\PositionController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["prefix" => "position", "middleware" => ["auth:sanctum", "activeVerify"]], function () {

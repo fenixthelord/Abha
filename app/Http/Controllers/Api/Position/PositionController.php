@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Position;
+namespace App\Http\Controllers\Api\Position;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Position\CreatePositionRequest;
 use App\Http\Requests\Position\DeletePositionRequest;
 use App\Http\Requests\Position\ListOfPositionsRequest;
 use App\Http\Requests\Position\UpdatePositionRequest;
-use App\Http\Resources\Position\PositionChieldResource;
 use App\Http\Resources\Position\PositionChildResource;
 use App\Http\Resources\Position\PositionResource;
 use App\Http\Traits\ResponseTrait;
@@ -41,8 +40,9 @@ class PositionController extends Controller
                 $query->whereNotIn("id", Position::getChildrenIds($request->id));
             }
 
-            $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-
+            // $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            $category = $query->get();
+            
             $data["positions"] = PositionResource::collection($category);
 
             return $this->returnData($data);
@@ -60,8 +60,8 @@ class PositionController extends Controller
     public function chart()
     {
         try {
-            $headPositionPosition = Position::with("children")->whereNull("parent_id")->firstOrFail();
-            $data["positions"] = PositionResource::make($headPositionPosition);
+            $MasterPositionPosition = Position::with("children")->whereNull("parent_id")->firstOrFail();
+            $data["positions"] = PositionResource::make($MasterPositionPosition);
             return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);
@@ -78,8 +78,10 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
+          
             $potions = Position::create($request->validated());
             $data["positions"] = PositionResource::make($potions);
+          
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -98,9 +100,11 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
+            
             $potions = Position::findOrFail($request->id);
             $potions->update($request->validated());
             $data["positions"] = PositionResource::make($potions);
+            
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -119,12 +123,14 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
+           
             $potions = Position::findOrFail($request->id);
             if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
                 $data["chields"] = PositionChildResource::make($potions);
                 return $this->returnData($data, "you can not delete this position because it has associated users or sub positions.");
             }
             $potions->delete();
+           
             DB::commit();
             return $this->returnSuccessMessage(__("Position deleted successfully"));
         } catch (\Exception $e) {
