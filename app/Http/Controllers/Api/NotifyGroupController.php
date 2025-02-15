@@ -231,7 +231,7 @@ class NotifyGroupController extends Controller
             if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
                 return $this->badRequest("group not found");
             }
-            return $this->returnSuccessMessage('the group deleted successfully');
+            return $this->returnSuccessMessage(__('validation.custom.notifyGroup.group_deleted'));
 
         } catch (Exception $e) {
             DB::rollBack();
