@@ -26,8 +26,8 @@ class PositionController extends Controller
     public function index(ListOfPositionsRequest $request)
     {
         try {
-            $perPage = $request->input('per_page', $this->per_page);
-            $pageNumber = $request->input('page', $this->pageNumber);
+            // $perPage = $request->input('per_page', $this->per_page);
+            // $pageNumber = $request->input('page', $this->pageNumber);
 
             $query = Position::query();
 
