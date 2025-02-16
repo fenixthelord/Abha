@@ -28,7 +28,7 @@ class NotificationController extends Controller
 
             // Retrieve all users in one query for better performance
             $userIds = $data['user_ids']??null;
-            $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+
 
             $userIds = $data['user_ids'];
 
