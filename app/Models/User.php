@@ -120,6 +120,8 @@ class User extends Authenticatable  implements Auditable
 
     protected $auditExclude = [
         'password',
+        'refresh_token',
+        'refresh_token_expires_at',
     ];
 
     // Relationship with notify groups
