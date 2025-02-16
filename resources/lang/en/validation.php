@@ -10,6 +10,24 @@ return [
             'id' => 'The ID is invalid.',
         ],
 
+        'type_controller' => [
+            'id_required' => 'The type ID is required.',
+            'id_exists' => 'The selected type does not exist.',
+            'not_found' => 'The requested type was not found.',
+            'name_exists' => 'A type with the same name already exists in this service.',
+            'created' => 'Type has been created successfully.',
+            'deleted' => 'Type has been deleted successfully.',
+            'already_delete' => 'This type is already deleted.',
+        ],
+        'service-' => [
+            'id_required' => 'The service ID is required.',
+            'id_exists' => 'The selected service does not exist.',
+        ],
+        'form' => [
+            'id_required' => 'The form ID is required.',
+            'id_exists' => 'The selected form does not exist.',
+        ],
+
         'roleAndPerm' => [
             'dont_have_permission' => 'you dont have permission to access this page',
             'role_name_already_in_use' => 'This role name is already in use',

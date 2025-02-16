@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('types', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string("name", 500);    
+            $table->string("name", 500);
+            $table->foreignUuid('service_id')->nullable()->constrained('services')->onDelete('cascade');
+            $table->foreignUuid('form_id')->nullable()->constrained('forms')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });
