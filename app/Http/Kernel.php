@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -69,8 +70,6 @@ class Kernel extends HttpKernel
         'super-admin' => \App\Http\Middleware\SuperAdminMiddleWare::class,
         'verify' => \App\Http\Middleware\Verify::class,
         'activeVerify' => \App\Http\Middleware\ActiveVerify::class,
-
-
-
+        'permission' => PermissionMiddleware::class,
     ];
 }

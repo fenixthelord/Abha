@@ -27,12 +27,30 @@ class UserController extends Controller
     use ResponseTrait;
     use Paginate;
 
+    public function __construct()
+    {
+        $permissions = [
+            'index'  => 'user.show',
+            'show'  => 'user.show',
+            'store' => 'user.create',
+            'update'    => 'user.update',
+            'updateAdmin'    => 'user.update',
+            'deleteUser'   => 'user.delete',
+            'showDeleteUser'   => 'user.delete',
+            'restoreUser'    => 'user.restore',
+            'active'    => 'user.restore',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
     public function index(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo('user.show')) {
-            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-        }
+//        if (!$user->hasPermissionTo('user.show')) {
+//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//        }
         try {
 
             /* $perPage = request()->input('perPage', 10);
@@ -117,9 +135,9 @@ class UserController extends Controller
     public function updateAdmin(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo('user.update')) {
-            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-        }
+//        if (!$user->hasPermissionTo('user.update')) {
+//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//        }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
@@ -198,9 +216,9 @@ class UserController extends Controller
     public function active(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo('user.restore')) {
-            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-        }
+//        if (!$user->hasPermissionTo('user.restore')) {
+//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//        }
 
         try {
             $validator = Validator::make($request->all(), [
@@ -236,9 +254,9 @@ class UserController extends Controller
     public function deleteUser(Request $request)
     {
         $current_user = auth()->user();
-        if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
-            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-        }
+//        if ($current_user && !$current_user->hasPermissionTo('user.delete')) {
+//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//        }
 
         DB::beginTransaction();
         try {
@@ -327,9 +345,9 @@ class UserController extends Controller
 
         try {
             $user = auth()->user();
-            if (!$user->hasPermissionTo('user.delete')) {
-                return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-            }
+//            if (!$user->hasPermissionTo('user.delete')) {
+//                return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//            }
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             if ($users = User::onlyTrashed()->paginate($perPage, ['*'], 'page', $pageNumber)) {
@@ -348,9 +366,9 @@ class UserController extends Controller
     public function restoreUser(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo('user.restore')) {
-            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-        }
+//        if (!$user->hasPermissionTo('user.restore')) {
+//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
+//        }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
