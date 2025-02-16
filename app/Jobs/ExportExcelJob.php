@@ -34,7 +34,7 @@ class ExportExcelJob implements ShouldQueue
             $excelFileUrl = $this->exportData($this->exportData, $this->filename);
             $userId = auth('sanctum')->id();
             $dateNow = date('Ymd');
-            $channelName = "pusher_{$this->filename}_{$dateNow}_{$userId}";
+            $channelName = "pusher_{$userId}";
 
             $params = [
                 'sender_id'        => null,
