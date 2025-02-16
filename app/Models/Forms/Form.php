@@ -3,6 +3,8 @@
 namespace App\Models\Forms;
 
 use App\Models\BaseModel;
+use App\Models\Category;
+use App\Models\Event;
 use App\Models\Type;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -44,10 +46,27 @@ class Form extends BaseModel
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%');
-            })->orWhereHas('category', function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%');
-            });;
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhereHasMorph(
+                        'formable',
+                        [Category::class, Event::class],
+                        function ($query, $type) use ($search) {
+                            if ($type === Category::class) {
+                                $query->where('name', 'like', '%' . $search . '%');
+                            } elseif ($type === Event::class) {
+                                $query->where('name', 'like', '%' . $search . '%');
+                            }
+                        }
+                    );
+            });
+        })->when($filters['event_id'] ?? null, function ($query, $eventId) {
+            $query->whereHasMorph('formable', [Event::class], function ($query) use ($eventId) {
+                $query->where('id', $eventId);
+            });
+        })->when($filters['category_id'] ?? null, function ($query, $categoryId) {
+            $query->whereHasMorph('formable', [Category::class], function ($query) use ($categoryId) {
+                $query->where('id', $categoryId);
+            });
         });
     }
 
