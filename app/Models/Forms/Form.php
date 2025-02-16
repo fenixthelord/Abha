@@ -5,6 +5,7 @@ namespace App\Models\Forms;
 use App\Models\BaseModel;
 use App\Models\Category;
 use App\Models\Event;
+use App\Models\Type;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -76,5 +77,8 @@ class Form extends BaseModel
             $form->fields()->delete();
             $form->submissions()->delete();
         });
+    }
+    public function types() {
+        return $this->hasMany(Type::class);
     }
 }
