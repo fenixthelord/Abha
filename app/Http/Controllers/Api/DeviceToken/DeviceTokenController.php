@@ -40,7 +40,7 @@ class DeviceTokenController extends Controller
 
 
             // Return a successful response
-            return $this->returnSuccessMessage('Device token saved successfully');
+            return $this->returnSuccessMessage(__('validation.custom.notification.device_token_saved'));
         } catch (\Exception $e) {
             // Handle any exceptions using the handleException method from the ResponseTrait
             return $this->handleException($e);
@@ -52,7 +52,7 @@ class DeviceTokenController extends Controller
             $user = request()->user('sanctum');
 
             if (!$user) {
-                return $this->Unauthorized(__('validation.custom.customer_not_authenticate'));
+                return $this->Unauthorized(__('validation.custom.notification.user_not_authenticate'));
             }
             // if you are login go to next
             $requestData = [

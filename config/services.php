@@ -64,6 +64,6 @@ return [
         'redirect' => 'http://example.com/callback-url',
     ],
 
-    'notify_serv' => env('NOTIFY_SERV', 'http://smartabha-notification.test/'),
+    'notify_serv' => env('NOTIFY_SERV', 'http://smartabha-notification.test'),
 
 ];
