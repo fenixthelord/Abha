@@ -156,8 +156,11 @@ class NotifyGroupController extends Controller
             if (!is_array($response) || !isset($response['data']['groups']) || !is_array($response['data']['groups'])) {
                 return $this->badRequest("group not found");
             }
-
             $data['group'] = GroupResource::collection($response['data']['groups']);
+            $data['current_page'] = $response['data']['current_page'];
+            $data['next_page'] = $response['data']['next_page'];
+            $data['previous_page'] = $response['data']['previous_page'];
+            $data['total_pages'] = $response['data']['total_pages'];
 
             return $this->returnData($data);
 
