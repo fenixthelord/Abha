@@ -20,7 +20,20 @@ use Illuminate\Testing\Constraints\CountInDatabase;
 class CategoryController extends Controller
 {
     use ResponseTrait;
+    public function __construct()
+    {
+        $permissions = [
+            'list'  => ['service.show,department.show'],
+            'filter'  => ['service.show,department.show'],
+            'create' => ['service.create,department.create'],
+            'update'    => ['service.update,department.update'],
+            'delete'   => ['service.delete,department.delete'],
+        ];
 
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
 
     /**
      * List of categories , All parent categories That the parentID is null
