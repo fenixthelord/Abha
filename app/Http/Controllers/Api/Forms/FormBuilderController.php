@@ -26,7 +26,7 @@ class FormBuilderController extends Controller
             $pageNumber = $request->input('page', 1);
             $perPage = $request->input('perPage', 10);
             $forms = Form::orderByAll($request->sortBy, $request->sortType)
-                ->filter($request->only('search'))
+                ->filter($request->only('search', 'event_id', 'category_id'))
                 ->with(['formable', 'fields.options', 'fields.sources']);
             $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
 
