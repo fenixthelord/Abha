@@ -9,5 +9,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('excel')->group(function () {
         Route::get('export-services', [ExcelReportController::class, 'exportServicesToExcel']);
+        Route::get('/export-audit-logs', [ExcelReportController::class, 'exportAuditLogsToExcel']);
     });
 });
