@@ -186,8 +186,11 @@ class RoleAndPermissionController extends Controller
             if ($request->role == 'Master') {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.master_role_can_not_assign_user'));
             }
-            $user->syncRoles($request->role);
-
+            $id = [];
+            foreach ($request->role as $role) {
+            $id = array_merge($id,Role::where('name',$role)->pluck('id')->toArray());
+            }
+            $user->auditSync('roles', $id);
             return $this->returnSuccessMessage(__('validation.custom.roleAndPerm.role_has_been_assigned_successfully'));
         } catch (\Exception $exception) {
             return $this->returnError($exception->getMessage());
@@ -225,7 +228,12 @@ class RoleAndPermissionController extends Controller
                         return $this->Forbidden(__('validation.custom.roleAndPerm.master_permission_user'));
                     }
                 }
-                $user->givePermissionTo($request->permissions);
+          //      $user->givePermissionTo($request->permissions);
+                $id = [];
+                foreach ($request->permissions as $permission) {
+                    $id = array_merge($id,Permission::where('name',$permission)->pluck('id')->toArray());
+                }
+                $user->auditSync('permissions', $id);
                 return $this->returnSuccessMessage(__('validation.custom.roleAndPerm.permission_assigned_successfully'));
             }
         } catch (\Exception $exception) {
@@ -458,7 +466,12 @@ class RoleAndPermissionController extends Controller
                     return $this->Forbidden(__('validation.custom.roleAndPerm.not_allowed_add_Master_permission'));
                 }
             }
-            $role->syncPermissions($request->permission);
+            $id = [];
+            foreach ($request->permission as $perm) {
+                $id = array_merge($id,Permission::where('name',$perm)->pluck('id')->toArray());
+            }
+            $role->auditSync('permissions', $id);
+        //    $role->syncPermissions($request->permission);
             $data['role'] = RolesResource::make($role)->withTranslate();
             DB::commit();
 
