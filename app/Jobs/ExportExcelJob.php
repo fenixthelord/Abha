@@ -3,12 +3,14 @@
 namespace App\Jobs;
 
 use App\Http\Traits\FileExportReportTrait;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 // Import the trait that contains the exportData() method.
 
@@ -129,7 +131,7 @@ class ExportExcelJob implements ShouldQueue
                 'group_id' => null,
                 'channel' => $channelName,
                 'image' => null,
-                'url' => $excelFileUrl,
+                'url' => url('storage/app/'.$excelFileUrl),
             ];
 
             // Send the notification using the NotificationService.

@@ -69,7 +69,7 @@ trait FileExportReportTrait
         Storage::put("uploads/exports/{$filename}", $excelData);
 
         // التأكد من إنشاء رابط التخزين العام عبر الأمر: php artisan storage:link
-        return Storage::url("uploads/exports/{$filename}");
+        return "uploads/exports/{$filename}";
     }
 
 
