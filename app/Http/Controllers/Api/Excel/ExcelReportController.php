@@ -151,7 +151,8 @@ class ExcelReportController extends Controller
             $transform = new AuditTransformer();
 
             // Dispatch the export job to process in the background
-            dispatch(new ExportExcelJob(
+            Queue::push(
+            ExportExcelJob::dispatch(
                 Audit::class,  // The model to query
                 $filters,      // Applied filters
                 [],            // No relationships needed
