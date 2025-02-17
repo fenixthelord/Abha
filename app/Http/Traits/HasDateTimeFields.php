@@ -30,7 +30,7 @@ trait HasDateTimeFields
     protected function formatDateTime($date)
     {
         $data = Carbon::parse($date);
-        return $data->format('d-M-Y');
+        return $data->format('d-m-Y');
     }
 
     public function getAttribute($key)
