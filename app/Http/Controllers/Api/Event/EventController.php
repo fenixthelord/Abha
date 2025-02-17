@@ -19,6 +19,20 @@ class EventController extends Controller
 {
     use ResponseTrait;
 
+    public function __construct()
+    {
+        $permissions = [
+            'list'  => 'event.show',
+            'showEvent'    => 'event.show',
+            'createEvent'  => 'event.create',
+            'deleteEvent' => 'event.delete',
+            'updateEvent'   => 'event.update',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
     public function list(ListEventsRequest $request)
     {
         try {

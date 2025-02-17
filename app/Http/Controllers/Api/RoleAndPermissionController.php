@@ -23,16 +23,29 @@ class RoleAndPermissionController extends Controller
 
     public function __construct()
     {
-        // Apply middleware to all actions in this controller
+        $permissions = [
+            'index'  => 'role.show',
+            'show'  => 'role.show',
+            'store' => 'role.create',
+            'update'    => 'role.update',
+            'SyncPermission'    => 'role.update',
+            'assignPermission'    => 'role.update',
+            'assignRole'    => 'role.update',
+            'DeleteRole'   => 'role.delete',
+            'removeRoleFromUser'   => 'user.update',
+            'GetAllPermissions'   => 'permission.update',
+        ];
 
-
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
     }
 
     public function index(Request $request)
     {
-        if (!auth()->user()->hasPermissionTo("role.show")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-        }
+//        if (!auth()->user()->hasPermissionTo("role.show")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//        }
         /*$roles = Role::where('name', '!=', 'Master')->get();
         $data['role'] = RolesResource::collection($roles)->each->withTranslate();
         return $this->returnData($data);*/
@@ -47,9 +60,9 @@ class RoleAndPermissionController extends Controller
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
-            if (!auth()->user()->hasPermissionTo("role.create")) {
-                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-            }
+//            if (!auth()->user()->hasPermissionTo("role.create")) {
+//                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//            }
             $validator = Validator::make($request->all(), [
                 // 'roleName' => 'required|string|unique:roles,name|regex:/^[^\s]+$/',
                 "displaying.en" => "required|string|unique:roles,displaying",
@@ -153,11 +166,10 @@ class RoleAndPermissionController extends Controller
 
 
     public function assignRole(Request $request)
-
     {
-        if (!auth()->user()->hasPermissionTo("user.update")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-        }
+//        if (!auth()->user()->hasPermissionTo("user.update")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//        }
         $validator = Validator::make($request->all(), [
             'role' => 'required|exists:roles,name',
 
@@ -185,9 +197,9 @@ class RoleAndPermissionController extends Controller
 
     public function assignPermission(Request $request)
     {
-        if (!auth()->user()->hasPermissionTo("user.update")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.forbidden_action'));
-        }
+//        if (!auth()->user()->hasPermissionTo("user.update")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.forbidden_action'));
+//        }
         $validatedData = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'permissions' => 'nullable'
@@ -225,9 +237,9 @@ class RoleAndPermissionController extends Controller
     function removeRoleFromUser(Request $request)
     {
         // Find the user by ID
-        if (!auth()->user()->hasPermissionTo("user.update")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-        }
+//        if (!auth()->user()->hasPermissionTo("user.update")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//        }
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'roleName' => 'required|string'
@@ -397,9 +409,9 @@ class RoleAndPermissionController extends Controller
 
     public function SyncPermission(Request $request)
     {
-        if (!auth()->user()->hasPermissionTo("role.update")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-        }
+//        if (!auth()->user()->hasPermissionTo("role.update")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//        }
         $validator = Validator::make($request->all(), [
             'permission' => 'required|array',
             'permission.*' => 'exists:permissions,name',
@@ -461,9 +473,9 @@ class RoleAndPermissionController extends Controller
     public function GetAllPermissions()
     {
         try {
-            if (!auth()->user()->hasPermissionTo("permission.show")) {
-                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-            }
+//            if (!auth()->user()->hasPermissionTo("permission.show")) {
+//                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//            }
 
             $permission = Permission::where('is_admin', false)->get();
 
@@ -477,9 +489,9 @@ class RoleAndPermissionController extends Controller
 
     public function DeleteRole(Request $request)
     {
-        if (!auth()->user()->hasPermissionTo("role.delete")) {
-            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
-        }
+//        if (!auth()->user()->hasPermissionTo("role.delete")) {
+//            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
+//        }
         $validator = Validator::make($request->all(), [
             'roleName' => 'required|array',
             'roleName.*' => 'exists:roles,name',
