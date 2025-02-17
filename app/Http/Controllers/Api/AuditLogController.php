@@ -15,15 +15,22 @@ class AuditLogController extends Controller
 
     public function __construct()
     {
-        return $this->middleware('auth:sanctum');
+        $permissions = [
+            //To be reviewed
+            'index'  => 'audit.show',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
     }
 
     public function index(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo('audit.show')) {
-            return $this->Forbidden("you don't have permission to access this page");
-        }
+//        if (!$user->hasPermissionTo('audit.show')) {
+//            return $this->Forbidden("you don't have permission to access this page");
+//        }
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',

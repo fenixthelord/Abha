@@ -7,11 +7,12 @@ use App\Http\Requests\Notification\SendNotificationRequest;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use App\Services\NotificationService;
-use Illuminate\Http\Request;
+use Exception;
 
 class NotificationController extends Controller
 {
     use ResponseTrait;
+
     protected NotificationService $notificationService;
 
     public function __construct(NotificationService $notificationService)
@@ -22,55 +23,40 @@ class NotificationController extends Controller
     public function sendNotification(SendNotificationRequest $request)
     {
         try {
-            $userAuth=auth('sanctum')->user();
+            $userAuth = auth('sanctum')->user();
             // Validate and retrieve request data
             $data = $request->validated();
 
             // Retrieve all users in one query for better performance
-            $userIds = $data['user_ids']??null;
-            $users = User::whereIn('id', $userIds)->get()->keyBy('id');
-
-            $userIds = $data['user_ids'];
-
-            // Process the user_ids:
-            // - If the first element is "*", set the new array with wildcard values.
-            // - Otherwise, retrieve users in one query and map each user_id to include department_id.
-            $newUserIds = collect($userIds)->when(
-                isset($userIds[0]) && $userIds[0] === '*',
-                function ($collection) {
+            $userIds = $data['user_ids'] ?? null;
+            if (isset($userIds)) {
+                // Process the user_ids:
+                // - If the first element is "*", set the new array with wildcard values.
+                // - Otherwise, retrieve users in one query and map each user_id to include department_id.
+                $newUserIds = collect($userIds)->when(isset($userIds[0]) && $userIds[0] === '*', function ($collection) {
                     return collect([['user_id' => '*']]); // Ensure correct structure
-                },
-                function ($collection) {
-                    $users = \App\Models\User::whereIn('id', $collection->all())
-                        ->get()
-                        ->keyBy('id');
+                }, function ($collection) {
+                    $users = User::whereIn('id', $collection->all())->get()->keyBy('id');
 
                     return $collection->map(function ($userId) use ($users) {
-                        return [
-                            'user_id'       => $userId,
-                            'department_id' => $users->has($userId) ? $users[$userId]->department_id : null,
-                        ];
+                        return ['user_id' => $userId, 'department_id' => $users->has($userId) ? $users[$userId]->department_id : null,];
                     })->values(); // Reset keys to maintain a clean array structure
-                }
-            )->toArray();
-
-          $data['user_ids'] = $newUserIds;
-
+                })->toArray();
+                $data['user_ids'] = $newUserIds;
+            }
             // Prepare the notification data
-            $notificationData = [
-                'sender_id'        => $userAuth->id,
-                'sender_type'      => $data['sender_type'] ?? 'user',
-                'sender_service'   => $data['sender_service'] ?? 'user_service', // Default value if not provided
-                'title'            => $data['title'],
-                'body'             => $data['body'],
-                'user_ids'         => $data['user_ids'], // Use the transformed user_ids array
-                'receiver_service' => $data['model']=='user' ? 'user_service':'customer_service',
-                'receiver_type'    => $data['model'] ?? 'user',
-                'group_id'         => $data['group_id'] ?? null,
-                'channel'          => $data['channel'] ?? 'fcm',
-                'image'            => $data['image'] ?? null,
-                'url'              => $data['url'] ?? null,
-           // Use current time if not provided
+            $notificationData = ['sender_id' => $userAuth->id,
+                'sender_type' => $data['sender_type'] ?? 'user',
+                'sender_service' => $data['sender_service'] ?? 'user_service', // Default value if not provided
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'user_ids' => $data['user_ids'] ?? null, // Use the transformed user_ids array
+                'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service',
+                'receiver_type' => $data['model'] ?? 'user',
+                'group_id' => $data['group_id'] ?? null,
+                'channel' => $data['channel'] ?? 'fcm',
+                'image' => $data['image'] ?? null,
+                'url' => $data['url'] ?? null,// Use current time if not provided
 
             ];
 //dd($notificationData);
@@ -84,7 +70,7 @@ class NotificationController extends Controller
 
             // Return a success response if the notification was sent successfully
             return $this->returnSuccessMessage('Notification sent successfully');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Handle any exceptions with a custom response using the handleException method
             return $this->handleException($e);
         }

@@ -17,6 +17,20 @@ class DepartmentsControllers extends Controller
 {
     use ResponseTrait, Paginate;
 
+    public function __construct()
+    {
+        $permissions = [
+            'index'  => 'department.show',
+            'show'  => 'department.show',
+            'store' => 'department.create',
+            'update'    => 'department.update',
+            'destroy'   => 'department.delete',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
     public function index(Request $request)
     {
         try {

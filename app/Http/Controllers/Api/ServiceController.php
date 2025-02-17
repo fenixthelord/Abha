@@ -16,6 +16,21 @@ use App\Models\Department;
 
 class ServiceController extends Controller {
     use ResponseTrait;
+
+    public function __construct()
+    {
+        $permissions = [
+            'index'  => 'service.show',
+            'show'  => 'service.show',
+            'store' => 'service.create',
+            'update'    => 'service.update',
+            'destroy'   => 'service.delete',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
     public function index(Request $request) {
         try {
             $validator = Validator::make($request->all(), [

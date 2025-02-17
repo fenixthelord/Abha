@@ -15,6 +15,21 @@ class WorkflowController extends Controller
 {
     use ResponseTrait;
 
+    public function __construct()
+    {
+        $permissions = [
+            'index'  => 'workflow.show',
+            'show'  => 'workflow.show',
+            'store' => 'workflow.create',
+            'update'    => 'workflow.update',
+            'destroy'   => 'workflow.delete',
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
+
     public function index(Request $request)
     {
         try {

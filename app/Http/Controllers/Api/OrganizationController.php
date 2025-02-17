@@ -32,6 +32,24 @@ class OrganizationController extends Controller
         'ar' => "رئيس القسم"
     ];
 
+    public function __construct()
+    {
+        $permissions = [
+            //To be reviewed
+            'index'  => 'organization.show',
+            'delete'  => 'organization.delete',
+            'getDepartmentManagers'  => 'organization.show',
+            'getDepartmentEmployees'  => 'organization.show',
+            'AddEmployee'  => 'organization.create',
+            'updateEmployee'  => 'organization.create',
+            'filter'  => ['organization.show','user.show'],
+            'chart'  => ['organization.show','user.show'],
+        ];
+
+        foreach ($permissions as $method => $permission) {
+            $this->middleware("permission:$permission")->only($method);
+        }
+    }
     public function getDepartmentManagers(ManagerRequest $request)
     {
         try {
@@ -127,7 +145,7 @@ class OrganizationController extends Controller
                     'position' => Self::HEAD_MANAGER_POSITION
                 ]);
             }
-            
+
             $orgUser = Organization::create([
                 'department_id' => $department,
                 'manager_id' => $manager,
@@ -203,7 +221,7 @@ class OrganizationController extends Controller
                             $q->whereHas("department", function ($q) use ($departmentId) {
                                 $q->where("id", $departmentId);
                             });
-                        }   
+                        }
                         if ($managerId) {
                             $childManagerIds = Organization::getAllChildIds($managerId);
                             $childManagerIds[] = $managerId;
