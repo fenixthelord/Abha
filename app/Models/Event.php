@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
 
-class Event extends BaseModel
+class Event extends BaseModel implements Auditable
 {
     use HasFactory, SoftDeletes, HasTranslations;
+    use \OwenIt\Auditing\Auditable;
 
     protected $translatable = ['name', 'details'];
     protected $fillable = [

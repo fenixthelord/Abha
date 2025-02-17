@@ -6,12 +6,13 @@ use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Translatable\HasTranslations;
 
-class Position extends BaseModel
+class Position extends BaseModel implements Auditable
 {
     use HasFactory, SoftDeletes, HasTranslations;
-    
+    use \OwenIt\Auditing\Auditable;
     const MASTER_ID = 'ad02d43b-0e34-4689-885f-b0958c9c900c';
 
     protected $translatable = ['name'];
