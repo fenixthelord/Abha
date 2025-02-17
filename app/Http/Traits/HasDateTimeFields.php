@@ -9,7 +9,6 @@ trait HasDateTimeFields
         'start_date',
         'end_date',
         'email_verified_at',
-        'otp_expires_at',
         'refresh_token_expires_at',
         'schedule_at',
         'reserved_at',

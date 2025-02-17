@@ -5,16 +5,37 @@ namespace App\Http\Controllers\Api\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Jobs\ExportExcelJob;
-use App\Models\Service;
 use App\Models\Audit;
+use App\Models\Service;
 use App\Services\Excel\AuditTransformer;
 use App\Services\Excel\ServiceTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Queue;
 
 class ExcelReportController extends Controller
 {
     use ResponseTrait;
+
+    public function export(Request $request)
+    {
+        try {
+            switch ($request->export_type) {
+                case "service":
+                    return $this->exportServicesToExcel($request);
+                    break;
+
+                case "audit":
+                    return $this->exportAuditLogsToExcel($request);
+                    break;
+
+                default:
+                    return $this->badRequest($request->export_type . ' not found 😅');
+            }
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
 
     /**
      * Export Services to Excel.
@@ -23,7 +44,7 @@ class ExcelReportController extends Controller
      * It gathers filtering criteria from the request, defines a transformation
      * callback for each service, and then dispatches the ExportGenericJob.
      *
-     * @param  Request  $request  The HTTP request instance.
+     * @param Request $request The HTTP request instance.
      * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
      */
     public function exportServicesToExcel(Request $request)
@@ -41,14 +62,24 @@ class ExcelReportController extends Controller
 
             $transformer = new ServiceTransformer();
 
-            dispatch(new ExportExcelJob(
-                Service::class,
-                $filters,
-                ['department'],
-                $filename,
-                [$userId],
-                [$transformer, 'transform']
-            ));
+            Queue::push(
+                ExportExcelJob::dispatch(
+                    Service::class,
+                    $filters,
+                    ['department'],
+                    $filename,
+                    [$userId],
+                    [$transformer, 'transform']
+                ));
+
+//            ExportExcelJob::dispatch(
+//                Service::class,
+//                $filters,
+//                ['department'],
+//                $filename,
+//                [$userId],
+//                [$transformer, 'transform']
+//            );
 
             // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
@@ -65,7 +96,7 @@ class ExcelReportController extends Controller
      * It gathers filtering criteria from the request, defines a transformation
      * callback for each audit record, and then dispatches the ExportGenericJob.
      *
-     * @param  Request  $request  The HTTP request instance.
+     * @param Request $request The HTTP request instance.
      * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
      */
     public function exportAuditLogsToExcel(Request $request)

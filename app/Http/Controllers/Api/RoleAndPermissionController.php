@@ -24,20 +24,19 @@ class RoleAndPermissionController extends Controller
     public function __construct()
     {
         $permissions = [
-            'index'  => 'role.show',
-            'show'  => 'role.show',
-            'store' => 'role.create',
-            'update'    => 'role.update',
-            'SyncPermission'    => 'role.update',
-            'assignPermission'    => 'role.update',
-            'assignRole'    => 'role.update',
-            'DeleteRole'   => 'role.delete',
-            'removeRoleFromUser'   => 'user.update',
-            'GetAllPermissions'   => 'permission.update',
+            'index'  => ['role.show'],
+            'ShowRole'  => ['role.show'],
+            'store' => ['role.create'],
+            'SyncPermission'    => ['role.update'],
+            'assignPermission'    => ['role.update'],
+            'assignRole'    => ['role.update'],
+            'DeleteRole'   => ['role.delete'],
+            'removeRoleFromUser'   => ['user.update'],
+            'GetAllPermissions'   => ['permission.update'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
 
