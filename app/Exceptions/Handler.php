@@ -2,13 +2,17 @@
 
 namespace App\Exceptions;
 
+use App\Http\Traits\ResponseTrait;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Laravel\Sanctum\Exceptions\MissingAbilityException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use ResponseTrait;
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -34,6 +38,12 @@ class Handler extends ExceptionHandler
     }
     public function render($request, Throwable $e)
     {
+
+        if ($e instanceof UnauthorizedException || $e instanceof AuthorizationException) {
+            return $this->Forbidden("you don't have permission to access this page");
+        }
+
+
         // Handle MissingAbilityException (token exists but lacks permissions)
         if ($e instanceof MissingAbilityException) {
 

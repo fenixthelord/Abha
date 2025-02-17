@@ -5,16 +5,38 @@ namespace App\Http\Controllers\Api\Excel;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Jobs\ExportExcelJob;
-use App\Models\Service;
 use App\Models\Audit;
+use App\Models\Service;
 use App\Services\Excel\AuditTransformer;
 use App\Services\Excel\ServiceTransformer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Queue;
 
 class ExcelReportController extends Controller
 {
     use ResponseTrait;
+
+    public function export(Request $request)
+    {
+        try {
+            switch ($request->export_type) {
+                case "service":
+                    return $this->exportServicesToExcel($request);
+                    break;
+
+                case "audit":
+                    return $this->exportAuditLogsToExcel($request);
+                    break;
+
+                default:
+                    return $this->badRequest($request->export_type . ' not found 😅');
+            }
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
 
     /**
      * Export Services to Excel.
@@ -23,7 +45,7 @@ class ExcelReportController extends Controller
      * It gathers filtering criteria from the request, defines a transformation
      * callback for each service, and then dispatches the ExportGenericJob.
      *
-     * @param  Request  $request  The HTTP request instance.
+     * @param Request $request The HTTP request instance.
      * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
      */
     public function exportServicesToExcel(Request $request)
@@ -41,14 +63,24 @@ class ExcelReportController extends Controller
 
             $transformer = new ServiceTransformer();
 
-            dispatch(new ExportExcelJob(
-                Service::class,
-                $filters,
-                ['department'],
-                $filename,
-                [$userId],
-                [$transformer, 'transform']
-            ));
+            Queue::push(
+                ExportExcelJob::dispatch(
+                    Service::class,
+                    $filters,
+                    ['department'],
+                    $filename,
+                    [$userId],
+                    [$transformer, 'transform']
+                ));
+
+//            ExportExcelJob::dispatch(
+//                Service::class,
+//                $filters,
+//                ['department'],
+//                $filename,
+//                [$userId],
+//                [$transformer, 'transform']
+//            );
 
             // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
@@ -65,40 +97,74 @@ class ExcelReportController extends Controller
      * It gathers filtering criteria from the request, defines a transformation
      * callback for each audit record, and then dispatches the ExportGenericJob.
      *
-     * @param  Request  $request  The HTTP request instance.
+     * @param Request $request The HTTP request instance.
      * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
      */
     public function exportAuditLogsToExcel(Request $request)
     {
         try {
-            // Retrieve filtering or search criteria from the request (e.g., search term)
-            $filters = $request->only(['search']); // You can add additional filters if needed.
+            // Validate incoming request parameters
+            $request->validate([
+                'model_type' => 'nullable|string',
+                'user_type' => 'nullable|string',
+                'event' => 'nullable|in:created,updated,deleted,restored',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'user_id' => 'nullable|string',
+            ]);
 
-            // Set the file name based on the current date.
+            // Build filters based on provided request inputs
+            $filters = [];
+
+            if ($request->filled('model_type')) {
+                $filters['auditable_type'] = $request->input('model_type');
+            }
+            if ($request->filled('user_type')) {
+                $filters['user_type'] = $request->input('user_type');
+            }
+            if ($request->filled('event')) {
+                $filters['event'] = $request->input('event');
+            }
+            if ($request->filled('user_id')) {
+                $filters['user_id'] = $request->input('user_id');
+            }
+
+
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $filters['created_at'] = [
+                    Carbon::parse($request->input('start_date'))->startOfDay(),
+                    Carbon::parse($request->input('end_date'))->endOfDay(),
+                ];
+            } elseif ($request->filled('start_date')) {
+                $filters['created_at'] = ['>=', Carbon::parse($request->input('start_date'))->startOfDay()];
+            } elseif ($request->filled('end_date')) {
+                $filters['created_at'] = ['<=', Carbon::parse($request->input('end_date'))->endOfDay()];
+            }
+            // Set the filename based on the current date
             $dateNow = date('Ymd');
             $filename = "audit_logs_{$dateNow}.xlsx";
 
-            // Get the current user's ID for notification purposes.
+            // Get the current authenticated user ID
             $userId = Auth::id();
 
-            // Define a callback to transform each Audit record into an array for export.
+            // Transformer for formatting audit log data
             $transform = new AuditTransformer();
 
-            // Dispatch the generic export job for audit logs.
-            dispatch(new ExportExcelJob(
-                Audit::class,   // The model class to query.
-                $filters,       // Filtering and search criteria.
-                [],             // No extra relationships are required.
-                $filename,      // Name of the output Excel file.
-                [$userId],      // User IDs to be notified when export is complete.
-                [$transform, 'transform']     // Transformation callback for each audit record.
+            // Dispatch the export job to process in the background
+            Queue::push(
+            ExportExcelJob::dispatch(
+                Audit::class,  // The model to query
+                $filters,      // Applied filters
+                [],            // No relationships needed
+                $filename,     // Generated file name
+                [$userId],     // User to notify upon completion
+                [$transform, 'transform'] // Data transformation callback
             ));
 
-            // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {
-            // Handle any exceptions and return an error response.
             return $this->handleException($e);
         }
     }
+
 }

@@ -30,27 +30,23 @@ class UserController extends Controller
     public function __construct()
     {
         $permissions = [
-            'index'  => 'user.show',
-            'show'  => 'user.show',
-            'store' => 'user.create',
-            'update'    => 'user.update',
-            'updateAdmin'    => 'user.update',
-            'deleteUser'   => 'user.delete',
-            'showDeleteUser'   => 'user.delete',
-            'restoreUser'    => 'user.restore',
-            'active'    => 'user.restore',
+            'index'  => ['user.show'],
+            'show'  => ['user.show'],
+            'store' => ['user.create'],
+            'update'    => ['user.update'],
+            'updateAdmin'    => ['user.update'],
+            'deleteUser'   => ['user.delete'],
+            'showDeleteUser'   => ['user.delete'],
+            'restoreUser'    => ['user.restore'],
+            'active'    => ['user.restore'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
     public function index(Request $request)
     {
-        $user = auth()->user();
-//        if (!$user->hasPermissionTo('user.show')) {
-//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-//        }
         try {
 
             /* $perPage = request()->input('perPage', 10);

@@ -8,4 +8,6 @@ Route::prefix('types')->group(function () {
     Route::post('/store', [TypeController::class, 'store']);
     Route::get('/show', [TypeController::class, 'show']);
     Route::match(['put', 'patch'], '/update', [TypeController::class, 'update']);
+    Route::get('/get-service', [TypeController::class, 'getServiceByType']);
+    Route::get('/get-customers', [TypeController::class, 'getCustomers']);
 });
