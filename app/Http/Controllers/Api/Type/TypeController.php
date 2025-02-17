@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Type;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Type\TypeResource;
+use App\Http\Resources\ServiceResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\Form;
 use App\Models\Service;
@@ -149,6 +150,31 @@ class TypeController extends Controller {
             return $this->returnData(['type' => new TypeResource($type)]);
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+
+    public function getServiceByType(Request $request) {
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => ['required', 'exists:types,id'],
+            ], [
+                'id.required' => __('validation.custom.type_controller.id_required'),
+                'id.exists' => __('validation.custom.type_controller.id_exists'),
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $type = Type::with('service')->findOrFail($request->id);
+
+            if (!$type->service) {
+                return $this->NotFound(__('validation.custom.type_controller.service_not_found'));
+            }
+
+            return $this->returnData(['service' => new ServiceResource($type->service)]);
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
