@@ -11,21 +11,29 @@ return [
         ],
 
         'type_controller' => [
+            'name_required' => 'The name field is required.',
+            'name_max' => 'The name must not exceed :max characters.',
+
+            'name_en_required' => 'The English name is required.',
+            'name_en_max' => 'The English name must not exceed :max characters.',
+            'name_en_unique' => 'The English name must be unique.',
+
+            'name_ar_required' => 'The Arabic name is required.',
+            'name_ar_max' => 'The Arabic name must not exceed :max characters.',
+            'name_ar_unique' => 'The Arabic name must be unique.',
+
+            'service_id_required' => 'The service ID is required.',
+            'service_id_exists' => 'The selected service ID is invalid.',
+
+            'form_id_required' => 'The form ID is required.',
+            'form_id_exists' => 'The selected form ID is invalid.',
+
             'id_required' => 'The type ID is required.',
-            'id_exists' => 'The selected type does not exist.',
+            'id_exists' => 'The selected type ID is invalid.',
+
+            'created' => 'The type has been successfully created.',
+            'updated' => 'The type has been successfully updated.',
             'not_found' => 'The requested type was not found.',
-            'name_exists' => 'A type with the same name already exists in this service.',
-            'created' => 'Type has been created successfully.',
-            'deleted' => 'Type has been deleted successfully.',
-            'already_delete' => 'This type is already deleted.',
-        ],
-        'service-' => [
-            'id_required' => 'The service ID is required.',
-            'id_exists' => 'The selected service does not exist.',
-        ],
-        'form' => [
-            'id_required' => 'The form ID is required.',
-            'id_exists' => 'The selected form does not exist.',
         ],
 
         'roleAndPerm' => [

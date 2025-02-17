@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class TypeController extends Controller
-{
+class TypeController extends Controller {
     use ResponseTrait;
 
     public function index(Request $request) {
@@ -25,16 +24,17 @@ class TypeController extends Controller
                 'search' => ['nullable', 'string'],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
-            ]);
+            ], __('validation.custom.type_controller'));
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
+            $search = $request->input('search', null);
             $query = Type::query();
 
-            if ($request->filled('search')) {
-                $query->where('name', 'LIKE', "%{$request->search}%");
+            if ($search) {
+                $query->whereAny(['name->en', 'name->ar'], $search);
             }
 
             if ($request->filled('service_id')) {
@@ -58,7 +58,7 @@ class TypeController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:types,id',
-            ]);
+            ], __('validation.custom.type_controller'));
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -77,26 +77,18 @@ class TypeController extends Controller
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'max:500'],
-                'name.en' => ['required', 'max:500'],
-                'name.ar' => ['required', 'max:500'],
+                'name' => ['required', 'array'],
+                'name.en' => ['required', 'max:500', Rule::unique('types', 'name->en')],
+                'name.ar' => ['required', 'max:500', Rule::unique('types', 'name->ar')],
                 'service_id' => ['required', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['required', 'exists:forms,id,deleted_at,NULL'],
-            ]);
-//dd($request->all());
+            ], __('validation.custom.type_controller'));
+
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
-            $service = Service::where('id', $request->service_id)->value('id');
-            $form = Form::where('id', $request->form_id)->value('id');
-
-            $type = Type::create([
-                'name' => $request->name,
-                'service_id' => $service,
-                'form_id' => $form,
-            ]);
-
+            $type = Type::create($request->all());
             DB::commit();
             return $this->returnSuccessMessage(['type' => new TypeResource($type)], __('validation.custom.type_controller.created'));
         } catch (\Exception $e) {
@@ -110,24 +102,19 @@ class TypeController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:types,id',
-                'name' => ['nullable', 'max:500'],
-                'name.en' => ['nullable', 'max:500',],
-                'name.ar' => ['nullable', 'max:500',],
+                'name' => ['nullable', 'array'],
+                'name.en' => ['nullable', 'max:500', Rule::unique('types', 'name->en')],
+                'name.ar' => ['nullable', 'max:500', Rule::unique('types', 'name->ar')],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
-            ]);
+            ], __('validation.custom.type_controller'));
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
             $type = Type::findOrFail($request->id);
-            $type->update([
-                'name' => $request->name ?? $type->name,
-                'service_id' => $request->service_id ?? $type->service_id,
-                'form_id' => $request->form_id ?? $type->form_id,
-            ]);
-
+            $type->update($request->all());
             DB::commit();
             return $this->returnData(['type' => new TypeResource($type)]);
         } catch (\Exception $e) {
@@ -135,44 +122,4 @@ class TypeController extends Controller
             return $this->handleException($e);
         }
     }
-
-// SoftDelete is Ready, just add Route to this Function When you Want.
-    public function destroy(Request $request) {
-        DB::beginTransaction();
-        try {
-            $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:type,id',
-            ], [
-                'id.required' => __('validation.custom.type_controller.id_required'),
-                'id.exists' => __('validation.custom.type_controller.id_exists'),
-            ]);
-
-            if ($validator->fails()) {
-                return $this->returnValidationError($validator);
-            }
-
-            if ($type = Type::withTrashed()->where('id',$request->id)->first()) {
-                if ($type->trashed()) {
-                    return $this->badRequest(__('validation.custom.type_controller.already_delete'));
-                }
-
-                $name = $type->getTranslations("name");
-                $type->name = [
-                    'en' => $name['en'] . '-' . $type->id . '-deleted',
-                    'ar' => $name['ar'] . '-' . $type->id . '-محذوف',
-                ];
-                $type->save();
-                $type->delete();
-                DB::commit();
-                return $this->returnSuccessMessage(__('validation.custom.type_controller.deleted'));
-
-            } else {
-                return $this->badRequest(__('validation.custom.type_controller.not_found'));
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->handleException($e);
-        }
-    }
 }
-
