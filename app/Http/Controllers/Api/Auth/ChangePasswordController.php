@@ -36,12 +36,13 @@ class ChangePasswordController extends Controller
             // dd($user->otp_expires_at  );
             if ($user->otp_expires_at == null ? false : Carbon::now()->lessThan($user->otp_expires_at)) {
                 return $this->badRequest(__('validation.custom.forget_password.expired'));
-            } elseif (Carbon::now()->isAfter($user->otp_expires_at)) {
+            } elseif (Carbon::now()->isAfter($user->otp_expires_at)||$user->otp_expires_at == null) {
                 $verificationCode = rand(100000, 999999);
                 $user->verify_code = $verificationCode;
                 $user->otp_expires_at = Carbon::now()->addMinutes(5);
                 $user->save();
                 Mail::to($user->email)->send(new OtpMail($verificationCode));
+                DB::commit();
                 return $this->returnSuccessMessage(__('validation.custom.forget_password.sent_code'));
             } else {
                 DB::rollBack();
