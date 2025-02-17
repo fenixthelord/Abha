@@ -57,6 +57,7 @@ class DeviceTokenController extends Controller
             // if you are login go to next
             $requestData = [
                 'receiver_id' => $user->id,
+                'delivered' => 1,
             ];
             $response = $this->notificationService->getCall('/notifications', $requestData);
             $response = json_decode(json_encode($response, true));

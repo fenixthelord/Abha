@@ -10,6 +10,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('notification')->group(function () {
             Route::post('/send', [NotificationController::class, 'sendNotification']);
+            Route::post('/mark-as-reader', [NotificationController::class, 'callMarkAsDeliveredApi']);
         });
         Route::post('notifications/all', [NotificationController::class, 'allNotification']);
         Route::post('/notifications', [NotificationController::class, 'store']);

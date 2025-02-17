@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Notification;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Notification\MarkAsDeliveredRequest;
 use App\Http\Requests\Notification\SendNotificationRequest;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
@@ -75,5 +76,44 @@ class NotificationController extends Controller
             return $this->handleException($e);
         }
     }
+
+
+
+
+
+
+
+    public function callMarkAsDeliveredApi(MarkAsDeliveredRequest $request)
+    {
+        try {
+            // Validate the incoming request
+            $validated = $request->validated();
+
+            // Prepare the data to send to the other API
+            $data = [
+                'notification_id' => $validated['notification_id'],
+                'receiver_id' => auth('sanctum')->id(),
+            ];
+
+
+            $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
+//
+            // Return an error response if one exists in the service response
+            if (isset($response['error'])) {
+                return $this->returnError($response['error']);
+            }
+
+            // Return a success response if the notification was sent successfully
+            return $this->returnSuccessMessage('Notification marked as delivered successfully');
+        } catch (Exception $e) {
+            // Handle any exceptions with a custom response using the handleException method
+            return $this->handleException($e);
+        }
+    }
+
+
+
+
+
 
 }
