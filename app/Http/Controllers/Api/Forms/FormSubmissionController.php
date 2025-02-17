@@ -24,16 +24,16 @@ class FormSubmissionController extends Controller
             // Create validation rules dynamically
             foreach ($form->fields as $field) {
                 if ($field->required) {
-                    $rules["fields.{$field->label}"] = ['required'];
+                    $rules[$field->label] = ['required'];
                 }
                 if ($field->type === 'number') {
-                    $rules["fields.{$field->label}"][] = 'numeric';
+                    $rules[$field->label][] = 'numeric';
                 }
                 if ($field->type === 'file') {
-                    $rules["fields.{$field->label}"][] = 'file';
+                    $rules[$field->label][] = 'file';
                 }
                 if ($field->type === 'date') {
-                    $rules["fields.{$field->label}"][] = 'date';
+                    $rules[$field->label][] = 'date';
                 }
             }
             //Validate $request based on the created rules
@@ -44,7 +44,7 @@ class FormSubmissionController extends Controller
 
             // Save Field Values
             foreach ($form->fields as $field) {
-                $value = $validatedData['fields'][$field->label];
+                $value = $validatedData[$field->label];
                 $field = FormField::find($field->id);
 
                 if ($field) {

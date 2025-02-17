@@ -47,10 +47,6 @@ class UserController extends Controller
     }
     public function index(Request $request)
     {
-        $user = auth()->user();
-//        if (!$user->hasPermissionTo('user.show')) {
-//            return $this->Forbidden(__('validation.custom.userController.permission_denied'));
-//        }
         try {
 
             /* $perPage = request()->input('perPage', 10);
