@@ -45,9 +45,18 @@ class NotificationController extends Controller
                 $data['user_ids'] = $newUserIds;
             }
             // Prepare the notification data
-            $notificationData = ['sender_id' => $userAuth->id, 'sender_type' => $data['sender_type'] ?? 'user', 'sender_service' => $data['sender_service'] ?? 'user_service', // Default value if not provided
-                'title' => $data['title'], 'body' => $data['body'], 'user_ids' => $data['user_ids'] ?? null, // Use the transformed user_ids array
-                'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service', 'receiver_type' => $data['model'] ?? 'user', 'group_id' => $data['group_id'] ?? null, 'channel' => $data['channel'] ?? 'fcm', 'image' => $data['image'] ?? null, 'url' => $data['url'] ?? null,// Use current time if not provided
+            $notificationData = ['sender_id' => $userAuth->id,
+                'sender_type' => $data['sender_type'] ?? 'user',
+                'sender_service' => $data['sender_service'] ?? 'user_service', // Default value if not provided
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'user_ids' => $data['user_ids'] ?? null, // Use the transformed user_ids array
+                'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service',
+                'receiver_type' => $data['model'] ?? 'user',
+                'group_id' => $data['group_id'] ?? null,
+                'channel' => $data['channel'] ?? 'fcm',
+                'image' => $data['image'] ?? null,
+                'url' => $data['url'] ?? null,// Use current time if not provided
 
             ];
 //dd($notificationData);
