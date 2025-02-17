@@ -11,29 +11,18 @@ return [
         ],
 
         'type_controller' => [
-            'name_required' => 'The name field is required.',
-            'name_max' => 'The name must not exceed :max characters.',
-
-            'name_en_required' => 'The English name is required.',
-            'name_en_max' => 'The English name must not exceed :max characters.',
-            'name_en_unique' => 'The English name must be unique.',
-
-            'name_ar_required' => 'The Arabic name is required.',
-            'name_ar_max' => 'The Arabic name must not exceed :max characters.',
-            'name_ar_unique' => 'The Arabic name must be unique.',
-
-            'service_id_required' => 'The service ID is required.',
-            'service_id_exists' => 'The selected service ID is invalid.',
-
-            'form_id_required' => 'The form ID is required.',
-            'form_id_exists' => 'The selected form ID is invalid.',
-
-            'id_required' => 'The type ID is required.',
-            'id_exists' => 'The selected type ID is invalid.',
-
+            'id_required' => 'The ID is required.',
+            'id_exists' => 'The selected ID does not exist.',
+            'name_required' => 'The type name is required.',
+            'name_en_required' => 'The name in English is required.',
+            'name_ar_required' => 'The name in Arabic is required.',
+            'name_en_unique' => 'The name in English has already been taken.',
+            'name_ar_unique' => 'The name in Arabic has already been taken.',
+            'service_id_required' => 'The associated service is required.',
+            'service_id_exists' => 'The selected service is invalid.',
+            'form_id_required' => 'The associated form is required.',
+            'form_id_exists' => 'The selected form is invalid.',
             'created' => 'The type has been successfully created.',
-            'updated' => 'The type has been successfully updated.',
-            'not_found' => 'The requested type was not found.',
         ],
 
         'roleAndPerm' => [

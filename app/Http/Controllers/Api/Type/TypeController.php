@@ -24,17 +24,16 @@ class TypeController extends Controller {
                 'search' => ['nullable', 'string'],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
-            ], __('validation.custom.type_controller'));
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
-            $search = $request->input('search', null);
             $query = Type::query();
 
-            if ($search) {
-                $query->whereAny(['name->en', 'name->ar'], $search);
+            if ($request->filled('search')) {
+                $query->where('name', 'LIKE', "%{$request->search}%");
             }
 
             if ($request->filled('service_id')) {
@@ -58,7 +57,10 @@ class TypeController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:types,id',
-            ], __('validation.custom.type_controller'));
+            ], [
+                'id.required' => __('validation.custom.type_controller.id_required'),
+                'id.exists' => __('validation.custom.type_controller.id_exists'),
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -77,20 +79,35 @@ class TypeController extends Controller {
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'name' => ['required', 'array'],
+                'name' => ['required', 'max:500'],
                 'name.en' => ['required', 'max:500', Rule::unique('types', 'name->en')],
                 'name.ar' => ['required', 'max:500', Rule::unique('types', 'name->ar')],
                 'service_id' => ['required', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['required', 'exists:forms,id,deleted_at,NULL'],
-            ], __('validation.custom.type_controller'));
+            ], [
+                'name.required' => __('validation.custom.type_controller.name_required'),
+                'name.en.required' => __('validation.custom.type_controller.name_en_required'),
+                'name.ar.required' => __('validation.custom.type_controller.name_ar_required'),
+                'name.en.unique' => __('validation.custom.type_controller.name_en_unique'),
+                'name.ar.unique' => __('validation.custom.type_controller.name_ar_unique'),
+                'service_id.required' => __('validation.custom.type_controller.service_id_required'),
+                'service_id.exists' => __('validation.custom.type_controller.service_id_exists'),
+                'form_id.required' => __('validation.custom.type_controller.form_id_required'),
+                'form_id.exists' => __('validation.custom.type_controller.form_id_exists'),
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
-            $type = Type::create($request->all());
+            $type = Type::create([
+                'name' => $request->name,
+                'service_id' => $request->service_id,
+                'form_id' => $request->form_id,
+            ]);
+
             DB::commit();
-            return $this->returnSuccessMessage(['type' => new TypeResource($type)], __('validation.custom.type_controller.created'));
+            return $this->returnSuccessMessage(['type' => new TypeResource($type)], __('type_controller.created'));
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->handleException($e);
@@ -102,19 +119,31 @@ class TypeController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:types,id',
-                'name' => ['nullable', 'array'],
+                'name' => ['nullable', 'max:500'],
                 'name.en' => ['nullable', 'max:500', Rule::unique('types', 'name->en')],
                 'name.ar' => ['nullable', 'max:500', Rule::unique('types', 'name->ar')],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
-            ], __('validation.custom.type_controller'));
+            ], [
+                'id.required' => __('validation.custom.type_controller.id_required'),
+                'id.exists' => __('validation.custom.type_controller.id_exists'),
+                'name.en.unique' => __('validation.custom.type_controller.name_en_unique'),
+                'name.ar.unique' => __('validation.custom.type_controller.name_ar_unique'),
+                'service_id.exists' => __('validation.custom.type_controller.service_id_exists'),
+                'form_id.exists' => __('validation.custom.type_controller.form_id_exists'),
+            ]);
 
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
 
             $type = Type::findOrFail($request->id);
-            $type->update($request->all());
+            $type->update([
+                'name' => $request->name ?? $type->name,
+                'service_id' => $request->service_id ?? $type->service_id,
+                'form_id' => $request->form_id ?? $type->form_id,
+            ]);
+
             DB::commit();
             return $this->returnData(['type' => new TypeResource($type)]);
         } catch (\Exception $e) {
