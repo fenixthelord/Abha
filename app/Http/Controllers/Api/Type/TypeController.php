@@ -33,6 +33,8 @@ class TypeController extends Controller {
                 'search' => ['nullable', 'string'],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
+                'ids' => ['nullable', 'array'],
+                'ids.*' => ['uuid', 'exists:types,id'],
             ]);
 
             if ($validator->fails()) {
@@ -51,6 +53,9 @@ class TypeController extends Controller {
 
             if ($request->filled('form_id')) {
                 $query->where('form_id', $request->form_id);
+            }
+            if ($request->has('ids')) {
+                $query->whereIn('id', $request->ids);
             }
 
             $results = $query->paginate($request->per_page ?? 10);
