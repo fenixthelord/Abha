@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Traits\FileExportReportTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -10,7 +11,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 // Import the trait that contains the exportData() method.
-use App\Http\Traits\FileExportReportTrait;
 
 class ExportExcelJob implements ShouldQueue
 {
@@ -32,26 +32,27 @@ class ExportExcelJob implements ShouldQueue
     /**
      * Constructor to initialize the export job.
      *
-     * @param string   $modelClass        The model class to query (e.g., App\Models\Service).
-     * @param array    $filters           Filtering and search criteria (e.g., ['department_id' => 5, 'search' => 'abc']).
-     * @param array    $relations         Relationships to load (e.g., ['department']).
-     * @param string   $filename          The name of the exported Excel file.
-     * @param array    $userIds           User IDs that will receive the export completion notification.
+     * @param string $modelClass The model class to query (e.g., App\Models\Service).
+     * @param array $filters Filtering and search criteria (e.g., ['department_id' => 5, 'search' => 'abc']).
+     * @param array $relations Relationships to load (e.g., ['department']).
+     * @param string $filename The name of the exported Excel file.
+     * @param array $userIds User IDs that will receive the export completion notification.
      * @param callable $transformCallback Optional callback function to format each record.
      */
     public function __construct(
-        string $modelClass,
-        array $filters = [],
-        array $relations = [],
-        string $filename = 'export.xlsx',
-        array $userIds = [],
+        string   $modelClass,
+        array    $filters = [],
+        array    $relations = [],
+        string   $filename = 'export.xlsx',
+        array    $userIds = [],
         callable $transformCallback = null
-    ) {
-        $this->modelClass        = $modelClass;
-        $this->filters           = $filters;
-        $this->relations         = $relations;
-        $this->filename          = $filename;
-        $this->userIds           = $userIds;
+    )
+    {
+        $this->modelClass = $modelClass;
+        $this->filters = $filters;
+        $this->relations = $relations;
+        $this->filename = $filename;
+        $this->userIds = $userIds;
         $this->transformCallback = $transformCallback;
     }
 
@@ -117,18 +118,18 @@ class ExportExcelJob implements ShouldQueue
 
             // Prepare notification parameters.
             $params = [
-                'sender_id'        => null,
-                'sender_type'      => 'user',
-                'sender_service'   => 'service_user',
-                'title'            => 'Excel Export Completed',
-                'body'             => 'Your exported Excel file is ready.',
-                'user_ids'         => $this->userIds,
+                'sender_id' => null,
+                'sender_type' => 'user',
+                'sender_service' => 'service_user',
+                'title' => 'Excel Export Completed',
+                'body' => 'Your exported Excel file is ready.',
+                'user_ids' => $this->userIds,
                 'receiver_service' => 'service_user',
-                'receiver_type'    => 'user',
-                'group_id'         => null,
-                'channel'          => $channelName,
-                'image'            => null,
-                'url'              => $excelFileUrl,
+                'receiver_type' => 'user',
+                'group_id' => null,
+                'channel' => $channelName,
+                'image' => null,
+                'url' => $excelFileUrl,
             ];
 
             // Send the notification using the NotificationService.
