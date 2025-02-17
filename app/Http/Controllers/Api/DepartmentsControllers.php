@@ -20,15 +20,15 @@ class DepartmentsControllers extends Controller
     public function __construct()
     {
         $permissions = [
-            'index'  => 'department.show',
-            'show'  => 'department.show',
-            'store' => 'department.create',
-            'update'    => 'department.update',
-            'destroy'   => 'department.delete',
+            'index'  => ['department.show'],
+            'show'  => ['department.show'],
+            'store' => ['department.create'],
+            'update'    => ['department.update'],
+            'destroy'   => ['department.delete'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
     public function index(Request $request)

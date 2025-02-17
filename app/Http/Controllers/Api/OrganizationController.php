@@ -36,18 +36,18 @@ class OrganizationController extends Controller
     {
         $permissions = [
             //To be reviewed
-            'index'  => 'organization.show',
-            'delete'  => 'organization.delete',
-            'getDepartmentManagers'  => 'organization.show',
-            'getDepartmentEmployees'  => 'organization.show',
-            'AddEmployee'  => 'organization.create',
-            'updateEmployee'  => 'organization.create',
+            'index'  => ['organization.show'],
+            'delete'  => ['organization.delete'],
+            'getDepartmentManagers'  => ['organization.show'],
+            'getDepartmentEmployees'  => ['organization.show'],
+            'AddEmployee'  => ['organization.create'],
+            'updateEmployee'  => ['organization.create'],
             'filter'  => ['organization.show','user.show'],
             'chart'  => ['organization.show','user.show'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
     public function getDepartmentManagers(ManagerRequest $request)

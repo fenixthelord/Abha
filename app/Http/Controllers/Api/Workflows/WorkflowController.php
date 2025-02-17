@@ -18,15 +18,15 @@ class WorkflowController extends Controller
     public function __construct()
     {
         $permissions = [
-            'index'  => 'workflow.show',
-            'show'  => 'workflow.show',
-            'store' => 'workflow.create',
-            'update'    => 'workflow.update',
-            'destroy'   => 'workflow.delete',
+            'index'  => ['workflow.show'],
+            'show'  => ['workflow.show'],
+            'store' => ['workflow.create'],
+            'update'    => ['workflow.update'],
+            'destroy'   => ['workflow.delete'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
 
