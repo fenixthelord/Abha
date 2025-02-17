@@ -22,15 +22,15 @@ class EventController extends Controller
     public function __construct()
     {
         $permissions = [
-            'list'  => 'event.show',
-            'showEvent'    => 'event.show',
-            'createEvent'  => 'event.create',
-            'deleteEvent' => 'event.delete',
-            'updateEvent'   => 'event.update',
+            'list'  => ['event.show'],
+            'showEvent'    => ['event.show'],
+            'createEvent'  => ['event.create'],
+            'deleteEvent' => ['event.delete'],
+            'updateEvent'   => ['event.update'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
     public function list(ListEventsRequest $request)

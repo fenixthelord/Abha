@@ -17,11 +17,11 @@ class AuditLogController extends Controller
     {
         $permissions = [
             //To be reviewed
-            'index'  => 'audit.show',
+            'index'  => ['audit.show'],
         ];
 
         foreach ($permissions as $method => $permission) {
-            $this->middleware("permission:$permission")->only($method);
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
 
