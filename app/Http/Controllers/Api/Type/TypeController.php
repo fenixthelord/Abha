@@ -138,11 +138,12 @@ class TypeController extends Controller {
             }
 
             $type = Type::findOrFail($request->id);
-            $type->update([
-                'name' => $request->name ?? $type->name,
-                'service_id' => $request->service_id ?? $type->service_id,
-                'form_id' => $request->form_id ?? $type->form_id,
-            ]);
+            $type->update($request->only([
+                'name',
+                'service_id',
+                'form_id',
+            ]));
+
 
             DB::commit();
             return $this->returnData(['type' => new TypeResource($type)]);
