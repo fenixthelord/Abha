@@ -25,13 +25,22 @@ class UserAuthController extends Controller
 {
     use ResponseTrait;
     use FileUploader;
+    public function __construct()
+    {
+        $permissions = [
+            'register'  => ['user.create'],
+        ];
 
+        foreach ($permissions as $method => $permission) {
+            $this->middleware('permission:' . implode('|', $permission))->only($method);
+        }
+    }
     public function register(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasPermissionTo("user.create")) {
-            return $this->Forbidden(__('validation.custom.auth.permission'));
-        }
+//        if (!$user->hasPermissionTo("user.create")) {
+//            return $this->Forbidden(__('validation.custom.auth.permission'));
+//        }
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [

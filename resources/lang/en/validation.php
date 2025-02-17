@@ -11,21 +11,18 @@ return [
         ],
 
         'type_controller' => [
-            'id_required' => 'The type ID is required.',
-            'id_exists' => 'The selected type does not exist.',
-            'not_found' => 'The requested type was not found.',
-            'name_exists' => 'A type with the same name already exists in this service.',
-            'created' => 'Type has been created successfully.',
-            'deleted' => 'Type has been deleted successfully.',
-            'already_delete' => 'This type is already deleted.',
-        ],
-        'service-' => [
-            'id_required' => 'The service ID is required.',
-            'id_exists' => 'The selected service does not exist.',
-        ],
-        'form' => [
-            'id_required' => 'The form ID is required.',
-            'id_exists' => 'The selected form does not exist.',
+            'id_required' => 'The ID is required.',
+            'id_exists' => 'The selected ID does not exist.',
+            'name_required' => 'The type name is required.',
+            'name_en_required' => 'The name in English is required.',
+            'name_ar_required' => 'The name in Arabic is required.',
+            'name_en_unique' => 'The name in English has already been taken.',
+            'name_ar_unique' => 'The name in Arabic has already been taken.',
+            'service_id_required' => 'The associated service is required.',
+            'service_id_exists' => 'The selected service is invalid.',
+            'form_id_required' => 'The associated form is required.',
+            'form_id_exists' => 'The selected form is invalid.',
+            'created' => 'The type has been successfully created.',
         ],
 
         'roleAndPerm' => [

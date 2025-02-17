@@ -65,5 +65,5 @@ return [
     ],
 
     'notify_serv' => env('NOTIFY_SERV', 'http://smartabha-notification.test'),
-
+    'customer_serv' => env('CUSTOMER_SERV', 'http://smartabha-customer-service.test'),
 ];
