@@ -72,6 +72,7 @@ class ExportExcelJob implements ShouldQueue
             // Apply filters except for the 'search' key.
             foreach ($this->filters as $key => $value) {
                 if ($key !== 'search') {
+
                     $query->where($key, $value);
                 }
             }

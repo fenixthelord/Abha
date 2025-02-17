@@ -3,21 +3,30 @@
 namespace App\Services\Excel;
 
 use App\Models\Audit;
+use Carbon\Carbon;
 
 class AuditTransformer
 {
     public function transform(Audit $audit): array
     {
+        dd($audit->created_at);
+
         return [
-            'User Name'       => $audit->user_full_name,
-            'Event'           => $audit->event,
-            'Auditable Type'  => $audit->auditable_type,
-            'IP Address'      => $audit->ip_address,
-            'User Agent'      => $audit->user_agent,
-            'Tags'            => $audit->tags,
-            'Exported By'     => auth()->user()->name ?? 'Unknown',
-            'Created At'      => $audit->created_at->toDateTimeString(),
-            'Created At hijri'=> $audit->hijri['created_at_hijri'],
+
+            'User Type'         => $audit->user_type,
+            'User Full Name'    => $audit->user_full_name,
+            'Event'             => $audit->event,
+            'Auditable Type'    => $audit->auditable_type,
+            'Auditable ID'      => $audit->auditable_id,
+            'Old Values'        => $audit->old_values,
+            'New Values'        => $audit->new_values,
+            'URL'               => $audit->url,
+            'IP Address'        => $audit->ip_address,
+            'User Agent'        => $audit->user_agent,
+            'Tags'              => $audit->tags,
+            'Created At'        => Carbon::parse($audit->created_at)->format('Y-m-d H:i:s'),
+            'Created At Hijri'  => $audit->hijri['created_at_hijri'] ?? '',
+            'Exported By'       => auth()->user()->name ?? 'Unknown',
         ];
     }
 
