@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Http\Traits\HasDateTimeFields;
-use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Audit extends BaseModel
+class Audit extends BaseModel  implements Auditable
 {
-    use Auditable,HasDateTimeFields;
+    use HasDateTimeFields;
+    use AuditingTrait;
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = [
         'id',
         'user_id',
@@ -22,7 +25,7 @@ class Audit extends BaseModel
         'ip_address',
         'user_agent',
         'tags',
-        'created_at',
+
     ];
 
     public function auditable()
