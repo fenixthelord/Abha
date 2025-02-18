@@ -35,6 +35,10 @@ class TypeController extends Controller {
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
                 'ids' => ['nullable', 'array'],
                 'ids.*' => ['uuid', 'exists:types,id'],
+                ], [
+                'ids.array' => __('validation.custom.type_controller.id_array'),
+                'ids.*.uuid' => __('validation.custom.type_controller.id_uuid'),
+                'ids.*.exists' => __('validation.custom.type_controller.id_exists'),
             ]);
 
             if ($validator->fails()) {
