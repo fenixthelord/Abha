@@ -22,11 +22,23 @@ class GroupResource extends JsonResource
            'group_model' => $this->resource['group_type'],
            'owner_id' => $this->resource['owner_id'],
            'department_id' => $this->resource['department_id'] ?? null,
-           'department_name' => Department::find($this->resource['department_id'])->getTranslations("name")??null,
+           'department_name' => $this->department($this->resource['department_id'])??null,
            'group_service' => $this->resource['group_service'],
            'users' =>MemberResource::collection($this->resource['members']),
 
 
        ];
+    }
+    public function department($id)
+    {
+        /*$de = Department::find($id);
+        return $de->getTranslations('name');*/
+        $de = Department::find($id);
+
+        if ($de) {
+            return $de->getTranslations('name');
+        } else {
+            return 'Department not found';
+        }
     }
 }
