@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Mail\OtpMail;
+use App\Models\Role\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
