@@ -19,6 +19,6 @@ class FormSubmissionValue extends BaseModel
 
     public function field(): BelongsTo
     {
-        return $this->belongsTo(FormField::class);
+        return $this->belongsTo(FormField::class, 'form_field_id');
     }
 }

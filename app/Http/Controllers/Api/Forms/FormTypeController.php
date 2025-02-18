@@ -16,6 +16,23 @@ class FormTypeController extends Controller
 {
     use ResponseTrait;
 
+    public function __construct()
+    {
+        $permissions = [
+            'index'  => ['formtype.show'],
+            'store'  => ['formtype.create'],
+            'show'  => ['formtype.show'],
+            'update'  => ['formtype.update'],
+            'destroy'  => ['formtype.delete'],
+        ];
+
+        foreach ($permissions as $method => $permissionGroup) {
+            foreach ($permissionGroup as $permission) {
+                $this->middleware("permission:{$permission}")->only($method);
+            }
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -43,7 +60,7 @@ class FormTypeController extends Controller
         DB::beginTransaction();
         try {
             $formType = FormType::create($request->validated());
-            $data['form'] = FormResource::make($formType);
+            $data['form'] = FormTypeResource::make($formType);
             DB::commit();
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
@@ -55,10 +72,10 @@ class FormTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
         try {
-            $formType = FormType::with('type')->findOrFail($id);
+            $formType = FormType::with('forms')->findOrFail($id);
             $data['form_type'] = FormTypeResource::make($formType);
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -69,7 +86,7 @@ class FormTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateFormTypeRequest $request, string $id)
+    public function update(UpdateFormTypeRequest $request, $id)
     {
         DB::beginTransaction();
         try {
@@ -78,7 +95,7 @@ class FormTypeController extends Controller
                 'name' => $request->name,
             ]);
 
-            $data['form'] = FormResource::make($formType);
+            $data['form'] = FormTypeResource::make($formType);
             DB::commit();
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -90,7 +107,7 @@ class FormTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         DB::beginTransaction();
         try {
