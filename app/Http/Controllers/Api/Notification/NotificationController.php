@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\Notification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Notification\MarkAsDeliveredRequest;
 use App\Http\Requests\Notification\SendNotificationRequest;
+use App\Http\Resources\Notifications\NotificationResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use App\Services\NotificationService;
 use Exception;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -60,7 +62,7 @@ class NotificationController extends Controller
                 'url' => $data['url'] ?? null,// Use current time if not provided
 
             ];
-//dd($notificationData);
+
             // Send the notification using the NotificationService
             $response = $this->notificationService->postCall('/send-notification', $notificationData);
 //
@@ -89,30 +91,122 @@ class NotificationController extends Controller
             // Validate the incoming request
             $validated = $request->validated();
 
+            // Get the current authenticated user ID
+            $receiverId = auth('sanctum')->id();
+
             // Prepare the data to send to the other API
             $data = [
-                'notification_id' => $validated['notification_id'],
-                'receiver_id' => auth('sanctum')->id(),
+                'receiver_id' => $receiverId,
             ];
 
+            // Check if notification_id is provided
+            if ($request->filled('notification_id')) {
+                // If notification_id is provided, mark specific notification as delivered
+                $data['notification_id'] = $validated['notification_id'];
 
-            $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
-//dd($response);
-            // Return an error response if one exists in the service response
+                // Call the external API to mark this notification as delivered
+                $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
+            } else {
+                // If notification_id is not provided, mark all notifications for the user as delivered
+                $response = $this->notificationService->postCall('/notification/mark-all-as-delivered', $data);
+            }
+
+            // Check for errors in the response
             if (isset($response['error'])) {
                 return $this->returnError($response['error']);
             }
 
-            // Return a success response if the notification was sent successfully
-            return $this->returnSuccessMessage('Notification marked as delivered successfully');
+            // Return success message
+            return $this->returnSuccessMessage('Notification(s) marked as delivered successfully.');
         } catch (Exception $e) {
-            // Handle any exceptions with a custom response using the handleException method
+            // Handle any exceptions
             return $this->handleException($e);
         }
     }
 
 
 
+    public function getReceivedNotifications(Request $request) {
+        try {
+            $user = request()->user('sanctum');
+
+            if (!$user) {
+                return $this->Unauthorized(__('validation.custom.notification.user_not_authenticate'));
+            }
+
+
+            $delivered = request()->has('delivered') ? request()->input('delivered') : null;
+
+
+            $requestData = [
+                'receiver_id' => $user->id,
+            ];
+
+            if (!is_null($delivered)) {
+                $requestData['delivered'] = $delivered;
+            }
+            $response = $this->notificationService->getCall('/notifications', $requestData);
+            $response = json_decode(json_encode($response, true));
+
+            if (isset($response->error)) {
+                return $this->returnError($response->error);
+            }
+            if (!isset($response->data)) {
+                return $this->returnError(__('validation.user.invalid_response_data'));
+            }
+
+            $response = $response->data;
+
+            $details = collect($response->notifications)->pluck("details")->collapse();
+            $notificationsCollection = \App\Http\Resources\Notifications\NotificationResource::collection($details);
+
+            $data = [
+                "notifications" => $notificationsCollection,
+                "current_page" => $response->current_page,
+                "next_page" => $response->next_page,
+                "previous_page" => $response->previous_page,
+                "total_pages" => $response->total_pages,
+            ];
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+
+    public function getSentNotifications()
+    {
+        try {
+            $requestData = [
+                'sender_id' => Request()->user()->id,
+            ];
+
+            $response = $this->notificationService->getCall('/notifications', $requestData);
+            $response = json_decode(json_encode($response, true));
+            // dd($response->data->current_page, 123);
+            if (isset($response->error)) {
+                return $this->returnError($response->error);
+            }
+
+            $response =  $response->data;
+
+            $details =  collect($response->notifications)->pluck("details")->collapse();
+            $notificationsCollection = NotificationResource::collection($details);
+
+            $data = [
+                "notifications"  => $notificationsCollection,
+                "current_page"   => $response->current_page,
+                "next_page"      => $response->next_page,
+                "previous_page"  => $response->previous_page,
+                "total_pages"    => $response->total_pages,
+            ];
+
+            return $this->returnData($data);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 
 
 
