@@ -108,7 +108,7 @@ class NotificationController extends Controller
                 $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
             } else {
                 // If notification_id is not provided, mark all notifications for the user as delivered
-                $response = $this->notificationService->postCall('/notification/mark-all-as-delivered', $data);
+                $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
             }
 
             // Check for errors in the response
