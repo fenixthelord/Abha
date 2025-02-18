@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Notification;
 
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class MarkAsDeliveredRequest extends FormRequest
 {
+    use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -41,14 +44,9 @@ class MarkAsDeliveredRequest extends FormRequest
         ];
     }
 
-    /**
-     * Handle a failed validation attempt.
-     *
-     * @param \Illuminate\Contracts\Validation\Validator $validator
-     * @return void
-     */
+
     protected function failedValidation($validator)
     {
-        throw new \HttpResponseException($this->returnValidationError($validator));
+        throw new HttpResponseException($this->returnValidationError($validator));
     }
 }

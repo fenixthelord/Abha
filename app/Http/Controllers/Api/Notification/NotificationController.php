@@ -97,7 +97,7 @@ class NotificationController extends Controller
 
 
             $response = $this->notificationService->postCall('/notification/mark-as-delivered', $data);
-//
+//dd($response);
             // Return an error response if one exists in the service response
             if (isset($response['error'])) {
                 return $this->returnError($response['error']);
