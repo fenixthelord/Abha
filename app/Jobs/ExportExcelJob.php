@@ -132,7 +132,7 @@ class ExportExcelJob implements ShouldQueue
                 'group_id' => null,
                 'channel' => $channelName,
                 'image' => null,
-                'url' => url('storage/app/'.$excelFileUrl),
+                'url' => url($excelFileUrl),
             ];
 
             // Send the notification using the NotificationService.

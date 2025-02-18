@@ -56,11 +56,11 @@ class ExcelReportController extends Controller
 
             // Set the file name based on the current date
             $dateNow = date('Ymd');
-            $filename = "services_{$dateNow}.xlsx";
+
 
             // Get the current user's ID for notification purposes.
             $userId = Auth::id();
-
+            $filename = "services_{$dateNow}_{$userId}.xlsx";
             $transformer = new ServiceTransformer();
 
             Queue::push(
@@ -151,7 +151,7 @@ class ExcelReportController extends Controller
             $transform = new AuditTransformer();
 
             // Dispatch the export job to process in the background
-            Queue::push(
+//            Queue::push(
             ExportExcelJob::dispatch(
                 Audit::class,  // The model to query
                 $filters,      // Applied filters
@@ -159,7 +159,7 @@ class ExcelReportController extends Controller
                 $filename,     // Generated file name
                 [$userId],     // User to notify upon completion
                 [$transform, 'transform'] // Data transformation callback
-            ));
+            );
 
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {
