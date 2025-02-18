@@ -73,14 +73,14 @@ class ExcelReportController extends Controller
                     [$transformer, 'transform']
                 ));
 
-//            ExportExcelJob::dispatch(
-//                Service::class,
-//                $filters,
-//                ['department'],
-//                $filename,
-//                [$userId],
-//                [$transformer, 'transform']
-//            );
+            /*ExportExcelJob::dispatch(
+                Service::class,
+                $filters,
+                ['department'],
+                $filename,
+                [$userId],
+                [$transformer, 'transform']
+            );*/
 
             // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
