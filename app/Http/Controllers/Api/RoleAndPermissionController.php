@@ -112,7 +112,12 @@ class RoleAndPermissionController extends Controller
                         return $this->Forbidden(__('validation.custom.roleAndPerm.master_permission'));
                     }
                 }
-                $role->syncPermissions($request->permission);
+                $id = [];
+                foreach ($request->permission as $perm) {
+                    $id = array_merge($id,Permission::where('name',$perm)->pluck('id')->toArray());
+                }
+                $role->auditSync('permissions', $id);
+           //     $role->syncPermissions($request->permission);
             }
 
             DB::commit();
