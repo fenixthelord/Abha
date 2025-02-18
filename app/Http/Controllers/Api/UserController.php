@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Mail\OtpMail;
+use App\Models\Role\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
@@ -194,7 +195,12 @@ class UserController extends Controller
                 }
                 $user->save();
                 if ($request->role) {
-                    $user->syncRoles($request->role);
+                //    $user->syncRoles($request->role);
+                    $id = [];
+                    foreach ($request->role as $role) {
+                        $id = array_merge($id,Role::where('name',$role)->pluck('id')->toArray());
+                    }
+                    $user->auditSync('roles', $id);
                 }
 
                 $data['data'] = UserResource::make($user);

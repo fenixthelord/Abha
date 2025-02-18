@@ -14,9 +14,11 @@ use App\Models\Forms\FormField;
 use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
 use App\Models\Organization;
+use App\Models\Role\Role;
 use App\Models\User;
 use App\Services\NotificationService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -29,16 +31,15 @@ class UserAuthController extends Controller
 {
     use ResponseTrait;
     use FileUploader;
+
     public function __construct()
     {
-        $permissions = [
-            'register'  => ['user.create'],
-        ];
-
+        $permissions = ['register' => ['user.create'],];
         foreach ($permissions as $method => $permission) {
             $this->middleware('permission:' . implode('|', $permission))->only($method);
         }
     }
+
     public function register(Request $request)
     {
         $user = auth()->user();
@@ -87,12 +88,28 @@ class UserAuthController extends Controller
 
             ]);
             if (!$request->role) {
-                $user->assignRole('Master_employee'); // Default role
+                //         $user->assignRole('employee'); // Default role
+                if ($role = Role::where('name', 'Master_employee')->first()) {
+                $user->auditAttach('roles', $role->id);
+                }else{
+                    return $this->badRequest('the employee role is not defined');
+                }
             } else {
-                if ($request->role != "Master") {
-                    $user->syncRoles($request->role);
+//                if ($request->role != "Master") {
+                    if (!in_array("Master", $request->role)) {
+//                    $user->syncRoles($request->role);
+                    $id = [];
+                    foreach ($request->role as $role) {
+                        $id = array_merge($id, Role::where('name', $role)->pluck('id')->toArray());
+                    }
+                    $user->auditAttach('roles', $id);
                 } else {
-                    $user->assignRole('Master_employee');
+//                    $user->assignRole('Master_employee');
+                        if ($role = Role::where('name', 'Master_employee')->first()) {
+                            $user->auditAttach('roles', $role->id);
+                        }else{
+                            return $this->badRequest('the employee role is not defined');
+                        }
                 }
             }
             $form = Form::FindOrFail($request->form_id);
@@ -142,22 +159,20 @@ class UserAuthController extends Controller
 
 
             if ($user) {
-                event(new UserRegistered($user));
+                // event(new UserRegistered($user));
             }
             //     event(new sendOtpPhone($user->otp, $user->phone));
             $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
             // Generate a refresh token
             $refreshToken = Str::random(60);
-            $user->update([
-                'refresh_token' => Hash::make($refreshToken),
-                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+            $user->update(['refresh_token' => Hash::make($refreshToken), 'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
             ]);
             // Include refresh token in the response
             $data['refresh_token'] = $refreshToken;
             DB::commit();
             return $this->returnData($data);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());
         }
@@ -167,19 +182,12 @@ class UserAuthController extends Controller
     {
 
         try {
-            $validator = Validator::make($request->all(), [
-                'user' => [
-                    'required',
-                    'string',
-                    function ($attribute, $value, $fail) {
-                        $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-                        if (!User::where($field, $value)->exists()) {
-                            $fail(__('validation.custom.auth.failed'));
-                        }
-                    }
-                ],
-                'password' => 'required|string',
-            ], messageValidation());
+            $validator = Validator::make($request->all(), ['user' => ['required', 'string', function ($attribute, $value, $fail) {
+                $field = filter_var($value, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+                if (!User::where($field, $value)->exists()) {
+                    $fail(__('validation.custom.auth.failed'));
+                }
+            }], 'password' => 'required|string',], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator, 401);
             }
@@ -202,9 +210,7 @@ class UserAuthController extends Controller
                     // Generate a refresh token
                     $refreshToken = Str::random(60);
 
-                    $user->update([
-                        'refresh_token' => Hash::make($refreshToken),
-                        'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+                    $user->update(['refresh_token' => Hash::make($refreshToken), 'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
                     ]);
 
 
@@ -217,7 +223,7 @@ class UserAuthController extends Controller
             } else {
                 return $this->Unauthorized(__('validation.custom.auth.failed'));
             }
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
 
             return $this->badRequest($ex->getMessage());
         }
@@ -228,12 +234,10 @@ class UserAuthController extends Controller
         DB::beginTransaction();
         try {
 
-            $user=auth('sanctum')->user();
+            $user = auth('sanctum')->user();
 
             $notificationService = new NotificationService();
-            $response = $notificationService->deleteCall('/device-tokens/delete/force', [
-                'token_device' => $request->token,
-            ]);
+            $response = $notificationService->deleteCall('/device-tokens/delete/force', ['token_device' => $request->token,]);
 
             if (isset($response['error'])) {
                 return $this->badRequest($response['error']);
@@ -242,7 +246,7 @@ class UserAuthController extends Controller
             $user->currentAccessToken()->delete();
             DB::commit();
             return $this->returnSuccessMessage(__('validation.custom.auth.logout'));
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             DB::rollBack();
             return $this->badRequest($ex->getMessage());
         }
@@ -252,9 +256,7 @@ class UserAuthController extends Controller
     {
         DB::beginTransaction();
         try {
-            $request->validate([
-                'refresh_token' => 'required|string',
-            ]);
+            $request->validate(['refresh_token' => 'required|string',]);
 
             // Fetch all users with a non-null refresh token
             $users = User::whereNotNull('refresh_token')->get();
@@ -284,19 +286,14 @@ class UserAuthController extends Controller
 
             // Generate a new refresh token
             $refreshToken = Str::random(60);
-            $user->update([
-                'refresh_token' => Hash::make($refreshToken),
-                'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
+            $user->update(['refresh_token' => Hash::make($refreshToken), 'refresh_token_expires_at' => Carbon::now()->addDays(config('refresh_token_expires_at')), // Customize expiry as needed
             ]);
 
             DB::commit();
 
 
-            return $this->returnData([
-                'token' => $accessToken,
-                'refresh_token' => $refreshToken,
-            ]);
-        } catch (\Exception $ex) {
+            return $this->returnData(['token' => $accessToken, 'refresh_token' => $refreshToken,]);
+        } catch (Exception $ex) {
             DB::rollBack();
             return $this->returnError($ex->getMessage());
         }

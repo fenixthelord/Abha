@@ -38,7 +38,7 @@ trait HasDateTimeFields
         $value = parent::getAttribute($key);
 
         if (in_array($key, $this->datetimeFields) && !is_null($value)) {
-            return $this->formatDateTime($value);
+            return $value;
         }
 
         return $value;
