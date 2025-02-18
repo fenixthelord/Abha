@@ -47,10 +47,10 @@ class EventController extends Controller
                     $q->Filter($request->service_id);
                 })
                 ->when($request->filled("start_date"), function ($q) use ($request) {
-                    $q->where("start_date", ">=", $request->start_date);
+                    $q->where("start_date", ">=", Carbon::parse($request->start_date));
                 })
                 ->when($request->filled("end_date"), function ($q) use ($request) {
-                    $q->where("end_date", "<=", $request->end_date);
+                    $q->where("end_date", "<=", Carbon::parse($request->end_date));
                 });
 
             // date range

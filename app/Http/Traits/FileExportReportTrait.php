@@ -65,11 +65,15 @@ trait FileExportReportTrait
             $filename = "{$userId}_{$date}_{$filename}";
         }
 
-        // حفظ الملف في مجلد uploads/exports
-        Storage::put("uploads/exports/{$filename}", $excelData);
+        $userId = auth('sanctum')->id();
+        $exportPath = public_path("exports/{$userId}/");
+        if (!file_exists($exportPath)) {
+            mkdir($exportPath, 0777, true);
+        }
+        $filePath = $exportPath . $filename;
+        file_put_contents($filePath, $excelData);
 
-        // التأكد من إنشاء رابط التخزين العام عبر الأمر: php artisan storage:link
-        return "uploads/exports/{$filename}";
+        return "exports/{$userId}/{$filename}";
     }
 
 
