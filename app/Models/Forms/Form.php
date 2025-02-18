@@ -6,6 +6,7 @@ use App\Models\BaseModel;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Type;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,15 +16,16 @@ class Form extends BaseModel
 {
     use HasTranslations, SoftDeletes;
 
-    protected $fillable = ['formable_id', 'formable_type', 'name'];
+    protected $fillable = ['name','form_type_id'];
     private $translatable = ['name'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
-    public function formable(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(FormType::class, 'form_type_id');
+    }
     public function fields(): HasMany
     {
         return $this->hasMany(FormField::class)->orderBy('order', 'asc');
@@ -47,28 +49,15 @@ class Form extends BaseModel
         $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->where(function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhereHasMorph(
-                        'formable',
-                        [Category::class, Event::class],
-                        function ($query, $type) use ($search) {
-                            if ($type === Category::class) {
-                                $query->where('name', 'like', '%' . $search . '%');
-                            } elseif ($type === Event::class) {
-                                $query->where('name', 'like', '%' . $search . '%');
-                            }
+                    ->orWhereHas(
+                        'type', function ($query) use ($search) {
+                            return $query->where('name', 'like', '%' . $search . '%');
                         }
                     );
             });
-        })->when($filters['event_id'] ?? null, function ($query, $eventId) {
-            $query->whereHasMorph('formable', [Event::class], function ($query) use ($eventId) {
-                $query->where('id', $eventId);
-            });
-        })->when($filters['category_id'] ?? null, function ($query, $categoryId) {
-            $query->whereHasMorph('formable', [Category::class], function ($query) use ($categoryId) {
-                $query->where('id', $categoryId);
-            });
         });
     }
+
 
     protected static function boot()
     {

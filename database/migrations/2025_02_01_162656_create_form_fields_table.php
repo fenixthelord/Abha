@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('form_fields', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
+            $table->uuid('form_id');
+            $table->foreign('form_id')->references('id')->on('forms')->onDelete('cascade');
             $table->string('label');
             $table->string('placeholder');
             $table->enum('type', ['text', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'file', 'map']);

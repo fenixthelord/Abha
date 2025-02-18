@@ -9,6 +9,11 @@ use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Department;
+use App\Models\Forms\Form;
+use App\Models\Forms\FormField;
+use App\Models\Forms\FormSubmission;
+use App\Models\Forms\FormSubmissionValue;
+use App\Models\Organization;
 use App\Models\Role\Role;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -43,13 +48,43 @@ class UserAuthController extends Controller
 //        }
         DB::beginTransaction();
         try {
-            $validator = Validator::make($request->all(), ['first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255', 'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255', 'email' => 'required|email|unique:users,email|max:255', 'password' => 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed', 'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/', 'gender' => 'required|in:male,female', 'alt' => 'nullable|string', 'job' => 'nullable|string', 'job_id' => 'nullable|string', 'image' => 'nullable|string', 'role' => 'nullable|array', 'role.*' => 'string|exists:roles,name', 'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],]);
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
+                'last_name' => 'required|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
+                'email' => 'required|email|unique:users,email|max:255',
+                'password' =>
+                'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                'phone' => 'required|unique:users,phone|numeric|regex:/^05\d{8}$/',
+                'gender' => 'required|in:male,female',
+                'alt' => 'nullable|string',
+                'job' => 'nullable|string',
+                'job_id' => 'nullable|string',
+                'image' => 'nullable|string',
+                'role' => 'nullable|array',
+                'role.*' => 'string|exists:roles,name',
+                'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
+
+                'form_id'=>'required'
+            ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             $department = Department::where("id", $request->department_id)->firstorFail();
 
-            $user = User::create(['first_name' => $request->first_name, 'last_name' => $request->last_name, 'email' => $request->email, 'phone' => $request->phone, 'password' => $request->password ? Hash::make($request->password) : null, 'alt' => $request->alt, 'gender' => $request->gender, 'job' => $request->job, 'job_id' => $request->job_id, 'image' => $request->image, 'otp_code' => rand(100000, 999999), 'otp_expires_at' => Carbon::now()->addMinutes(5), 'department_id' => $department->id,
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => $request->password ? Hash::make($request->password) : null,
+                'alt' => $request->alt,
+                'gender' => $request->gender,
+                'job' => $request->job,
+                'job_id' => $request->job_id,
+                'image' => $request->image,
+                'otp_code' => rand(100000, 999999),
+                'otp_expires_at' => Carbon::now()->addMinutes(5),
+                'department_id' => $department->id,
 
             ]);
             if (!$request->role) {
@@ -77,6 +112,52 @@ class UserAuthController extends Controller
                         }
                 }
             }
+            $form = Form::FindOrFail($request->form_id);
+            if(!$form){
+                return $this->returnError('form not found');
+            }
+
+            $rules = [];
+
+            // Create validation rules dynamically
+            foreach ($form->fields as $field) {
+
+                if ($field->required) {
+                    $rules[$field->label] = ['required'];
+                }
+                if ($field->type === 'number') {
+                    $rules[$field->label][] = 'numeric';
+                }
+                if ($field->type === 'file') {
+                    $rules[$field->label][] = 'file';
+                }
+                if ($field->type === 'date') {
+                    $rules[$field->label][] = 'date';
+                }
+            }
+            $validatedData = $request->validate($rules);
+            $submission = FormSubmission::create([
+                'form_id' => $form->id,
+                'submitter_id' => $user->id,
+                'submitter_service' => 'user'
+            ]);
+            foreach ($form->fields as $field) {
+                $value = $validatedData[$field->label];
+                $field = FormField::find($field->id);
+
+                if ($field) {
+                    FormSubmissionValue::create([
+                        'form_submission_id' => $submission->id,
+                        'form_field_id' => $field->id,
+                        'value' => is_array($value) ? json_encode($value) : $value,
+                    ]);
+                } else {
+                    // Handle non-existent form field
+                    return $this->badRequest( "Form field with the ID you provided does not exist.");
+                }
+            }
+
+
             if ($user) {
                 // event(new UserRegistered($user));
             }

@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('form_submissions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('form_id')->constrained('forms')->onDelete('cascade');
+            $table->uuid('form_id');
+            $table->foreign('form_id')->references('id')->on('forms')->onDelete('cascade');
+            $table->uuid('submitter_id');
+            $table->string('submitter_service')->nullable(); // if NULL then the submitter is local
             $table->softDeletes();
             $table->timestamps();
         });
