@@ -196,9 +196,24 @@ class TypeController extends Controller {
         }
     }
 
-    public function getCustomers() {
+    public function getCustomers(Request $request) {
         try {
-            $response = $this->customerService->getCall('customer/all-customers');
+            $validator = Validator::make($request->all(), [
+                'type_id' => ['required', 'exists:types,id'],
+                ], [
+                    'type_id.exists' => __('validation.custom.type_controller.type_not_found'),
+                    'type_id.required' => __('validation.custom.type_controller.type_required'),
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $data = [
+                'type' => $request->type,
+            ];
+
+            $response = $this->customerService->getCall('customer/all-customers', $data);
             $responseData = json_decode(json_encode($response['data']));
 
             $customersCollection = CustomerResource::collection($responseData->customer);

@@ -24,7 +24,9 @@ return [
             'form_id_exists' => 'The selected form is invalid.',
             'created' => 'The type has been successfully created.',
             'id_array' => 'The ids field must be an array.',
-            'id_uuid' => 'The ids.0 field must be a valid UUID.'
+            'id_uuid' => 'The ids.0 field must be a valid UUID.',
+            'type_not_found' => 'Type is not found.',
+            'type_required' => 'Type is required.'
         ],
 
         'roleAndPerm' => [
