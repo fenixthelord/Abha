@@ -25,7 +25,7 @@ class MarkAsDeliveredRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notification_id' => 'required', // Check if notification_id exists in the notifications table
+            'notification_id' => 'nullable', // Check if notification_id exists in the notifications table
 
         ];
     }
@@ -38,7 +38,7 @@ class MarkAsDeliveredRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'notification_id.required' => 'The notification ID is required.',
+
 
 
         ];
