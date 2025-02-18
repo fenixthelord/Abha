@@ -63,24 +63,24 @@ class ExcelReportController extends Controller
             $filename = "services_{$dateNow}_{$userId}.xlsx";
             $transformer = new ServiceTransformer();
 
-            Queue::push(
-                ExportExcelJob::dispatch(
-                    Service::class,
-                    $filters,
-                    ['department'],
-                    $filename,
-                    [$userId],
-                    [$transformer, 'transform']
-                ));
+//            Queue::push(
+//                ExportExcelJob::dispatch(
+//                    Service::class,
+//                    $filters,
+//                    ['department'],
+//                    $filename,
+//                    [$userId],
+//                    [$transformer, 'transform']
+//                ));
 
-            /*ExportExcelJob::dispatch(
+            ExportExcelJob::dispatch(
                 Service::class,
                 $filters,
                 ['department'],
                 $filename,
                 [$userId],
                 [$transformer, 'transform']
-            );*/
+            );
 
             // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
