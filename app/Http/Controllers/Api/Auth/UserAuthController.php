@@ -54,13 +54,14 @@ class UserAuthController extends Controller
             ]);
             if (!$request->role) {
                 //         $user->assignRole('employee'); // Default role
-                $user->auditAttach('roles', Role::where('name', 'employee')->pluck('id'));
-
+                if ($role = Role::where('name', 'Master_employee')->first()) {
+                $user->auditAttach('roles', $role->id);
+                }else{
+                    return $this->badRequest('the employee role is not defined');
+                }
             } else {
-
 //                if ($request->role != "Master") {
                     if (!in_array("Master", $request->role)) {
-
 //                    $user->syncRoles($request->role);
                     $id = [];
                     foreach ($request->role as $role) {
@@ -69,7 +70,11 @@ class UserAuthController extends Controller
                     $user->auditAttach('roles', $id);
                 } else {
 //                    $user->assignRole('Master_employee');
-                    $user->auditAttach('roles', Role::where('name', 'Master_employee')->pluck('id'));
+                        if ($role = Role::where('name', 'Master_employee')->first()) {
+                            $user->auditAttach('roles', $role->id);
+                        }else{
+                            return $this->badRequest('the employee role is not defined');
+                        }
                 }
             }
             if ($user) {
