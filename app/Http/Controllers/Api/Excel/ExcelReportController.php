@@ -168,7 +168,6 @@ class ExcelReportController extends Controller
                 [$transform, 'transform'] // Data transformation callback
             ));
 
-
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {
             return $this->handleException($e);

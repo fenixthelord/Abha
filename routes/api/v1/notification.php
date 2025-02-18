@@ -18,8 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
 
         Route::post('/save-device-token', [DeviceTokenController::class, 'saveDeviceToken']);
-        Route::get('/received-notifications', [DeviceTokenController::class, 'getReceivedNotifications']);
-        Route::get('/sent-notifications/', [DeviceTokenController::class, 'getSentNotifications']);
+        Route::get('/received-notifications', [NotificationController::class, 'getReceivedNotifications']);
+        Route::get('/sent-notifications/', [NotificationController::class, 'getSentNotifications']);
+
         Route::prefix('notify-groups')->group(function () {
           Route::get('/', [NotifyGroupController::class, 'allGroup']);
           Route::post('/show', [NotifyGroupController::class, 'groupDetail']);
