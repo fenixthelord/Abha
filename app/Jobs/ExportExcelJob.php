@@ -69,10 +69,12 @@ class ExportExcelJob implements ShouldQueue
             // Build the query from the provided model class.
             $query = ($this->modelClass)::query();
 
-            // Apply filters except for the 'search' key.
-            foreach ($this->filters as $key => $value) {
-                if ($key !== 'search') {
 
+            foreach ($this->filters as $key => $value) {
+                if ($key === 'created_at' && is_array($value)) {
+
+                    $query->whereBetween('created_at', [$value[0], $value[1]]);
+                } elseif ($key !== 'search') {
                     $query->where($key, $value);
                 }
             }
@@ -132,7 +134,7 @@ class ExportExcelJob implements ShouldQueue
                 'group_id' => null,
                 'channel' => $channelName,
                 'image' => null,
-                'url' => url('storage/app/'.$excelFileUrl),
+                'url' => url($excelFileUrl),
             ];
 
             // Send the notification using the NotificationService.

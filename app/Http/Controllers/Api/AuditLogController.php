@@ -67,13 +67,13 @@ class AuditLogController extends Controller
         // Optional: Date range filter
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('created_at', [
-                $request->input('start_date'),
-                $request->input('end_date'),
+                Carbon::parse($request->input('start_date')),
+                Carbon::parse($request->input('end_date')),
             ]);
         } else if ($request->filled('start_date')) {
-            $query->where('created_at', '>=', $request->input('start_date'));
+            $query->where('created_at', '>=', Carbon::parse($request->input('start_date')));
         } else if ($request->filled('end_date')) {
-            $query->where('created_at', '<=', $request->input('end_date'));
+            $query->where('created_at', '<=', Carbon::parse($request->input('end_date')));
         }
 
         // Order by newest to oldest
