@@ -26,11 +26,11 @@ class FormBuilderController extends Controller
         try {
             $pageNumber = $request->input('page', 1);
             $perPage = $request->input('perPage', 10);
-            $forms = Form::orderByAll($request->sortBy, $request->sortType)
+            $forms = Form::with(['type', 'fields.options', 'fields.sources'])
                 ->filter($request->only('search', 'event_id', 'category_id'))
-                ->with(['formable', 'fields.options', 'fields.sources']);
-            $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
+                ->orderByAll($request->sortBy, $request->sortType);
 
+            $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
             $data['forms'] =  FormResource::collection($form);
             return $this->PaginateData($data, $form);
         } catch (\Exception $e) {
@@ -41,7 +41,7 @@ class FormBuilderController extends Controller
     public function show($id)
     {
         try {
-            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($id);
+            $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -55,40 +55,8 @@ class FormBuilderController extends Controller
             DB::beginTransaction();
             $form = Form::create([
                 'name' => $request->name,
-                'formable_type' => $request->formable_type,
-                'formable_id' => $request->formable_id
+                'form_type_id' => $request->form_type_id,
             ]);
-
-            // Get models dynamically
-            $models = [
-                'category' => Category::class,
-                'employee' => User::class,
-                'event' => Event::class,
-            ];
-
-            if(isset($models[$request->formable_type]))
-
-            $formableModel = app($models[$request->formable_type])::
-                // Insure that the id belongs to an EMPLOYEE
-            when($request->formable_type == 'employee', function ($query){
-                return $query->where('role', 'employee');
-            })
-            ->findOrFail($request->formable_id);
-
-
-            $formableModel->forms()->save($form);
-
-            //Review before deletion
-//            if ($request->formable_type === 'category') {
-//                $category = Category::find($request->formable_id);
-//                $category->forms()->save($form);
-//            }elseif ($request->formable_type === 'employee'){
-//                $employees = User::find($request->formable_id);
-//                $employees->forms()->save($form);
-//            } else {
-//                $event = Event::findOrfail($request->formable_id);
-//                $event->forms()->save($form);
-//            }
 
             foreach ($request['fields'] as $field_data) {
                 $form_field = $form->fields()->create($field_data);
@@ -101,7 +69,7 @@ class FormBuilderController extends Controller
                         $form_field->sources()->create($data_source);
                     }
             }
-            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($form->id);
+            $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
             DB::commit();
             return $this->returnData($data, "Form created successfully");
@@ -118,16 +86,8 @@ class FormBuilderController extends Controller
             $form = Form::findOrFail($id);
             $form->update([
                 'name' => $request->name,
-                'formable_type' => $request->formable_type,
-                'formable_id' => $request->formable_id
+                'form_type_id' => $request->form_type_id,
             ]);
-            if ($request->formable_type === 'category') {
-                $category = Category::findOrfail($request->formable_id);
-                $category->forms()->save($form);
-            } else {
-                $event = Event::findOrfail($request->formable_id);
-                $event->forms()->save($form);
-            }
 
             $field_ids = $request->input('fields.*.id');
             $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);

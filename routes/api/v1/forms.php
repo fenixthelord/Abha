@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Forms\FormTypeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Forms\FormBuilderController;
 use App\Http\Controllers\Api\Forms\FormFieldController;
@@ -20,3 +21,10 @@ Route::group(["prefix" => "/forms"], function () {
         });
     });
 });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::middleware('activeVerify')->group(function () {
+            Route::apiResource('form-types', FormTypeController::class);
+        });
+    });
+

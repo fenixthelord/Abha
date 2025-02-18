@@ -5,17 +5,19 @@ namespace App\Http\Resources\Forms;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FormResource extends JsonResource
+class FormTypeResource extends JsonResource
 {
-
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
-        $is_list = request()->route()->getName() === 'forms.list';
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'type' => $this->type?->name,
-            'fields' => FormFieldResource::collection($this->whenLoaded('fields')),
+            'forms' => FormResource::collection($this->whenLoaded('forms')),
         ];
     }
 }

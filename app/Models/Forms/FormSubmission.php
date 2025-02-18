@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FormSubmission extends BaseModel
 {
     use SoftDeletes;
-    protected $fillable = ['form_id'];
+    protected $fillable = ['form_id', 'submitter_id', 'submitter_service'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function form(): BelongsTo

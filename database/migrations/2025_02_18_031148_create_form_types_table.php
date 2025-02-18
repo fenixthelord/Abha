@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_submissions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->unsignedBigInteger('submitter_id');
-            $table->string('submitter_service')->nullable(); // if NULL then the submitter is local
+        Schema::create('form_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('form_submissions');
+        Schema::dropIfExists('form_types');
     }
 };
