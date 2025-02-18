@@ -196,7 +196,7 @@ class TypeController extends Controller {
         }
     }
 
-    public function getCustomers(Request $request) {
+    public function getCustomersByType(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['required', 'exists:types,id'],
@@ -210,7 +210,7 @@ class TypeController extends Controller {
             }
 
             $data = [
-                'type' => $request->type,
+                'type_id' => $request->type_id,
             ];
 
             $response = $this->customerService->getCall('customer/all-customers', $data);
