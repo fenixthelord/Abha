@@ -16,7 +16,7 @@ class Form extends BaseModel
 {
     use HasTranslations, SoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name','form_type_id'];
     private $translatable = ['name'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
@@ -24,7 +24,7 @@ class Form extends BaseModel
 
     public function type(): BelongsTo
     {
-        return $this->belongsTo(Type::class);
+        return $this->belongsTo(FormType::class, 'form_type_id');
     }
     public function fields(): HasMany
     {

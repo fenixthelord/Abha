@@ -30,6 +30,7 @@ class FormBuilderController extends Controller
                 ->filter($request->only('search', 'event_id', 'category_id'))
                 ->orderByAll($request->sortBy, $request->sortType);
 
+
             $form = $forms->paginate($perPage, ['*'], 'page', $pageNumber);
             $data['forms'] =  FormResource::collection($form);
             return $this->PaginateData($data, $form);
@@ -52,11 +53,13 @@ class FormBuilderController extends Controller
     public function store(CreateFormBuilderRequest $request)
     {
         try {
+
             DB::beginTransaction();
             $form = Form::create([
                 'name' => $request->name,
                 'form_type_id' => $request->form_type_id,
             ]);
+
 
             foreach ($request['fields'] as $field_data) {
                 $form_field = $form->fields()->create($field_data);
@@ -69,6 +72,7 @@ class FormBuilderController extends Controller
                         $form_field->sources()->create($data_source);
                     }
             }
+
             $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
             DB::commit();
@@ -138,7 +142,7 @@ class FormBuilderController extends Controller
                         }
                 }
             }
-            $form = Form::with(['formable', 'fields.options', 'fields.sources'])->findOrFail($id);
+            $form = Form::with([ 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             DB::commit();
             return $this->returnData($data);

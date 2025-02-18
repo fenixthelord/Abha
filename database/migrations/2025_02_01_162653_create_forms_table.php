@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('form_type_id')->constrained('form_types')->onDelete('cascade');
             $table->string('name');
             $table->softDeletes();
             $table->timestamps();

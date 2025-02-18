@@ -13,7 +13,10 @@ use Illuminate\Http\Request;
 class FormSubmissionController extends Controller
 {
     use ResponseTrait;
-    public function index() {}
+
+    public function index()
+    {
+    }
 
     public function store(Request $request, $id)
     {
@@ -38,9 +41,35 @@ class FormSubmissionController extends Controller
             }
             //Validate $request based on the created rules
             $validatedData = $request->validate($rules);
+            $request->merge([
+                'submitter_service' => $request->submitter_service ?? 'user', // Default to "user" if not provided
+            ]);
 
-            // Save Submission
-            $submission = FormSubmission::create(['form_id' => $form->id]);
+            $request->validate([
+
+                'submitter_service' => 'in:customer,user', // Ensure it's either "customer" or "user"
+                'submitter_id' => [
+                    'required_if:submitter_service,customer', // Required if service is "customer"
+                    'nullable'
+                    // Ensure ID exists in the customers table
+                ],
+            ]);
+
+            $submitterId = ($request->submitter_service === 'user')
+                ? auth()->id()
+                : $request->submitter_id;
+
+            $submission = FormSubmission::create([
+                'form_id' => $request->form_id,
+                'submitter_id' => $submitterId,
+                'submitter_service' => $request->submitter_service
+            ]);
+
+
+
+            $submission = FormSubmission::create(['form_id' => $form->id,
+                'submitter_id' =>$submitterId,
+                'submitter_service' => $request->submitter_service]);
 
             // Save Field Values
             foreach ($form->fields as $field) {
@@ -55,11 +84,11 @@ class FormSubmissionController extends Controller
                     ]);
                 } else {
                     // Handle non-existent form field
-                    return response()->json(['error' => "Form field with the ID you provided does not exist."], 400);
+                    return $this->badRequest( "Form field with the ID you provided does not exist.");
                 }
             }
 
-            return response()->json(['message' => 'Form submitted successfully']);
+            return $this->returnSuccessMessage('Form submitted successfully');
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

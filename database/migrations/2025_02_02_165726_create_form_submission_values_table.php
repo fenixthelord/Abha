@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('form_submission_values', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('form_submission_id')->constrained('form_submissions')->onDelete('cascade');
-            $table->foreignUuid('form_field_id')->constrained('form_fields')->onDelete('cascade');
+            $table->uuid('form_submission_id');
+            $table->foreign('form_submission_id')->references('id')->on('form_submissions');
+            $table->uuid('form_field_id');
+            $table->foreign('form_field_id')->references('id')->on('form_fields');
             $table->text('value');
             $table->softDeletes();
             $table->timestamps();

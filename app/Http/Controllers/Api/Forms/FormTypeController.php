@@ -26,7 +26,7 @@ class FormTypeController extends Controller
             $perPage = $request->input('perPage', 10);
 
             $formTypes = FormType::with('forms')->paginate($perPage, ['*'], 'page', $pageNumber);
-            $data['form_types'] = FormTypeResource::make($formTypes);
+            $data['form_types'] = FormTypeResource::collection($formTypes);
 
             return $this->PaginateData($data, $formTypes);
         } catch (\Exception $e) {

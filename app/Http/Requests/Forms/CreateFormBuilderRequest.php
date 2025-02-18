@@ -18,25 +18,21 @@ class CreateFormBuilderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'formable_id' => 'required|uuid',
-            'formable_type' => 'required|in:category,event,employee',
+
+            'form_type_id' => 'required|exists:form_types,id',
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->en')
-                    ->where("formable_id", $this->formable_id)
-            ],
+
             'name.ar' => [
                 'required',
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->ar')
-                    ->where("formable_id", $this->formable_id)
-            ],
+
 
             'fields' => [
                 'required',
@@ -81,7 +77,7 @@ class CreateFormBuilderRequest extends FormRequest
 
             'fields.*.sources.*.source_table' => 'required|string|max:255',
             'fields.*.sources.*.source_column' => 'required|string|max:255',
-        ];
+        ]]];
     }
 
     public function messages(): array
