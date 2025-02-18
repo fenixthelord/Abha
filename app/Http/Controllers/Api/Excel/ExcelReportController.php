@@ -109,12 +109,22 @@ class ExcelReportController extends Controller
                 'user_type' => 'nullable|string',
                 'event' => 'nullable|in:created,updated,deleted,restored',
                 'start_date' => 'nullable|date',
-                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'end_date' => [
+                    'nullable',
+                    'date',
+                    'after_or_equal:start_date',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($value && !$request->filled('start_date')) {
+                            $fail('The start_date field is required when end_date is provided.');
+                        }
+                    },
+                ],
                 'user_id' => 'nullable|string',
             ]);
 
             // Build filters based on provided request inputs
             $filters = [];
+            $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
 
             if ($request->filled('model_type')) {
                 $filters['auditable_type'] = $request->input('model_type');
@@ -135,23 +145,20 @@ class ExcelReportController extends Controller
                     Carbon::parse($request->input('start_date'))->startOfDay(),
                     Carbon::parse($request->input('end_date'))->endOfDay(),
                 ];
-            } elseif ($request->filled('start_date')) {
-                $filters['created_at'] = ['>=', Carbon::parse($request->input('start_date'))->startOfDay()];
-            } elseif ($request->filled('end_date')) {
-                $filters['created_at'] = ['<=', Carbon::parse($request->input('end_date'))->endOfDay()];
             }
             // Set the filename based on the current date
             $dateNow = date('Ymd');
-            $filename = "audit_logs_{$dateNow}.xlsx";
+
 
             // Get the current authenticated user ID
             $userId = Auth::id();
+            $filename = "audit_logs_{$dateNow}_{$userId}.xlsx";
 
             // Transformer for formatting audit log data
             $transform = new AuditTransformer();
 
             // Dispatch the export job to process in the background
-//            Queue::push(
+            Queue::push(
             ExportExcelJob::dispatch(
                 Audit::class,  // The model to query
                 $filters,      // Applied filters
@@ -159,7 +166,8 @@ class ExcelReportController extends Controller
                 $filename,     // Generated file name
                 [$userId],     // User to notify upon completion
                 [$transform, 'transform'] // Data transformation callback
-            );
+            ));
+
 
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {

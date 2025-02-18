@@ -71,8 +71,10 @@ class ExportExcelJob implements ShouldQueue
 
             // Apply filters except for the 'search' key.
             foreach ($this->filters as $key => $value) {
-                if ($key !== 'search') {
-
+                if ($key === 'created_at' && is_array($value)) {
+                    // التأكد من تطبيق whereBetween إذا كانت قيمة التاريخ مصفوفة
+                    $query->whereBetween('created_at', [$value[0], $value[1]]);
+                } elseif ($key !== 'search') {
                     $query->where($key, $value);
                 }
             }
