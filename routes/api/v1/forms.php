@@ -26,7 +26,7 @@ Route::group(["prefix" => "form-types"], function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
             Route::get('/', [FormTypeController::class, 'index'])->name('form-types.index');
-            Route::get('/{id}', [FormTypeController::class, 'show'])->name('form-types.show');
+            Route::get('/show', [FormTypeController::class, 'show'])->name('form-types.show');
             Route::post('/', [FormTypeController::class, 'store'])->name('form-types.store');
             Route::put('/{id}', [FormTypeController::class, 'update'])->name('form-types.update');
             Route::delete('/{id}', [FormTypeController::class, 'destroy'])->name('form-types.destroy');

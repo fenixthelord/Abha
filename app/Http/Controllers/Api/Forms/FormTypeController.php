@@ -11,6 +11,7 @@ use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FormTypeController extends Controller
 {
@@ -72,9 +73,16 @@ class FormTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Request $request)
     {
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:form_types,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $formType = FormType::with('forms')->findOrFail($id);
             $data['form_type'] = FormTypeResource::make($formType);
             return $this->returnData($data);
