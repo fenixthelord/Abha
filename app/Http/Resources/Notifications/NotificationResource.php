@@ -17,13 +17,13 @@ class NotificationResource extends JsonResource
         return [
             'id'      => $this->id,
             "is_read" => $this->receivers[0]?->delivered,
-            'details' => DetailResource::make($this->details[0]),  
+            'details' => DetailResource::make($this->details[0]),
             // 'title' => $this->title,
             // 'description' => $this->description,
             // 'image' => $this->image,
             // 'url' => $this->url,
-            // 'created_at' => $this->created_at,
-            // 'updated_at' => $this->updated_at,
+             'created_at' => $this->created_at,
+             'updated_at' => $this->updated_at,
         ];
     }
 }
