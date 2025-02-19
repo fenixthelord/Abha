@@ -161,10 +161,17 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         DB::beginTransaction();
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $form = Form::onlyTrashed()->find($id);
             if ($form) {
                 return $this->badRequest('Form already deleted.');
