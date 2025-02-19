@@ -94,10 +94,11 @@ class FormTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateFormTypeRequest $request, $id)
+    public function update(UpdateFormTypeRequest $request)
     {
         DB::beginTransaction();
         try {
+            $id = $request->input('id');
             $formType = FormType::findOrFail($id);
             $formType->update([
                 'name' => $request->name,
