@@ -91,7 +91,7 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function update(UpdateFormBuilderRequest $request, $id)
+    public function update(UpdateFormBuilderRequest $request)
     {
         try {
             $id = request()->input('id');
