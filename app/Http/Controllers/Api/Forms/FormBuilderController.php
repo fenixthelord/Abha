@@ -16,6 +16,7 @@ use App\Models\Forms\FormFieldOption;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FormBuilderController extends Controller
 {
@@ -39,9 +40,16 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request)
     {
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);

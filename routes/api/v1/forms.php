@@ -11,7 +11,7 @@ Route::group(["prefix" => "/forms"], function () {
         Route::middleware('activeVerify')->group(function () {
             Route::get('/', [FormBuilderController::class, 'list'])->name('forms.list');
             Route::post('/', [FormBuilderController::class, 'store'])->name('forms.store');
-            Route::get('/{form}', [FormBuilderController::class, 'show'])->name('forms.show');
+            Route::get('/show', [FormBuilderController::class, 'show'])->name('forms.show');
             Route::put('/{form}', [FormBuilderController::class, 'update'])->name('forms.update');
             Route::delete('/{form}', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
