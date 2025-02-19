@@ -121,7 +121,7 @@ class FormTypeController extends Controller
         DB::beginTransaction();
         try {
             $validate = Validator::make(request()->all(), [
-                'id' => 'required|string|exists:forms,id',
+                'id' => 'required|string|exists:form_types,id',
             ]);
             if ($validate->fails()) {
                 return $this->returnValidationError($validate);
@@ -131,7 +131,7 @@ class FormTypeController extends Controller
             if (!$formType || $formType->trashed()) {
                 return $this->badRequest('Form already deleted.');
             }
-
+            $formType->name = $formType->name . '-' . $formType->id . '-deleted';
             $formType->delete();
             DB::commit();
             return $this->returnSuccessMessage('Form deleted successfully');
