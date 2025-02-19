@@ -42,8 +42,10 @@ class UserController extends Controller
             'active'    => ['user.restore'],
         ];
 
-        foreach ($permissions as $method => $permission) {
-            $this->middleware('permission:' . implode('|', $permission))->only($method);
+        foreach ($permissions as $method => $permissionGroup) {
+            foreach ($permissionGroup as $permission) {
+                $this->middleware("permission:{$permission}")->only($method);
+            }
         }
     }
     public function index(Request $request)
