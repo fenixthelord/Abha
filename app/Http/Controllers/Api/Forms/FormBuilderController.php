@@ -179,7 +179,7 @@ class FormBuilderController extends Controller
                 $form = Form::findOrFail($id);
                 $form->name = $form->name . '-' . $form->id . '-deleted';
                 $form->save();
-                $form->forceDelete();
+                $form->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('Form deleted successfully');
             }
