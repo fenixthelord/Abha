@@ -34,7 +34,6 @@ class UserController extends Controller
             'index'  => ['user.show'],
             'show'  => ['user.show'],
             'store' => ['user.create'],
-            'update'    => ['user.update'],
             'updateAdmin'    => ['user.update'],
             'deleteUser'   => ['user.delete'],
             'showDeleteUser'   => ['user.delete'],
