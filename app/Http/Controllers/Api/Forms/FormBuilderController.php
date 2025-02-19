@@ -40,7 +40,7 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function show(Request $request)
+    public function show()
     {
         try {
             $validate = Validator::make(request()->all(), [
@@ -161,7 +161,7 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy()
     {
         DB::beginTransaction();
         try {

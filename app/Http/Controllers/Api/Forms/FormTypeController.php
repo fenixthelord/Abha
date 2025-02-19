@@ -73,7 +73,7 @@ class FormTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function show()
     {
         try {
             $validate = Validator::make(request()->all(), [
@@ -116,7 +116,7 @@ class FormTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy()
     {
         DB::beginTransaction();
         try {
