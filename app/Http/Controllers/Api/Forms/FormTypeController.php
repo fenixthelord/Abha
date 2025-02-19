@@ -11,6 +11,7 @@ use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FormTypeController extends Controller
 {
@@ -72,9 +73,16 @@ class FormTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show()
     {
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:form_types,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $formType = FormType::with('forms')->findOrFail($id);
             $data['form_type'] = FormTypeResource::make($formType);
             return $this->returnData($data);
@@ -86,10 +94,11 @@ class FormTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateFormTypeRequest $request, $id)
+    public function update(UpdateFormTypeRequest $request)
     {
         DB::beginTransaction();
         try {
+            $id = $request->input('id');
             $formType = FormType::findOrFail($id);
             $formType->update([
                 'name' => $request->name,
@@ -107,15 +116,22 @@ class FormTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy()
     {
         DB::beginTransaction();
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:form_types,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $formType = FormType::findOrFail($id);
             if (!$formType || $formType->trashed()) {
                 return $this->badRequest('Form already deleted.');
             }
-
+            $formType->name = $formType->name . '-' . $formType->id . '-deleted';
             $formType->delete();
             DB::commit();
             return $this->returnSuccessMessage('Form deleted successfully');

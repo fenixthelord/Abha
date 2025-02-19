@@ -10,6 +10,7 @@ use App\Models\Forms\FormField;
 use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class FormSubmissionController extends Controller
 {
@@ -27,15 +28,29 @@ class FormSubmissionController extends Controller
             }
         }
     }
-    public function showFormWithSubmissions($id)
+    public function showFormWithSubmissions()
     {
+        $validate = Validator::make(request()->all(), [
+            'id' => 'required|string|exists:forms,id',
+        ]);
+        if ($validate->fails()) {
+            return $this->returnValidationError($validate);
+        }
+        $id = request()->input('id');
         $formField = Form::with('type', 'submissions.values.field')->findOrFail($id);
         return FormSubmissionResource::make($formField);
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request)
     {
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $form = Form::findOrFail($id);
             $rules = [];
 

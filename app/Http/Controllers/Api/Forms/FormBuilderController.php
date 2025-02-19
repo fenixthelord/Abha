@@ -16,6 +16,7 @@ use App\Models\Forms\FormFieldOption;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FormBuilderController extends Controller
 {
@@ -39,9 +40,16 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function show($id)
+    public function show()
     {
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($id);
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);
@@ -83,9 +91,10 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function update(UpdateFormBuilderRequest $request, $id)
+    public function update(UpdateFormBuilderRequest $request)
     {
         try {
+            $id = request()->input('id');
             DB::beginTransaction();
             $form = Form::findOrFail($id);
             $form->update([
@@ -152,10 +161,17 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy()
     {
         DB::beginTransaction();
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $form = Form::onlyTrashed()->find($id);
             if ($form) {
                 return $this->badRequest('Form already deleted.');
@@ -163,7 +179,7 @@ class FormBuilderController extends Controller
                 $form = Form::findOrFail($id);
                 $form->name = $form->name . '-' . $form->id . '-deleted';
                 $form->save();
-                $form->forceDelete();
+                $form->delete();
                 DB::commit();
                 return $this->returnSuccessMessage('Form deleted successfully');
             }

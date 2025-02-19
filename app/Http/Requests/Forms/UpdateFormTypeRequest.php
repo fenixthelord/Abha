@@ -23,22 +23,23 @@ class UpdateFormTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => 'required|exists:form_types,id|string',
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->en')
-                    ->ignore($this->route('form'))
+                Rule::unique('form_types', 'name->en')
+                    ->ignore($this->id)
             ],
             'name.ar' => [
                 'required',
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->ar')
-                    ->ignore($this->route('form'))
+                Rule::unique('form_types', 'name->ar')
+                    ->ignore($this->id)
             ],
         ];
     }

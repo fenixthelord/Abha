@@ -13,7 +13,7 @@ class FormResource extends JsonResource
         $is_list = request()->route()->getName() === 'forms.list';
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => $this->getTranslations('name'),
             'type' => $this->type?->name,
             'fields' => FormFieldResource::collection($this->whenLoaded('fields')),
         ];
