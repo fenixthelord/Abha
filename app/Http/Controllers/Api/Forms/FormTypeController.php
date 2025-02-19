@@ -116,10 +116,17 @@ class FormTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         DB::beginTransaction();
         try {
+            $validate = Validator::make(request()->all(), [
+                'id' => 'required|string|exists:forms,id',
+            ]);
+            if ($validate->fails()) {
+                return $this->returnValidationError($validate);
+            }
+            $id = request()->input('id');
             $formType = FormType::findOrFail($id);
             if (!$formType || $formType->trashed()) {
                 return $this->badRequest('Form already deleted.');

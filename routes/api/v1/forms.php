@@ -29,7 +29,7 @@ Route::group(["prefix" => "form-types"], function () {
             Route::get('/show', [FormTypeController::class, 'show'])->name('form-types.show');
             Route::post('/', [FormTypeController::class, 'store'])->name('form-types.store');
             Route::put('/update', [FormTypeController::class, 'update'])->name('form-types.update');
-            Route::delete('/{id}', [FormTypeController::class, 'destroy'])->name('form-types.destroy');
+            Route::delete('/delete', [FormTypeController::class, 'destroy'])->name('form-types.destroy');
         });
     });
 });
