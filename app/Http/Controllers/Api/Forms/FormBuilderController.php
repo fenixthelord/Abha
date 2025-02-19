@@ -98,13 +98,13 @@ class FormBuilderController extends Controller
             $form = Form::findOrFail($id);
             $form->update([
                 'name' => $request->name,
-                'form_type_id' => $request->form_type_id,
             ]);
 
             $field_ids = $request->input('fields.*.id');
-            $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);
-            FormField::whereIn('id', $missing_field_ids)->forceDelete();
 
+            $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);
+
+            $res = FormField::whereIn('id', $missing_field_ids)->forceDelete();
             $option_ids = $request->input('fields.*.options.*.id');
             $source_ids = $request->input('fields.*.sources.*.id');
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('form_id');
             $table->foreign('form_id')->references('id')->on('forms')->onDelete('cascade');
             $table->uuid('submitter_id');
-            $table->string('submitter_service')->nullable(); // if NULL then the submitter is local
+            $table->string('submitter_service')->default('local'); // if NULL then the submitter is local
             $table->softDeletes();
             $table->timestamps();
         });

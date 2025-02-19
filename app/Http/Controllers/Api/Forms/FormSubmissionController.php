@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Forms;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Forms\FormSubmissionResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
@@ -14,8 +15,22 @@ class FormSubmissionController extends Controller
 {
     use ResponseTrait;
 
-    public function index()
+    public function __construct()
     {
+        $permissions = [
+            'store'  => ['formsubmission.create', 'formsubmissionvalue.create'],
+        ];
+
+        foreach ($permissions as $method => $permissionGroup) {
+            foreach ($permissionGroup as $permission) {
+                $this->middleware("permission:{$permission}")->only($method);
+            }
+        }
+    }
+    public function showFormWithSubmissions($id)
+    {
+        $formField = Form::with('type', 'submissions.values.field')->findOrFail($id);
+        return FormSubmissionResource::make($formField);
     }
 
     public function store(Request $request, $id)
@@ -41,35 +56,34 @@ class FormSubmissionController extends Controller
             }
             //Validate $request based on the created rules
             $validatedData = $request->validate($rules);
-            $request->merge([
-                'submitter_service' => $request->submitter_service ?? 'user', // Default to "user" if not provided
+
+
+//            $request->merge([
+//                'submitter_service' => $request->submitter_service ?? 'user', // Default to "user" if not provided
+//            ]);
+//            $request->validate([
+//
+//                'submitter_service' => 'in:customer,user', // Ensure it's either "customer" or "user"
+//                'submitter_id' => [
+//                    'required_if:submitter_service,customer', // Required if service is "customer"
+//                    'nullable'
+//                    // Ensure ID exists in the customers table
+//                ],
+//            ]);
+//            $submitterId = ($request->submitter_service === 'user')
+//                ? auth()->id()
+//                : $request->submitter_id;
+
+            $form_submission_validated_data = $request->validate([
+                'submitter_id' => ['nullable', 'required_with:submitter_service'],
+                'submitter_service' => ['nullable', 'string', 'max:255', 'required_with:submitter_id'],
             ]);
-
-            $request->validate([
-
-                'submitter_service' => 'in:customer,user', // Ensure it's either "customer" or "user"
-                'submitter_id' => [
-                    'required_if:submitter_service,customer', // Required if service is "customer"
-                    'nullable'
-                    // Ensure ID exists in the customers table
-                ],
-            ]);
-
-            $submitterId = ($request->submitter_service === 'user')
-                ? auth()->id()
-                : $request->submitter_id;
 
             $submission = FormSubmission::create([
-                'form_id' => $request->form_id,
-                'submitter_id' => $submitterId,
-                'submitter_service' => $request->submitter_service
+                'form_id' => $form->id,
+                'submitter_id' => $form_submission_validated_data['submitter_id']?? auth()->id(),
+                'submitter_service' => $form_submission_validated_data['submitter_service']?? null,
             ]);
-
-
-
-            $submission = FormSubmission::create(['form_id' => $form->id,
-                'submitter_id' =>$submitterId,
-                'submitter_service' => $request->submitter_service]);
 
             // Save Field Values
             foreach ($form->fields as $field) {

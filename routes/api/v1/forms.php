@@ -16,15 +16,20 @@ Route::group(["prefix" => "/forms"], function () {
             Route::delete('/{form}', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
             Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
-            Route::get('/{form_id}/submissions', [FormSubmissionController::class, 'index']);
+            Route::get('/{form_id}/submissions', [FormSubmissionController::class, 'showFormWithSubmissions']);
             Route::post('/{form_id}/submit', [FormSubmissionController::class, 'store']);
         });
     });
 });
 
+Route::group(["prefix" => "form-types"], function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
-            Route::apiResource('form-types', FormTypeController::class);
+            Route::get('/', [FormTypeController::class, 'index'])->name('form-types.index');
+            Route::get('/{id}', [FormTypeController::class, 'show'])->name('form-types.show');
+            Route::post('/', [FormTypeController::class, 'store'])->name('form-types.store');
+            Route::put('/{id}', [FormTypeController::class, 'update'])->name('form-types.update');
+            Route::delete('/{id}', [FormTypeController::class, 'destroy'])->name('form-types.destroy');
         });
     });
-
+});

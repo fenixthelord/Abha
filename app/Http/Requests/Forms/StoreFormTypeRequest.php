@@ -29,14 +29,14 @@ class StoreFormTypeRequest extends FormRequest
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->en')
+                Rule::unique('form_types', 'name->en')
             ],
             'name.ar' => [
                 'required',
                 'string',
                 'min:2',
                 'max:255',
-                Rule::unique('forms', 'name->ar')
+                Rule::unique('form_types', 'name->ar')
             ],        ];
     }
 }

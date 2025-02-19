@@ -5,7 +5,7 @@ namespace App\Http\Resources\Forms;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FormTypeResource extends JsonResource
+class SubmissionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,9 +15,9 @@ class FormTypeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            //'forms' => FormResource::collection($this->whenLoaded('forms')),
+            'submitter_id' => $this->submitter_id ,
+            'submitter_service' => $this->submitter_service ,
+            'values' => SubmissionValueResource::collection($this->values) ,
         ];
     }
 }
