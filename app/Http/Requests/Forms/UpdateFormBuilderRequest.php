@@ -19,6 +19,7 @@ class UpdateFormBuilderRequest extends FormRequest
     {
         // dd($this->formable_type);
         return [
+            'id' => 'required|string|exists:forms,id',
 
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
@@ -27,7 +28,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->en')
-                    ->ignore($this->route('form'))
+                    ->ignore($this->id)
 
             ],
             'name.ar' => [
@@ -36,7 +37,7 @@ class UpdateFormBuilderRequest extends FormRequest
                 'min:2',
                 'max:255',
                 Rule::unique('forms', 'name->ar')
-                    ->ignore($this->route('form'))
+                    ->ignore($this->id)
 
             ],
 

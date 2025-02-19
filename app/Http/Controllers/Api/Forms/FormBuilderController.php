@@ -94,6 +94,7 @@ class FormBuilderController extends Controller
     public function update(UpdateFormBuilderRequest $request, $id)
     {
         try {
+            $id = request()->input('id');
             DB::beginTransaction();
             $form = Form::findOrFail($id);
             $form->update([
