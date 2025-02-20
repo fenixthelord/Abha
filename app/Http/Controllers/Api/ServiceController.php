@@ -20,8 +20,6 @@ class ServiceController extends Controller {
     public function __construct()
     {
         $permissions = [
-            'index'  => ['service.show'],
-            'show'  => ['service.show'],
             'store' => ['service.create'],
             'update'    => ['service.update'],
             'destroy'   => ['service.delete'],

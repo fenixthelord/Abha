@@ -22,8 +22,6 @@ class EventController extends Controller
     public function __construct()
     {
         $permissions = [
-            'list'  => ['event.show'],
-            'showEvent'    => ['event.show'],
             'createEvent'  => ['event.create'],
             'deleteEvent' => ['event.delete'],
             'updateEvent'   => ['event.update'],
@@ -124,16 +122,17 @@ class EventController extends Controller
         }
     }
 
-    public function showEvent($id)
+    public function showEvent()
     {
         try {
             $validation = Validator::make(
-                ["id" => $id],
+                request()->all(),
                 ['id' => 'required|exists:events,id']
             );
             if ($validation->fails()) {
                 return $this->ReturnError($validation->errors()->first());
             }
+            $id=request()->input('id');
             $event = Event::find($id);
 
             $data["event"] = EventResource::make($event)->allInfo();
