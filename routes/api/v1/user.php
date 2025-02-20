@@ -15,7 +15,6 @@ Route::prefix('user')->group(function () {
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
-            route::post('show', [UserController::class, 'show']);
         });
     });
 });
