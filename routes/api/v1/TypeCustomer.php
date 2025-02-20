@@ -8,5 +8,5 @@ Route::prefix('typeCustomer')->group(function () {
     Route::get('/get-customers', [TypeCustomerController::class, 'getCustomersByType']);
     Route::get('/get-customer-details', [TypeCustomerController::class, 'getCustomerDetails']);
 //    Route::get('/get-submission-value', [TypeCustomerController::class, 'getFormSubmissionValue']);
-    Route::post('/form-submission/approve', [TypeCustomerController::class, 'approveFormSubmission']);
+//    Route::get('/get-form-submission', [TypeCustomerController::class, 'getFormSubmissionById']);
 });
