@@ -163,6 +163,7 @@ class UserController extends Controller
                     'old_password' => 'nullable|required_with:password|string',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",
+                    'position_id' => ['nullable', 'string', Rule::exists('positions', 'id')->whereNull('deleted_at')],
                 ], messageValidation());
                 if ($validator->fails()) {
                     return $this->returnValidationError($validator);
@@ -180,6 +181,7 @@ class UserController extends Controller
                 $user->gender = $request->gender ? $request->gender : $user->gender;
                 $user->alt = $request->alt ? $request->alt : $user->alt;
                 $user->job = $request->job ? $request->job : $user->job;
+                $user->position_id = $request->position_id ? $request->position_id : $user->position_id;
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
                 $user->image = $request->image;
                 if ($request->has('password') && !empty($request->password)) {

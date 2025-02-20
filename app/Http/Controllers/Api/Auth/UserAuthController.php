@@ -14,6 +14,7 @@ use App\Models\Forms\FormField;
 use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
 use App\Models\Organization;
+use App\Models\Position;
 use App\Models\Role\Role;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -65,13 +66,14 @@ class UserAuthController extends Controller
                 'role' => 'nullable|array',
                 'role.*' => 'string|exists:roles,name',
                 'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
-
+                'position_id' => ['nullable', 'string', Rule::exists('positions', 'id')->whereNull('deleted_at')],
                 'form_id'=>'nullable|string',
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
             $department = Department::where("id", $request->department_id)->firstorFail();
+            $positionId = $request->position_id ? Position::where('id', $request->position_id)->value('id') : null;
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -87,6 +89,7 @@ class UserAuthController extends Controller
                 'otp_code' => rand(100000, 999999),
                 'otp_expires_at' => Carbon::now()->addMinutes(5),
                 'department_id' => $department->id,
+                'position_id' => $positionId,
 
             ]);
             if (!$request->role) {
