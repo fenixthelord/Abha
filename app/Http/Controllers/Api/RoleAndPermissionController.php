@@ -90,7 +90,7 @@ class RoleAndPermissionController extends Controller
 
             $user = auth()->user();
             if ($user->HasRole('Master')) {
-                $request->roleName = "Master_" . $name;
+                $name= "Master_".$name;
                 $role = Role::where('name', $name)->first();
             }
             if (Role::where('name', $name)->exists()) {
