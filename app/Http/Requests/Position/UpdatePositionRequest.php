@@ -48,6 +48,7 @@ class UpdatePositionRequest extends FormRequest
                     'uuid',
                     'exists:positions,id,deleted_at,NULL',
                     function ($attribute, $value, $fail) {
+
                         if ($value === $this->id) {
                             $fail('Position cannot be a parent of itself.');
                         }

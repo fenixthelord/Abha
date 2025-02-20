@@ -102,6 +102,9 @@ class PositionController extends Controller
             DB::beginTransaction();
 
             $potions = Position::findOrFail($request->id);
+            if (is_null($potions->parent_id) && $request->has('parent_id')) {
+                $this->badRequest('Cannot modify parent_id because it is currently null.');
+            }
             $potions->update($request->validated());
             $data["positions"] = PositionResource::make($potions);
 

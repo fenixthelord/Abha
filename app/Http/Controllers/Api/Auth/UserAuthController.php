@@ -160,9 +160,9 @@ class UserAuthController extends Controller
             }
 
 
-            if ($user) {
+//            if ($user) {
                 // event(new UserRegistered($user));
-            }
+//            }
             //     event(new sendOtpPhone($user->otp, $user->phone));
             $data['token'] = $user->createToken('MyApp')->plainTextToken;
 
