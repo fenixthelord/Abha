@@ -36,7 +36,7 @@ class FormBuilderController extends Controller
             $data['forms'] =  FormResource::collection($form);
             return $this->PaginateData($data, $form);
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -54,7 +54,7 @@ class FormBuilderController extends Controller
             $data['form'] =  FormResource::make($form);
             return $this->returnData($data);
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ class FormBuilderController extends Controller
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -157,7 +157,7 @@ class FormBuilderController extends Controller
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -185,7 +185,7 @@ class FormBuilderController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 }

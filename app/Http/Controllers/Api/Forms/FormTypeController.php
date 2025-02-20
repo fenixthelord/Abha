@@ -48,7 +48,7 @@ class FormTypeController extends Controller
 
             return $this->PaginateData($data, $formTypes);
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
 
     }
@@ -66,7 +66,7 @@ class FormTypeController extends Controller
             return $this->returnData($data, "Form created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ class FormTypeController extends Controller
             $data['form_type'] = FormTypeResource::make($formType);
             return $this->returnData($data);
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -109,7 +109,7 @@ class FormTypeController extends Controller
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 
@@ -137,7 +137,7 @@ class FormTypeController extends Controller
             return $this->returnSuccessMessage('Form deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
 
         }
 
