@@ -13,6 +13,7 @@ use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
 use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
+use App\Models\Forms\FormType;
 use App\Models\Organization;
 use App\Models\Position;
 use App\Models\Role\Role;
@@ -67,7 +68,7 @@ class UserAuthController extends Controller
                 'role.*' => 'string|exists:roles,name',
                 'department_id' => ["required", "string", Rule::exists('departments', 'id')->where("deleted_at", null)],
                 'position_id' => ['nullable', 'string', Rule::exists('positions', 'id')->whereNull('deleted_at')],
-                'form_id'=>'nullable|string',
+
             ], messageValidation());
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
@@ -117,10 +118,15 @@ class UserAuthController extends Controller
                         }
                 }
             }
-            $form = Form::FindOrFail($request->form_id);
+            $type = FormType::whereJsonContains('name->en', 'user')->first();
+            if (!$type){
+                return $this->badRequest('the type is not defined');
+            }
+            $form=Form::where('form_type_id', $type->id)->firstorFail();
             if(!$form){
                 return $this->returnError('form not found');
             }
+
 
             $rules = [];
 
