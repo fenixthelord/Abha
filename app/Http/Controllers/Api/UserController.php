@@ -32,7 +32,6 @@ class UserController extends Controller
     {
         $permissions = [
             'index'  => ['user.show'],
-            'show'  => ['user.show'],
             'store' => ['user.create'],
             'updateAdmin'    => ['user.update'],
             'deleteUser'   => ['user.delete'],
