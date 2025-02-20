@@ -138,8 +138,8 @@ class TypeController extends Controller {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:types,id',
                 'name' => ['nullable', 'max:500'],
-                'name.en' => ['nullable', 'max:500', Rule::unique('types', 'name->en')],
-                'name.ar' => ['nullable', 'max:500', Rule::unique('types', 'name->ar')],
+                'name.en' => ['nullable', 'max:500', Rule::unique('types', 'name->en')->ignore($request->id)],
+                'name.ar' => ['nullable', 'max:500', Rule::unique('types', 'name->ar')->ignore($request->id)],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
             ], [
