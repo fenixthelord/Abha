@@ -32,7 +32,7 @@ class User extends Authenticatable  implements Auditable
      * @var array<int, string>
      */
     protected $fillable = [
-
+        "position_id",
         "department_id",
         'first_name',
         'last_name',
@@ -77,6 +77,7 @@ class User extends Authenticatable  implements Auditable
         'otp_verified' => 'boolean',
         'verify_code' => 'string',
         'refresh_token' => 'string',
+        'position_id '=> "string",
         'refresh_token_expires_at' => 'datetime',
     ];
     protected $dates = ['deleted_at', 'refresh_token_expires_at'];
@@ -197,4 +198,10 @@ class User extends Authenticatable  implements Auditable
     {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'position_id');
+    }
+
 }

@@ -33,7 +33,11 @@ class UserResource extends JsonResource
                 'active' => $this->active,
                 'role' => $this->role,
                 "user_role" => $this->getRoleNames(),
-                "permission" => new NewPermissionsResource($this->getAllPermissions())
+                "permission" => new NewPermissionsResource($this->getAllPermissions()),
+                'position_name' => [
+                    'en' => $this->position?->getTranslation('name', 'en'),
+                    'ar' => $this->position?->getTranslation('name', 'ar'),
+                ],
             ]),
         ];
     }
