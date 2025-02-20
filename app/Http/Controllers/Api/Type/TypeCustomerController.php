@@ -60,7 +60,6 @@ class TypeCustomerController extends Controller {
 
     public function getFormsWithFields(Request $request) {
         try {
-
             $validator = Validator::make($request->all(), [
                 'type_id' => ['required', 'exists:form_types,id'],
             ], [
@@ -87,5 +86,4 @@ class TypeCustomerController extends Controller {
             return $this->handleException($e);
         }
     }
-
 }
