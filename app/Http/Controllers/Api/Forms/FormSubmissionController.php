@@ -119,7 +119,7 @@ class FormSubmissionController extends Controller
 
             return $this->returnSuccessMessage('Form submitted successfully');
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->returnError($e->getMessage());
         }
     }
 }
