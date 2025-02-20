@@ -67,7 +67,7 @@ class NotificationController extends Controller
             // Send the notification using the NotificationService
             $response = $this->notificationService->postCall('/send-notification', $notificationData);
 //
-            return $response;
+            
             // Return an error response if one exists in the service response
             if (isset($response['error'])) {
                 return $this->returnError($response['error']);
@@ -158,7 +158,7 @@ class NotificationController extends Controller
             }
 
             $response = $response->data;
-            // return $response;   
+            // return $response;
             // $details = collect($response->notifications)->pluck("details")->collapse();
             $notificationsCollection = NotificationResource::collection($response->notifications);
 
