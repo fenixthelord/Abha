@@ -42,6 +42,7 @@ class TypeCustomerController extends Controller {
                 return $this->returnError($responseData->error);
             }
 
+
             $customersCollection = CustomerResource::collection($responseData->customers);
             $data = [
                 "customers"      => $customersCollection,
