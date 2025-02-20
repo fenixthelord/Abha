@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 
 Route::prefix('user')->group(function () {
+            route::post('show', [UserController::class, 'show']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
             Route::get('/all', [UserController::class, 'index']);
@@ -14,7 +15,6 @@ Route::prefix('user')->group(function () {
             Route::get('show-deleted', [UserController::class, 'showDeleteUser']);
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
-            route::post('show', [UserController::class, 'show']);
         });
     });
 });
