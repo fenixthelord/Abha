@@ -18,6 +18,10 @@ class PositionResource extends JsonResource
         return [
             "id" => $this->id,
             "parent_id" => $this->parent_id,
+            'parent_name' => [
+                'en' => $this->parent?->getTranslation('name', 'en'),
+                'ar' => $this->parent?->getTranslation('name', 'ar'),
+            ],
             "name" => $this->getTranslations("name"),
             "children"  => $this->whenLoaded("children", fn() => PositionResource::collection($this->children->loadMissing('children')))
         ];
