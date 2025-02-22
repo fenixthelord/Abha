@@ -23,11 +23,11 @@ class CategoryController extends Controller
     public function __construct()
     {
         $permissions = [
-            'list'  => ['service.show','department.show'],
-            'filter'  => ['service.show','department.show'],
-            'create' => ['service.create','department.create'],
-            'update'    => ['service.update','department.update'],
-            'delete'   => ['service.delete','department.delete'],
+            'list'  => ['category.show'],
+            'filter'  => ['category.show'],
+            'create' => ['category.create'],
+            'update'    => ['category.update'],
+            'delete'   => ['category.delete'],
         ];
 
         foreach ($permissions as $method => $permissionGroup) {
