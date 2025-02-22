@@ -31,7 +31,7 @@ class AddGroupRequest extends FormRequest
             'description' => 'required|array',
             'description.en' => 'required|string',
             'description.ar' => 'required|string',
-            'icon' => 'string',
+            'icon' => 'string|nullable',
             'type' => 'required|string',
 
 
