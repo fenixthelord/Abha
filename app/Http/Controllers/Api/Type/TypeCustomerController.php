@@ -25,10 +25,9 @@ class TypeCustomerController extends Controller {
     public function getCustomersByType(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'type_id' => ['required', 'exists:types,id'],
+                'type_id' => ['nullable', 'exists:types,id'],
             ], [
                 'type_id.exists' => __('validation.custom.type_controller.type_not_found'),
-                'type_id.required' => __('validation.custom.type_controller.type_required'),
             ]);
 
             if ($validator->fails()) {
@@ -65,8 +64,9 @@ class TypeCustomerController extends Controller {
     public function getFormsWithFields(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'type_id' => ['nullable', 'exists:form_types,id'],
+                'type_id' => ['required', 'exists:form_types,id'],
             ], [
+                'type_id.required' => __('validation.custom.type_controller.type_required'),
                 'type_id.exists' => __('validation.custom.type_controller.type_id_exists'),
             ]);
 
