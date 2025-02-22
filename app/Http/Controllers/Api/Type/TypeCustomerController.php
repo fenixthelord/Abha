@@ -65,9 +65,8 @@ class TypeCustomerController extends Controller {
     public function getFormsWithFields(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'type_id' => ['required', 'exists:form_types,id'],
+                'type_id' => ['nullable', 'exists:form_types,id'],
             ], [
-                'type_id.required' => __('validation.custom.type_controller.type_id_required'),
                 'type_id.exists' => __('validation.custom.type_controller.type_id_exists'),
             ]);
 
