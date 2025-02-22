@@ -118,7 +118,7 @@ class UserAuthController extends Controller
                         }
                 }
             }
- /*           $type = FormType::whereJsonContains('name->en', 'user')->first();
+          $type = FormType::whereJsonContains('name->en', 'user')->first();
             if (!$type){
                 return $this->badRequest('the type is not defined');
             }
@@ -167,7 +167,7 @@ class UserAuthController extends Controller
                     return $this->badRequest( "Form field with the ID you provided does not exist.");
                 }
             }
-*/
+
 
 //            if ($user) {
                 // event(new UserRegistered($user));
