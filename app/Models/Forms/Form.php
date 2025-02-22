@@ -67,6 +67,6 @@ class Form extends BaseModel
         });
     }
     public function types() {
-        return $this->hasMany(Type::class);
+        return $this->hasOne(Type::class);
     }
 }

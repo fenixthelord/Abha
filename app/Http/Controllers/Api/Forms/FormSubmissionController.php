@@ -16,18 +16,18 @@ class FormSubmissionController extends Controller
 {
     use ResponseTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'store'  => ['formsubmission.create', 'formsubmissionvalue.create'],
-        ];
+    // public function __construct()
+    // {
+    //     $permissions = [
+    //         'store'  => ['formsubmission.create', 'formsubmissionvalue.create'],
+    //     ];
 
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
+    //     foreach ($permissions as $method => $permissionGroup) {
+    //         foreach ($permissionGroup as $permission) {
+    //             $this->middleware("permission:{$permission}")->only($method);
+    //         }
+    //     }
+    // }
     public function showFormWithSubmissions()
     {
         $validate = Validator::make(request()->all(), [
@@ -97,7 +97,7 @@ class FormSubmissionController extends Controller
             $submission = FormSubmission::create([
                 'form_id' => $form->id,
                 'submitter_id' => $form_submission_validated_data['submitter_id']?? auth()->id(),
-                'submitter_service' => $form_submission_validated_data['submitter_service']?? null,
+                'submitter_service' => $form_submission_validated_data['submitter_service']?? 'user',
             ]);
 
             // Save Field Values
@@ -116,8 +116,9 @@ class FormSubmissionController extends Controller
                     return $this->badRequest( "Form field with the ID you provided does not exist.");
                 }
             }
+           $data["submission"]=$submission->id;
 
-            return $this->returnSuccessMessage('Form submitted successfully');
+            return $this->returnData( $data,'Form submitted successfully');
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }

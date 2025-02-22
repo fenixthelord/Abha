@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\Forms\FormFieldController;
 use App\Http\Controllers\Api\Forms\FormSubmissionController;
 
 Route::group(["prefix" => "/forms"], function () {
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::middleware('activeVerify')->group(function () {
+    // Route::middleware('auth:sanctum')->group(function () {
+        // Route::middleware('activeVerify')->group(function () {
             Route::get('/', [FormBuilderController::class, 'list'])->name('forms.list');
             Route::post('/', [FormBuilderController::class, 'store'])->name('forms.store');
             Route::get('/show', [FormBuilderController::class, 'show'])->name('forms.show');
@@ -19,8 +19,8 @@ Route::group(["prefix" => "/forms"], function () {
             Route::get('/submissions', [FormSubmissionController::class, 'showFormWithSubmissions']);
             Route::post('/submit', [FormSubmissionController::class, 'store']);
         });
-    });
-});
+    // });
+// });
 
 Route::group(["prefix" => "form-types"], function () {
     Route::middleware('auth:sanctum')->group(function () {

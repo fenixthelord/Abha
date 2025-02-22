@@ -11,7 +11,7 @@
             cluster: 'eu'
         });
 
-        var channel = pusher.subscribe('pusher_149fceda-9d81-4de8-8a79-94067933deb7');
+        var channel = pusher.subscribe('pusher_11953802-99ad-4961-b7a6-bed53b1004ea');
         channel.bind('my-event', function(data) {
             alert(JSON.stringify(data));
         });
