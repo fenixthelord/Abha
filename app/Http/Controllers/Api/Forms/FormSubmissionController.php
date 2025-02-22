@@ -116,8 +116,9 @@ class FormSubmissionController extends Controller
                     return $this->badRequest( "Form field with the ID you provided does not exist.");
                 }
             }
+           $data["submission"]=$submission->id;
 
-            return $this->returnSuccessMessage('Form submitted successfully');
+            return $this->returnData( $data,'Form submitted successfully');
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
