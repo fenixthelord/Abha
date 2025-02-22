@@ -136,7 +136,8 @@ class ExportExcelJob implements ShouldQueue
                 'image' => null,
                 'url' => url($excelFileUrl),
             ];
-            Log::info('before-response');
+            Log::info($params);
+
             // Send the notification using the NotificationService.
             $notificationResponse = app('App\Services\NotificationService')
                 ->postCall('/notifications/send-pusher', $params);
