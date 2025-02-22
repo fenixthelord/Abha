@@ -14,9 +14,11 @@ class MemberResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $firstName = $this->resource['user']['data']['first_name'] ?? '';
-        $lastName = $this->resource['user']['data']['last_name'] ?? '';
-        $fullName = trim("{$firstName}.{$lastName}", '.');
+        $user = $this->resource['user'] ?? null;
+        $firstName = $user['data']['first_name'] ?? '';
+        $lastName = $user['data']['last_name'] ?? '';
+
+        $fullName = trim("{$firstName} {$lastName}");;
         return [
             'id'=>$this->resource['member_id'],
             'name'=>$fullName,
