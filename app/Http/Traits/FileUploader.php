@@ -5,6 +5,7 @@ namespace App\Http\Traits;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+
 trait FileUploader
 {
     /**
@@ -15,25 +16,23 @@ trait FileUploader
      * @param mixed|null $inputName
      * @return bool|string
      */
-    public function uploadImagePublic($request, $name, $inputName = 'image',$extra = null)
+    public function uploadImagePublic($request, $name, $inputName = 'image', $extra = null)
     {
 
-        if(!is_null($extra)){
+        if (!is_null($extra)) {
 
-            $requestFile=$extra;
-
-
-        }else{
+            $requestFile = $extra;
+        } else {
             $requestFile = $request->file($inputName);
         }
         try {
 
-            $dir = 'public/images/'.$name;
+            $dir = 'public/images/' . $name;
             $randomNumber = Str::random(5);
-            $fixName =$randomNumber.'.'.$requestFile->extension();
+            $fixName = $randomNumber . '.' . $requestFile->extension();
             if ($requestFile) {
-                 Storage::putFileAs($dir, $requestFile, $fixName);
-                 $url = Storage::url($dir.'/'.$fixName);
+                Storage::putFileAs($dir, $requestFile, $fixName);
+                $url = Storage::url($dir . '/' . $fixName);
                 $request->image = $fixName;
             }
 
@@ -50,9 +49,9 @@ trait FileUploader
         $requestFile = $request->file($inputName);
 
         try {
-            $dir = 'images/'.$name;
+            $dir = 'images/' . $name;
             $randomNumber = Str::random(5);
-            $fixName = $data->id.'-'.$randomNumber.'.'.$requestFile->extension();
+            $fixName = $data->id . '-' . $randomNumber . '.' . $requestFile->extension();
             if ($requestFile) {
                 $url =  Storage::putFileAs($dir, $requestFile, $fixName);
                 $request->image = $fixName;
@@ -91,7 +90,7 @@ trait FileUploader
     }
 
 
-        /**
+    /**
      * Upload a file safely.
      *
      * @param  \Illuminate\Http\UploadedFile  $file

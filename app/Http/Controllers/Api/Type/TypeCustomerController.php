@@ -36,14 +36,14 @@ class TypeCustomerController extends Controller {
             ];
 
             $response = $this->customerService->getCall('service/customers', $data);
-            $responseData = json_decode(json_encode($response['data']));
+            $responseData = json_decode(json_encode($response));
 
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
             }
 
-
-            $customersCollection = CustomerResource::collection($responseData->customers);
+            // return $responseData;
+            $customersCollection = CustomerResource::collection($responseData->data->customers);
             $data = [
                 "customers"      => $customersCollection,
                 "current_page"   => $responseData->current_page ?? null,
@@ -61,7 +61,7 @@ class TypeCustomerController extends Controller {
     public function getFormsWithFields(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'type_id' => ['required', 'exists:form_types,id'],
+                'type_id' => ['required', 'exists:types,id'],
             ], [
                 'type_id.required' => __('validation.custom.type_controller.type_id_required'),
                 'type_id.exists' => __('validation.custom.type_controller.type_id_exists'),
@@ -70,10 +70,14 @@ class TypeCustomerController extends Controller {
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-
-            $forms = Form::where('form_type_id', $request->type_id)
-                ->with('fields')
-                ->get();
+            $forms = Form::whereHas("types" , function ($query) use ($request) {
+                $query->where("id" , $request->type_id);
+            })->with("fields")->get();
+            
+            // return $forms;
+            // $forms = Form::where('form_type_id', $request->type_id)
+            //     ->with('fields')
+            //     ->get();
 
             if ($forms->isEmpty()) {
                 return $this->NotFound(__('validation.custom.type_controller.forms_not_found'));
