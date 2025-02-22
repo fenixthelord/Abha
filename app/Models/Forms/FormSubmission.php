@@ -20,7 +20,7 @@ class FormSubmission extends BaseModel
 
     public function values(): HasMany
     {
-        return $this->hasMany(FormSubmissionValue::class);
+        return $this->hasMany(FormSubmissionValue::class, 'form_submission_id');
     }
 
     protected static function boot()
