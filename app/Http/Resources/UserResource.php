@@ -34,6 +34,7 @@ class UserResource extends JsonResource
                 'role' => $this->role,
                 "user_role" => $this->getRoleNames(),
                 "permission" => new NewPermissionsResource($this->getAllPermissions()),
+                "position_id"=>$this->position_id,
                 'position_name' => [
                     'en' => $this->position?->getTranslation('name', 'en'),
                     'ar' => $this->position?->getTranslation('name', 'ar'),
