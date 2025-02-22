@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\CustomerResource;
 use App\Http\Resources\Forms\FormResource;
 use App\Models\Forms\Form;
+use App\Models\Forms\FormSubmission;
+use App\Models\Forms\FormSubmissionValue;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -73,7 +75,7 @@ class TypeCustomerController extends Controller {
             $forms = Form::whereHas("types" , function ($query) use ($request) {
                 $query->where("id" , $request->type_id);
             })->with("fields")->get();
-            
+
             // return $forms;
             // $forms = Form::where('form_type_id', $request->type_id)
             //     ->with('fields')
