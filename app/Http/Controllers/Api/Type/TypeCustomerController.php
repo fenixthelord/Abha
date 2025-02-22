@@ -5,10 +5,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\CustomerResource;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Resources\Forms\FormSubmissionResource;
-use App\Http\Resources\Type\FormSubmissionValueResource;
 use App\Models\Forms\Form;
-use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
+use App\Models\Type;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,6 +25,7 @@ class TypeCustomerController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['nullable', 'exists:types,id'],
+                'search' => ['nullable', 'string'],
             ], [
                 'type_id.exists' => __('validation.custom.type_controller.type_not_found'),
             ]);
@@ -36,6 +36,7 @@ class TypeCustomerController extends Controller {
 
             $data = [
                 'type_id' => $request->type_id,
+                'search' => $request->input('search'),
             ];
 
             $response = $this->customerService->getCall('service/customers', $data);
