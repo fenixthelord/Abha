@@ -61,6 +61,7 @@ class ExcelReportController extends Controller
 
             // Get the current user's ID for notification purposes.
             $userId = auth('sanctum')->user()->id;
+
             $filename = "services_{$dateNow}_{$userId}.xlsx";
             $transformer = new ServiceTransformer();
 
@@ -80,9 +81,10 @@ class ExcelReportController extends Controller
                 ['department'],
                 $filename,
                 [$userId],
+                $userId,
                 [$transformer, 'transform']
             );
-            Log::error($userId);
+
 
             // Return a successful JSON response.
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
@@ -153,7 +155,8 @@ class ExcelReportController extends Controller
 
 
             // Get the current authenticated user ID
-            $userId = Auth::id();
+            $userId = auth('sanctum')->user()->id;
+
             $filename = "audit_logs_{$dateNow}_{$userId}.xlsx";
 
             // Transformer for formatting audit log data
@@ -166,10 +169,11 @@ class ExcelReportController extends Controller
                 $filters,      // Applied filters
                 [],            // No relationships needed
                 $filename,     // Generated file name
-                [$userId],     // User to notify upon completion
+                [$userId],
+                $userId, // User to notify upon completion
                 [$transform, 'transform'] // Data transformation callback
             );
-
+            Log::error($userId);
             return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {
             return $this->handleException($e);

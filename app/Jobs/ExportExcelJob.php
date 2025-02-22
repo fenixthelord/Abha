@@ -28,6 +28,7 @@ class ExportExcelJob implements ShouldQueue
     protected string $filename;
     // Array of user IDs to be notified when the export is complete.
     protected array $userIds;
+    protected string $userId;
     // Optional callback to transform each record into an exportable format.
     protected $transformCallback;
 
@@ -47,6 +48,7 @@ class ExportExcelJob implements ShouldQueue
         array    $relations = [],
         string   $filename = 'export.xlsx',
         array    $userIds = [],
+        string  $userId=null,
         callable $transformCallback = null
     )
     {
@@ -56,6 +58,7 @@ class ExportExcelJob implements ShouldQueue
         $this->filename = $filename;
         $this->userIds = $userIds;
         $this->transformCallback = $transformCallback;
+        $this->userId=$userId;
     }
 
     /**
@@ -119,7 +122,7 @@ class ExportExcelJob implements ShouldQueue
             $dateNow = date('Ymd');
 
             // Define the channel name for the notification.
-            $channelName = "pusher_{$this->userIds}";
+            $channelName = "pusher_{$this->userId}";
 
             // Prepare notification parameters.
             $params = [
@@ -136,7 +139,7 @@ class ExportExcelJob implements ShouldQueue
                 'image' => null,
                 'url' => url($excelFileUrl),
             ];
-            Log::info($params);
+
 
             // Send the notification using the NotificationService.
             $notificationResponse = app('App\Services\NotificationService')
