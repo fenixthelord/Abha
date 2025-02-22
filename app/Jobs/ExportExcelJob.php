@@ -115,11 +115,11 @@ class ExportExcelJob implements ShouldQueue
             $excelFileUrl = $this->exportData($exportData, $this->filename);
 
             // Retrieve the current user ID using Sanctum authentication.
-            $userId = auth()->id();
+
             $dateNow = date('Ymd');
-            Log::info("the user ID is".$userId);
+
             // Define the channel name for the notification.
-            $channelName = "pusher_{$userId}";
+            $channelName = "pusher_{$this->userIds}";
 
             // Prepare notification parameters.
             $params = [
