@@ -10,6 +10,11 @@ return [
         ],
 
         'type_controller' => [
+            'form_submission_not_found' => 'لم يتم العثور على تقديم النموذج.',
+            'form_submission_required' =>  ' تقديم النموذج مطلوب',
+            'status_required' => 'الحالة المطلوبة',
+            'status_invalid' => 'الحالة غير صالحة',
+            'status_updated' => 'تم تحديث الحاله بنجاح',
             'id_required' => 'رقم التعريف مطلوب.',
             'id_exists' => 'المعرف المحدد غير موجود.',
             'name_required' => 'اسم النوع مطلوب.',
@@ -21,6 +26,7 @@ return [
             'service_id_exists' => 'الخدمة المحددة غير صحيحة.',
             'form_id_required' => 'النموذج المرتبط مطلوب.',
             'form_id_exists' => 'النموذج المحدد غير صحيح.',
+            'forms_not_found' => 'النموذج غير موجود',
             'created' => 'تم إنشاء النوع بنجاح.',
             'id_array' => 'يجب أن يكون حقل المعرف مصفوفة .',
             'id_uuid' => 'يجب أن يكون حقل المعرف صالحا.',
