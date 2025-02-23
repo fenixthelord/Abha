@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Api\Position;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Requests\Position\CreatePositionRequest;
 use App\Http\Requests\Position\DeletePositionRequest;
 use App\Http\Requests\Position\ListOfPositionsRequest;
 use App\Http\Requests\Position\UpdatePositionRequest;
+use App\Http\Requests\Position\UpdateUserPositionRequest;
 use App\Http\Resources\Position\PositionChildResource;
 use App\Http\Resources\Position\PositionResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Position;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -129,6 +132,7 @@ class PositionController extends Controller
 
             $potions = Position::findOrFail($request->id);
             if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
+                $data["position_id"] = $potions->id;
                 $data["chields"] = PositionChildResource::make($potions);
                 return $this->apiResponse(
                     data: $data,
@@ -143,6 +147,27 @@ class PositionController extends Controller
             return $this->returnSuccessMessage(__("Position deleted successfully"));
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * 
+     * @param UpdateUserPositionRequest $request
+     * @return ResponseTrait
+     */
+    public function updateUserPosition(UpdateUserPositionRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = User::findOrFail($request->user_id);
+            $user->position_id = $request->position_id;
+            $user->save();
+
+            DB::commit();
+            return $this->returnSuccessMessage("position updated sussefully");
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
