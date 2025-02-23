@@ -15,6 +15,22 @@ use App\Http\Traits\Paginate;
 class NotificationController extends Controller
 {
     use Firebase, ResponseTrait, Paginate;
+    public function __construct()
+    {
+        $permissions = [
+            'getUserNotifications'  => ['notification.show'],
+            'allNotification'  => ['notification.show'],
+            'sendNotification' => ['notification.create'],
+            'store' => ['notification.create'],
+            'processRecipient'    => ['notification.update'],
+        ];
+
+        foreach ($permissions as $method => $permissionGroup) {
+            foreach ($permissionGroup as $permission) {
+                $this->middleware("permission:{$permission}")->only($method);
+            }
+        }
+    }
     public function sendNotification(Request $request)
     {
         global $status;
@@ -82,10 +98,6 @@ class NotificationController extends Controller
             return $this->handleException($e);
         }
     }
-
-
-
-
 
     public function store(Request $request)
     {
