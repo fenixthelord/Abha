@@ -186,8 +186,6 @@ class UserController extends Controller
                 if ($request->has('password') && !empty($request->password)) {
                     $user->password = $request->password ? Hash::make($request->password) : null;
                     $user->tokens()->delete();
-                } else {
-                    return $this->badRequest(__('validation.custom.userController.old_password_required'));
                 }
                 $user->save();
                 if ($request->role) {
