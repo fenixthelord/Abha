@@ -68,7 +68,7 @@ class TypeCustomerController extends Controller {
                 'type_id' => ['required', 'exists:types,id'],
             ], [
                 'type_id.required' => __('validation.custom.type_controller.type_required'),
-                'type_id.exists' => __('validation.custom.type_controller.type_id_exists'),
+                'type_id.exists' => __('validation.custom.type_controller.type_not_found'),
             ]);
 
             if ($validator->fails()) {
@@ -100,8 +100,8 @@ class TypeCustomerController extends Controller {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
             ], [
-                'form_submission_id.exists' => __('validation.custom.form_submission_not_found'),
-                'form_submission_id.required' => __('validation.custom.form_submission_required'),
+                'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
+                'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
             ]);
 
             if ($validator->fails()) {
@@ -139,10 +139,10 @@ class TypeCustomerController extends Controller {
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
                 'status' => ['required', 'in:0,1,2,3'],
             ], [
-                'form_submission_id.exists' => __('validation.custom.form_submission_not_found'),
-                'form_submission_id.required' => __('validation.custom.form_submission_required'),
-                'status.required' => __('validation.custom.status_required'),
-                'status.in' => __('validation.custom.status_invalid'),
+                'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
+                'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
+                'status.required' => __('validation.custom.type_controller.status_required'),
+                'status.in' => __('validation.custom.type_controller.status_invalid'),
             ]);
 
             if ($validator->fails()) {
@@ -166,7 +166,7 @@ class TypeCustomerController extends Controller {
             }
 
             return $this->returnSuccessMessage([
-                'message' => 'Status updated successfully',
+                'message' => __('validation.custom.type_controller.status_updated'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
