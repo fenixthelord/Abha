@@ -182,12 +182,8 @@ class TypeCustomerController extends Controller {
     public function deleteCustomersByType(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'customer_type_id' => ['required', 'exists:types,id'],
-            ], [
-                'customer_type_id.required' => __('validation.custom.type_controller.customer_type_id_required'),
-                'customer_type_id.exists' => __('validation.custom.type_controller.customer_type_not_found'),
+                'customer_type_id' => ['required'],
             ]);
-
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
