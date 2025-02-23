@@ -195,4 +195,25 @@ class TypeController extends Controller {
             return $this->handleException($e);
         }
     }
+
+    public function getTypeByForm(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), ['id' => ['required', 'exists:forms,id']]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $form = Form::with('types')->findOrFail($request->id);
+
+            if (!$form->type) {
+                return $this->NotFound(__('validation.custom.type_controller.type_not_found'));
+            }
+
+            return $this->returnData(['type' => new TypeResource($form->types)]);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 }

@@ -141,6 +141,12 @@ class PositionController extends Controller
                     statusCode: 400
                 );
             }
+            $name = $potions->getTranslations("name");
+            $potions->name = [
+                'en' => $name['en'] . '-' . $potions->id . '-deleted',
+                'ar' => $name['ar'] . '-' . $potions->id . '-محذوف'
+            ];
+            $potions->save();
             $potions->delete();
 
             DB::commit();
