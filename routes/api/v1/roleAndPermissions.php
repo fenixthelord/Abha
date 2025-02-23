@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RoleAndPermissionController;
 
 Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(function () {
-    // temporary solution
-    Route::get('clear-permission-cache', [RoleAndPermissionController::class, 'clearPermissionCache']);
+
     Route::middleware('activeVerify')->group(function () {
         Route::get('/', [RoleAndPermissionController::class, 'index']);
         Route::post('/create', [RoleAndPermissionController::class, 'store']);
@@ -17,6 +16,8 @@ Route::prefix('roles-and-permissions')->middleware('auth:sanctum')->group(functi
             Route::post('/delete', [RoleAndPermissionController::class, 'DeleteRole']);
         });
         Route::prefix('permissions')->group(function () {
+            // temporary solution
+            Route::get('clear-permission-cache', [RoleAndPermissionController::class, 'clearPermissionCache']);
             Route::get('/get', [RoleAndPermissionController::class, 'GetAllPermissions']);
         });
         Route::post('/permission/create', [RoleAndPermissionController::class, 'CreatePermission']);
