@@ -31,13 +31,13 @@ class UserController extends Controller
     public function __construct()
     {
         $permissions = [
-            'index'  => ['user.show'],
+            'index' => ['user.show'],
             'store' => ['user.create'],
-            'updateAdmin'    => ['user.update'],
-            'deleteUser'   => ['user.delete'],
-            'showDeleteUser'   => ['user.delete'],
-            'restoreUser'    => ['user.restore'],
-            'active'    => ['user.restore'],
+            'updateAdmin' => ['user.update'],
+            'deleteUser' => ['user.delete'],
+            'showDeleteUser' => ['user.delete'],
+            'restoreUser' => ['user.restore'],
+            'active' => ['user.restore'],
         ];
 
         foreach ($permissions as $method => $permissionGroup) {
@@ -46,6 +46,7 @@ class UserController extends Controller
             }
         }
     }
+
     public function index(Request $request)
     {
         try {
@@ -86,7 +87,7 @@ class UserController extends Controller
                 'job_id' => 'nullable|string',
                 'image' => 'nullable|string',
                 'password' =>
-                'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
+                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                 'old_password' => 'nullable|required_with:password|string',
             ], messageValidation());
             if ($validator->fails()) {
@@ -158,8 +159,7 @@ class UserController extends Controller
                     'job_id' => 'nullable|string',
                     'image' => 'nullable|string',
                     'password' =>
-                    'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
-                    'old_password' => 'nullable|required_with:password|string',
+                        'nullable|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|confirmed',
                     'role' => "nullable|array",
                     "role.*" => "nullable|string|exists:roles,name",
                     'position_id' => ['nullable', 'string', Rule::exists('positions', 'id')->whereNull('deleted_at')],
@@ -184,23 +184,17 @@ class UserController extends Controller
                 $user->job_id = $request->job_id ? $request->job_id : $user->job_id;
                 $user->image = $request->image;
                 if ($request->has('password') && !empty($request->password)) {
-                    if ($request->has('old_password')) {
-                        if (Hash::check($request->old_password, $user->password)) {
-                            $user->password = $request->password ? Hash::make($request->password) : null;
-                            $user->tokens()->delete();
-                        } else {
-                            return $this->badRequest(__('validation.custom.userController.old_password_wrong'));
-                        }
-                    } else {
-                        return $this->badRequest(__('validation.custom.userController.old_password_required'));
-                    }
+                    $user->password = $request->password ? Hash::make($request->password) : null;
+                    $user->tokens()->delete();
+                } else {
+                    return $this->badRequest(__('validation.custom.userController.old_password_required'));
                 }
                 $user->save();
                 if ($request->role) {
-                //    $user->syncRoles($request->role);
+                    //    $user->syncRoles($request->role);
                     $id = [];
                     foreach ($request->role as $role) {
-                        $id = array_merge($id,Role::where('name',$role)->pluck('id')->toArray());
+                        $id = array_merge($id, Role::where('name', $role)->pluck('id')->toArray());
                     }
                     $user->auditSync('roles', $id);
                 }
@@ -319,6 +313,7 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
+
     public function searchUser(Request $request)
     {
         try {
@@ -344,6 +339,7 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
+
     public function showDeleteUser()
     {
 
@@ -393,6 +389,7 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
+
     public function addImage(Request $request)
     {
         DB::beginTransaction();
@@ -486,19 +483,22 @@ class UserController extends Controller
         ];
         return $this->returnData($data);
     }
-    public function show(Request $request){
-      try{  $validator = Validator::make($request->all(), [
-            'user_id' => 'required|string|exists:users,id',
-        ]);
-        if ($validator->fails()) {
-            return $this->returnValidationError($validator);
+
+    public function show(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required|string|exists:users,id',
+            ]);
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+            $user = User::where('id', $request->user_id)->first();
+
+            return $this->returnData(UserResource::make($user));
+
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
-        $user=User::where('id',$request->user_id)->first();
-
-       return $this->returnData(UserResource::make($user));
-
     }
-    catch(\Exception $e){
-          return $this->handleException($e);
-    }
-}}
+}
