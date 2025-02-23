@@ -18,7 +18,7 @@ return [
             'customer_type_id_required' => 'customer type ID field is required.',
             'customer_type_not_found' => 'customer type ID not found.',
             'form_submission_not_found' => 'Form submission not found.',
-            'customer_type_deleted' => 'Customer type deleted.',
+            'customer_type_deleted' => 'Customer type deleted successfully.',
             'id_required' => 'The ID is required.',
             'id_exists' => 'The selected ID does not exist.',
             'name_required' => 'The type name is required.',
