@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormSubmission;
 
-class TypeCustomerController extends Controller
-{
+class TypeCustomerController extends Controller {
     use ResponseTrait;
     protected CustomerService $customerService;
 
@@ -25,8 +24,7 @@ class TypeCustomerController extends Controller
     {
         $this->customerService = $customerService;
     }
-    public function getCustomersByType(Request $request)
-    {
+    public function getCustomersByType(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['nullable', 'exists:types,id'],
@@ -67,14 +65,13 @@ class TypeCustomerController extends Controller
         }
     }
 
-    public function getFormsWithFields(Request $request)
-    {
+    public function getFormsWithFields(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['required', 'exists:types,id'],
             ], [
                 'type_id.required' => __('validation.custom.type_controller.type_required'),
-                'type_id.exists' => __('validation.custom.type_controller.type_id_exists'),
+                'type_id.exists' => __('validation.custom.type_controller.type_not_found'),
             ]);
 
             if ($validator->fails()) {
@@ -101,14 +98,13 @@ class TypeCustomerController extends Controller
         }
     }
 
-    public function getFormSubmissionValues(Request $request)
-    {
+    public function getFormSubmissionValues(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
             ], [
-                'form_submission_id.exists' => __('validation.custom.form_submission_not_found'),
-                'form_submission_id.required' => __('validation.custom.form_submission_required'),
+                'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
+                'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
             ]);
 
             if ($validator->fails()) {
@@ -134,22 +130,22 @@ class TypeCustomerController extends Controller
                 'form_submission_id' => $request->form_submission_id,
                 'submission' =>  SubmissionResource::collection($formSubmissionValues)
             ]);
+
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function updateStatus(Request $request)
-    {
+    public function updateStatus(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
                 'status' => ['required', 'in:0,1,2,3'],
             ], [
-                'form_submission_id.exists' => __('validation.custom.form_submission_not_found'),
-                'form_submission_id.required' => __('validation.custom.form_submission_required'),
-                'status.required' => __('validation.custom.status_required'),
-                'status.in' => __('validation.custom.status_invalid'),
+                'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
+                'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
+                'status.required' => __('validation.custom.type_controller.status_required'),
+                'status.in' => __('validation.custom.type_controller.status_invalid'),
             ]);
 
             if ($validator->fails()) {
