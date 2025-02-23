@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Http\Controllers\Api\Type;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\CustomerResource;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Resources\Forms\FormSubmissionResource;
+use App\Http\Resources\Forms\SubmissionResource;
 use App\Models\Forms\Form;
 use App\Models\Forms\FormSubmissionValue;
 use App\Models\Type;
@@ -12,8 +14,10 @@ use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Forms\FormSubmission;
 
-class TypeCustomerController extends Controller {
+class TypeCustomerController extends Controller
+{
     use ResponseTrait;
     protected CustomerService $customerService;
 
@@ -21,7 +25,8 @@ class TypeCustomerController extends Controller {
     {
         $this->customerService = $customerService;
     }
-    public function getCustomersByType(Request $request) {
+    public function getCustomersByType(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['nullable', 'exists:types,id'],
@@ -62,7 +67,8 @@ class TypeCustomerController extends Controller {
         }
     }
 
-    public function getFormsWithFields(Request $request) {
+    public function getFormsWithFields(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['required', 'exists:types,id'],
@@ -74,8 +80,8 @@ class TypeCustomerController extends Controller {
             if ($validator->fails()) {
                 return $this->returnValidationError($validator);
             }
-            $forms = Form::whereHas("types" , function ($query) use ($request) {
-                $query->where("id" , $request->type_id);
+            $forms = Form::whereHas("types", function ($query) use ($request) {
+                $query->where("id", $request->type_id);
             })->with("fields")->get();
 
             // return $forms;
@@ -95,7 +101,8 @@ class TypeCustomerController extends Controller {
         }
     }
 
-    public function getFormSubmissionValues(Request $request) {
+    public function getFormSubmissionValues(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
@@ -119,21 +126,21 @@ class TypeCustomerController extends Controller {
                 return $this->returnError($responseData->error);
             }
 
-            $formSubmissionValues = FormSubmissionValue::with('submission')
-            ->where('form_submission_id', $request->form_submission_id)
+            $formSubmissionValues = FormSubmission::with('values')
+                ->where('id', $request->form_submission_id)
                 ->get();
 
             return $this->returnData([
                 'form_submission_id' => $request->form_submission_id,
-                'submission' =>  FormSubmissionResource::collection($formSubmissionValues->pluck('submission'))
+                'submission' =>  SubmissionResource::collection($formSubmissionValues)
             ]);
-
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function updateStatus(Request $request) {
+    public function updateStatus(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
@@ -165,10 +172,12 @@ class TypeCustomerController extends Controller {
                 return $this->returnError($responseData->error);
             }
 
-            return $this->returnSuccessMessage([
-                'message' => 'Status updated successfully',
-                'data' => $data
-            ]);
+            // return $this->returnSuccessMessage([
+            //     'message' => 'Status updated successfully',
+            //     'data' => $data
+            // ]);
+
+            return $this->returnData('Status updated successfully');
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
