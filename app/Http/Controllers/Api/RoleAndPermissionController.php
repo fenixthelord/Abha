@@ -58,6 +58,7 @@ class RoleAndPermissionController extends Controller
 
     public function store(Request $request)
     {
+
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
@@ -241,6 +242,10 @@ class RoleAndPermissionController extends Controller
                     $id = array_merge($id,Permission::where('name',$permission)->pluck('id')->toArray());
                 }
                 $user->auditSync('permissions', $id);
+
+                // Clear the permissions cache after modifications
+                app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
                 return $this->returnSuccessMessage(__('validation.custom.roleAndPerm.permission_assigned_successfully'));
             }
         } catch (\Exception $exception) {
@@ -574,5 +579,11 @@ class RoleAndPermissionController extends Controller
     public function isMasterRole($roleName)
     {
         return str_starts_with($roleName, 'Master_');
+    }
+
+    public function clearPermissionCache()
+    {
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        return $this->returnSuccessMessage('Cache cleared successfully');
     }
 }

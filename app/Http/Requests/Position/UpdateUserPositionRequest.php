@@ -3,13 +3,12 @@
 namespace App\Http\Requests\Position;
 
 use App\Http\Traits\ResponseTrait;
-use App\Models\Position;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
 
-class DeletePositionRequest extends FormRequest
+class UpdateUserPositionRequest extends FormRequest
 {
+
     use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
@@ -27,14 +26,8 @@ class DeletePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ["nullable", "exists:positions,id,deleted_at,NULL", Rule::notIn([Position::MASTER_ID])]
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'id.not_in' => 'Cannot delete master position',
+            "user_id" => ['required' , 'exists:users,id,deleted_at,NULL'],
+            "position_id" => ['required' , 'exists:positions,id,deleted_at,NULL'],
         ];
     }
 

@@ -230,9 +230,11 @@ class NotifyGroupController extends Controller
             ];
             $method = '/group/delete';
            $response= $this->notificationService->deleteCall($method, $params);
-
-            if (!is_array($response) || !isset($response['data']['group']) || !is_array($response['data']['group'])) {
-                return $this->badRequest("group not found");
+           if (!is_array($response)) {
+               return $this->badRequest("group not found");
+           }
+            if(isset($response['error'])){
+                return $this->badRequest($response['error']);
             }
             return $this->returnSuccessMessage(__('validation.custom.notifyGroup.group_deleted'));
 

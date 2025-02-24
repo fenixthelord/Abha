@@ -11,6 +11,14 @@ return [
         ],
 
         'type_controller' => [
+            'form_submission_required' => 'Form submission required',
+            'status_required' => 'Status required',
+            'status_invalid' => 'Status invalid.',
+            'status_updated' => 'Status updated successfully.',
+            'customer_type_id_required' => 'customer type ID field is required.',
+            'customer_type_not_found' => 'customer type ID not found.',
+            'form_submission_not_found' => 'Form submission not found.',
+            'customer_type_deleted' => 'Customer type deleted successfully.',
             'id_required' => 'The ID is required.',
             'id_exists' => 'The selected ID does not exist.',
             'name_required' => 'The type name is required.',
@@ -22,6 +30,7 @@ return [
             'service_id_exists' => 'The selected service is invalid.',
             'form_id_required' => 'The associated form is required.',
             'form_id_exists' => 'The selected form is invalid.',
+            'forms_not_found' => 'form not found.',
             'created' => 'The type has been successfully created.',
             'id_array' => 'The ids field must be an array.',
             'id_uuid' => 'The ids.0 field must be a valid UUID.',

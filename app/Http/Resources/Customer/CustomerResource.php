@@ -19,6 +19,7 @@ class CustomerResource extends JsonResource
             'customer_id'        => $this->customer_id,
             'first_name'         => $this->first_name,
             'last_name'          => $this->last_name,
+            'gender'             => $this->gender,
             'status'             => $this->status,
             'customer_type_id'   => $this->customer_type_id,
             'type_name' => Type::where('id', $this->type_id)->value('name') ?? 'Unknown',
