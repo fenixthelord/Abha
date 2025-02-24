@@ -9,6 +9,7 @@ use App\Http\Traits\FileUploader;
 use App\Mail\OtpMail;
 use App\Models\Role\Role;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Http\Traits\ResponseTrait;
@@ -17,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Http\Traits\Paginate;
 
@@ -79,7 +81,6 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
                 'last_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
-                'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id), 'max:255'],
                 'phone' => ['nullable', Rule::unique('users', 'phone')->ignore($user->id), 'numeric', 'regex:/^05\d{8}$/'],
                 'gender' => 'nullable|in:male,female',
                 'alt' => 'nullable|string',
@@ -95,10 +96,6 @@ class UserController extends Controller
             }
             $user->first_name = $request->first_name ? $request->first_name : $user->first_name;
             $user->last_name = $request->last_name ? $request->last_name : $user->last_name;
-            if ($request->has('email') && !empty($request->email)) {
-                $user->email = $request->email;
-                $user->otp_verified = false;
-            }
             if ($request->has('phone') && !empty($request->phone)) {
                 $user->phone = $request->phone;
                 $user->otp_verified = false;
@@ -128,6 +125,47 @@ class UserController extends Controller
             DB::rollBack();
             return $this->handleException($e);
         }
+    }
+
+    public function emailOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users,email',
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+        $cacheKey = $request->email;
+        if (Cache::has($cacheKey)) {
+            return $this->badRequest('otp send already');
+        }
+        $otp = Str::random(6); // Generate OTP
+        Cache::put($request->email, $otp, now()->addMinutes(5));
+        Mail::to($request->email)->send(new OtpMail($otp));
+        return $this->returnSuccessMessage('otp send successfully-'.$otp);
+    }
+
+    public function cahngeEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'otp' => 'required|string|min:6|max:6|',
+        ]);
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+   /*     if (Cache::has($request->email)) {
+            $cachedOTP = Cache::get($request->email);
+            if ($cachedOTP && $cachedOTP === $request->otp) {*/
+                $user = auth()->user();
+                $user->email = $request->email;
+                $user->save();
+           //     Cache::forget($request->email);
+                return $this->returnSuccessMessage('email change successfully');
+        /*    }
+            return $this->badRequest('otp is invalid or expired');
+        }
+        return $this->badRequest('otp is invalid or expired');*/
     }
 
     public function updateAdmin(Request $request)
