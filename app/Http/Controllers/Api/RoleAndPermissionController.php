@@ -28,11 +28,11 @@ class RoleAndPermissionController extends Controller
             'ShowRole'  => ['role.show'],
             'store' => ['role.create'],
             'SyncPermission'    => ['role.update'],
-            'assignPermission'    => ['role.update'],
+            'assignPermission'    => ['permission.create'],
             'assignRole'    => ['role.update'],
             'DeleteRole'   => ['role.delete'],
             'removeRoleFromUser'   => ['user.update'],
-            'GetAllPermissions'   => ['permission.update'],
+            'GetAllPermissions'   => ['permission.show'],
         ];
 
         foreach ($permissions as $method => $permissionGroup) {
