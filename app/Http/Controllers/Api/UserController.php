@@ -142,7 +142,7 @@ class UserController extends Controller
         $otp = Str::random(6); // Generate OTP
         Cache::put($request->email, $otp, now()->addMinutes(5));
         Mail::to($request->email)->send(new OtpMail($otp));
-        return $this->returnSuccessMessage('otp send successfully-'.$otp);
+        return $this->returnSuccessMessage('otp send successfully');
     }
 
     public function cahngeEmail(Request $request)
