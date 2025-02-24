@@ -19,7 +19,7 @@ class DepartmentsControllers extends Controller
 
     public function __construct()
     {
-      /*  $permissions = [
+        $permissions = [
             'index'  => ['department.show'],
             'show'  => ['department.show'],
             'store' => ['department.create'],
@@ -31,7 +31,7 @@ class DepartmentsControllers extends Controller
             foreach ($permissionGroup as $permission) {
                 $this->middleware("permission:{$permission}")->only($method);
             }
-        }*/
+        }
     }
     public function index(Request $request)
     {
@@ -49,11 +49,7 @@ class DepartmentsControllers extends Controller
                            $data["groups"] = DepartmentResource::collection($department);
                            return $this->PaginateData($data, $department);
                        }*/
-            $user = auth()->user();
 
-            if (!$user->hasPermissionTo('department.show')) {
-                return $this->Forbidden("you don't have permission to access this page");
-            }
             $fields = ['name->ar', 'name->en'];
             $department = $this->allWithSearch(new Department(), $fields, $request);
             $data['department'] = DepartmentResource::collection($department);
@@ -67,11 +63,9 @@ class DepartmentsControllers extends Controller
     public function show(Request $request)
     {
         try {
-            $user = auth()->user();
 
-            if (!$user->hasPermissionTo('department.show')) {
-                return $this->Forbidden("you don't have permission to access this page");
-            }
+
+
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
             ]);
@@ -94,11 +88,9 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = auth()->user();
 
-            if (!$user->hasPermissionTo('department.create')) {
-                return $this->Forbidden("you don't have permission to access this page");
-            }
+
+
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'array', 'max:254'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
@@ -125,11 +117,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = auth()->user();
 
-            if (!$user->hasPermissionTo('department.update')) {
-                return $this->Forbidden("you don't have permission to access this page");
-            }
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
             ]);
@@ -164,11 +152,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = auth()->user();
 
-            if (!$user->hasPermissionTo('department.delete')) {
-                return $this->Forbidden("you don't have permission to access this page");
-            }
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:departments,id',
             ], [
