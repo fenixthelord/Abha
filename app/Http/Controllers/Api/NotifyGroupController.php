@@ -23,6 +23,23 @@ class NotifyGroupController extends Controller
 
     public function __construct(NotificationService $notificationService)
     {
+        $permissions = [
+            'allGroup'  => ['notification.show'],
+            'groupDetail'  => ['notification.show'],
+            'createNotifyGroup' => ['notification.create'],
+            'sendNotificationToNotifyGroup' => ['notification.create'],
+            'editGroup'    => ['notification.update'],
+            'addUsersToNotifyGroup'    => ['notification.update'],
+            'removeUsersFromNotifyGroup'    => ['notification.update'],
+            'deleteNotifyGroup'    => ['notification.delete'],
+        ];
+
+        foreach ($permissions as $method => $permissionGroup) {
+            foreach ($permissionGroup as $permission) {
+                $this->middleware("permission:{$permission}")->only($method);
+            }
+        }
+
         $this->notificationService = $notificationService;
     }
 
