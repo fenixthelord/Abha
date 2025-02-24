@@ -11,6 +11,7 @@ use App\Http\Requests\Position\UpdatePositionRequest;
 use App\Http\Requests\Position\UpdateUserPositionRequest;
 use App\Http\Resources\Position\PositionChildResource;
 use App\Http\Resources\Position\PositionResource;
+use App\Http\Resources\UserResource;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Position;
 use App\Models\User;
@@ -48,7 +49,7 @@ class PositionController extends Controller
 
             $data["positions"] = PositionResource::collection($positions);
 
-            return $this->PaginateData($data , $positions);
+            return $this->PaginateData($data, $positions);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
@@ -129,11 +130,30 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
+            $perPage = $request->input('per_page', $this->per_page);
+            $pageNumber = $request->input('page', $this->pageNumber);
 
-            $potions = Position::findOrFail($request->id);
-            if ($potions->users()->count() > 0 || $potions->children()->count() > 0) {
-                $data["position_id"] = $potions->id;
-                $data["chields"] = PositionChildResource::make($potions);
+            $position = Position::findOrFail($request->id);
+            if ($position->users()->count() > 0 || $position->children()->count() > 0) {
+
+                $users = $position->users()->paginate($perPage, ['*'], 'page', $pageNumber);
+                $childPositions = $position->children;
+
+                $data = [
+                    'position_id' => $position->id,
+                    'chields' => [
+                        'employees' => [
+                            "employees_data" => UserResource::collection($users->items())->each->onlyName(),
+                            "meta" => [
+                                'next_page' => $users->nextPageUrl(),
+                                'current_page' => $users->currentPage(),
+                                'previous_page' => $users->previousPageUrl(),
+                                'total_pages' => $users->lastPage(),
+                            ],
+                        ],
+                        'child_positions' => PositionResource::collection($childPositions),
+                    ],
+                ];
                 return $this->apiResponse(
                     data: $data,
                     status: true,
@@ -141,13 +161,13 @@ class PositionController extends Controller
                     statusCode: 400
                 );
             }
-            $name = $potions->getTranslations("name");
-            $potions->name = [
-                'en' => $name['en'] . '-' . $potions->id . '-deleted',
-                'ar' => $name['ar'] . '-' . $potions->id . '-محذوف'
+            $name = $position->getTranslations("name");
+            $position->name = [
+                'en' => $name['en'] . '-' . $position->id . '-deleted',
+                'ar' => $name['ar'] . '-' . $position->id . '-محذوف'
             ];
-            $potions->save();
-            $potions->delete();
+            $position->save();
+            $position->delete();
 
             DB::commit();
             return $this->returnSuccessMessage(__("Position deleted successfully"));
@@ -166,7 +186,7 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-           
+
             foreach ($request->positions as $newPosition) {
                 $user = User::findOrFail($newPosition["user_id"]);
                 $user->position_id = $newPosition["position_id"];
