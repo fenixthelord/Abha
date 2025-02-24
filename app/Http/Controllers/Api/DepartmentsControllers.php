@@ -23,8 +23,8 @@ class DepartmentsControllers extends Controller
             'index'  => ['department.show'],
             'show'  => ['department.show'],
             'store' => ['department.create'],
-            'update'    => ['department.update'],
-            'destroy'   => ['department.delete'],
+            'update' => ['department.update'],
+            'destroy'=> ['department.delete'],
         ];
 
         foreach ($permissions as $method => $permissionGroup) {
@@ -49,6 +49,7 @@ class DepartmentsControllers extends Controller
                            $data["groups"] = DepartmentResource::collection($department);
                            return $this->PaginateData($data, $department);
                        }*/
+
             $fields = ['name->ar', 'name->en'];
             $department = $this->allWithSearch(new Department(), $fields, $request);
             $data['department'] = DepartmentResource::collection($department);
@@ -62,6 +63,9 @@ class DepartmentsControllers extends Controller
     public function show(Request $request)
     {
         try {
+
+
+
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
             ]);
@@ -84,6 +88,9 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+
+
+
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'array', 'max:254'],
                 'name.en' => ['required', 'max:255', Rule::unique('departments', 'name->en')],
@@ -110,6 +117,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
             ]);
@@ -144,6 +152,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:departments,id',
             ], [

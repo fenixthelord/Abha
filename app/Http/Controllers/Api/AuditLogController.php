@@ -15,7 +15,7 @@ class AuditLogController extends Controller
 
     public function __construct()
     {
-        $permissions = [
+       /* $permissions = [
             //To be reviewed
             'index'  => ['audit.show'],
         ];
@@ -24,15 +24,16 @@ class AuditLogController extends Controller
             foreach ($permissionGroup as $permission) {
                 $this->middleware("permission:{$permission}")->only($method);
             }
-        }
+        }*/
     }
 
     public function index(Request $request)
     {
-        $user = auth()->user();
-//        if (!$user->hasPermissionTo('audit.show')) {
-//            return $this->Forbidden("you don't have permission to access this page");
-//        }
+     /*   $user = auth()->user();
+
+     if (!$user->hasPermissionTo('audit.show')) {
+            return $this->Forbidden("you don't have permission to access this page");
+       }*/
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',
