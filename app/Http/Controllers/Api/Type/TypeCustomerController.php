@@ -139,7 +139,8 @@ class TypeCustomerController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
-                'status' => ['required', 'in:0,1,2,3'],
+                'status' => ['required', 'in:0,1,2'],
+                'reason' => ['nullable', 'string'],
             ], [
                 'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
                 'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
@@ -153,11 +154,12 @@ class TypeCustomerController extends Controller {
 
             $form_submission_id = $request->form_submission_id;
             $status = $request->status;
-
+            $reason = $request->reason;
 
             $data = [
                 'form_submission_id' => $form_submission_id,
                 'status' => $status,
+                'reason' => $reason
             ];
 
             $response = $this->customerService->postCall('service/status', $data);
@@ -167,7 +169,7 @@ class TypeCustomerController extends Controller {
                 return $this->returnError($responseData->error);
             }
 
-            return $this->returnData('Status updated successfully');
+            return $this->returnData('validation.custom.type_controller.status_updated');
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
