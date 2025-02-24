@@ -26,8 +26,9 @@ class UpdateUserPositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "user_id" => ['required' , 'exists:users,id,deleted_at,NULL'],
-            "position_id" => ['required' , 'exists:positions,id,deleted_at,NULL'],
+            "positions" => ['required', 'array'],
+            "positions.*.user_id" => ['required', 'exists:users,id,deleted_at,NULL'],
+            "positions.*.position_id" => ['required', 'exists:positions,id,deleted_at,NULL'],
         ];
     }
 

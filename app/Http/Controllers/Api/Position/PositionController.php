@@ -29,8 +29,8 @@ class PositionController extends Controller
     public function index(ListOfPositionsRequest $request)
     {
         try {
-            // $perPage = $request->input('per_page', $this->per_page);
-            // $pageNumber = $request->input('page', $this->pageNumber);
+            $perPage = $request->input('per_page', $this->per_page);
+            $pageNumber = $request->input('page', $this->pageNumber);
 
             $query = Position::query();
 
@@ -43,12 +43,12 @@ class PositionController extends Controller
                 $query->whereNotIn("id", Position::getChildrenIds($request->id));
             }
 
-            // $category = $query->paginate($perPage, ['*'], 'page', $pageNumber);
-            $category = $query->get();
+            $positions = $query->paginate($perPage, ['*'], 'page', $pageNumber);
+            // $positions = $query->get();
 
-            $data["positions"] = PositionResource::collection($category);
+            $data["positions"] = PositionResource::collection($positions);
 
-            return $this->returnData($data);
+            return $this->PaginateData($data , $positions);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
@@ -166,10 +166,12 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $user = User::findOrFail($request->user_id);
-            $user->position_id = $request->position_id;
-            $user->save();
+           
+            foreach ($request->positions as $newPosition) {
+                $user = User::findOrFail($newPosition["user_id"]);
+                $user->position_id = $newPosition["position_id"];
+                $user->save();
+            }
 
             DB::commit();
             return $this->returnSuccessMessage("position updated sussefully");
