@@ -29,11 +29,11 @@ class AuditLogController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
+     /*   $user = auth()->user();
 
      if (!$user->hasPermissionTo('audit.show')) {
             return $this->Forbidden("you don't have permission to access this page");
-       }
+       }*/
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',
