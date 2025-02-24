@@ -163,13 +163,13 @@ class TypeCustomerController extends Controller {
             ];
 
             $response = $this->customerService->postCall('service/status', $data);
-            $responseData = json_decode(json_encode($response['data']));
+            $responseData = json_decode(json_encode($response));
 
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
             }
 
-            return $this->returnData('validation.custom.type_controller.status_updated');
+            return $this->returnSuccessMessage(__('validation.custom.type_controller.status_updated'));
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
