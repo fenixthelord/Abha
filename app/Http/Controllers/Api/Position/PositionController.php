@@ -166,10 +166,12 @@ class PositionController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $user = User::findOrFail($request->user_id);
-            $user->position_id = $request->position_id;
-            $user->save();
+           
+            foreach ($request->positions as $newPosition) {
+                $user = User::findOrFail($newPosition["user_id"]);
+                $user->position_id = $newPosition["position_id"];
+                $user->save();
+            }
 
             DB::commit();
             return $this->returnSuccessMessage("position updated sussefully");
