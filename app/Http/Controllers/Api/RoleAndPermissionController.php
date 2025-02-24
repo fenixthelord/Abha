@@ -163,6 +163,9 @@ class RoleAndPermissionController extends Controller
 
                 $role->givePermissionTo($request->permission);
 
+                // Clear the permissions cache after assigning permmisions
+                app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
                 $data['role'] = RolesResource::make($role);
                 return $this->returnData($data);
             }
