@@ -23,20 +23,9 @@ class StoreFormTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|array|min:2|max:2',
-            'name.en' => [
-                'required',
-                'string',
-                'min:2',
-                'max:255',
-                Rule::unique('form_types', 'name->en')
-            ],
-            'name.ar' => [
-                'required',
-                'string',
-                'min:2',
-                'max:255',
-                Rule::unique('form_types', 'name->ar')
-            ],        ];
+            'name' => 'required|string',
+
+
+                 ];
     }
 }
