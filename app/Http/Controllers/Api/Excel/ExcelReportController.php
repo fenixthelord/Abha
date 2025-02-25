@@ -63,7 +63,7 @@ class ExcelReportController extends Controller
         try {
             // Retrieve filtering criteria from the request (e.g., department_id, search term)
             $filters = $request->only(['department_id', 'search']);
-
+            $fields = ['name->ar', 'name->en', 'details->en', 'details->ar'];
             // Set the file name based on the current date
             $dateNow = date('Ymd');
 
@@ -87,6 +87,7 @@ class ExcelReportController extends Controller
             ExportExcelJob::dispatch(
                 Service::class,
                 $filters,
+                $fields,
                 ['department'],
                 $filename,
                 [$userId],
@@ -182,6 +183,7 @@ class ExcelReportController extends Controller
 
             // Build filters based on provided request inputs
             $filters = [];
+            $fields = ['auditable_type','user_type','event','user_id'];
             $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
 
             if ($request->filled('model_type')) {
@@ -195,6 +197,9 @@ class ExcelReportController extends Controller
             }
             if ($request->filled('user_id')) {
                 $filters['user_id'] = $request->input('user_id');
+            }
+            if ($request->filled('search')) {
+                $filters['search'] = $request->input('search');
             }
 
 
@@ -221,6 +226,7 @@ class ExcelReportController extends Controller
             ExportExcelJob::dispatch(
                 Audit::class,  // The model to query
                 $filters,      // Applied filters
+                $fields,
                 [],            // No relationships needed
                 $filename,     // Generated file name
                 [$userId],

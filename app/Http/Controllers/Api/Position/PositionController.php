@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Position;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\UpdateEventRequest;
+use App\Http\Requests\Position\ChartPositionsRequest;
 use App\Http\Requests\Position\CreatePositionRequest;
 use App\Http\Requests\Position\DeletePositionRequest;
 use App\Http\Requests\Position\ListOfPositionsRequest;
@@ -63,10 +64,14 @@ class PositionController extends Controller
      * @param Request $request
      * @return ResponseTrait
      */
-    public function chart()
+    public function chart(/*ChartPositionsRequest $request*/)
     {
         try {
-            $MasterPositionPosition = Position::with("children")->whereNull("parent_id")->firstOrFail();
+            $relations = ["children"];
+            if (request()->has("with_employees") && request()->with_employees) {
+                $relations[] = "users";
+            }
+            $MasterPositionPosition = Position::with($relations)->whereNull("parent_id")->firstOrFail();
             $data["positions"] = PositionResource::make($MasterPositionPosition);
             return $this->returnData($data);
         } catch (\Exception $e) {
@@ -202,7 +207,10 @@ class PositionController extends Controller
         }
     }
 
-
+    /**
+     * @param Request $request
+     * @return ResponseTrait
+     */
     public function deleteUser(Request $request)
     {
         try {
@@ -216,17 +224,25 @@ class PositionController extends Controller
                 return $this->returnValidationError($validation);
             }
 
-
             foreach ($request->user_ids as $user_id) {
-                $selected_user = User::findOrFail($user_id);
-                if ($selected_user->hasRole("Master") || $selected_user->id == '11953802-99ad-4961-b7a6-bed53b1004ea') {
-                    return $this->Forbidden(__('validation.custom.userController.master_can_not_be_deleted'));
-                }
-                $selected_user->delete();
-            }   
+                $user = User::findOrFail($user_id);
+                $user->position_id = null;
+                $user->save();
+            }
 
             DB::commit();
             return $this->returnSuccessMessage("users deleted sussefully");
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function userChart()
+    {
+        try {
+            $MasterPositionPosition = Position::with("children", "users")->whereNull("parent_id")->firstOrFail();
+            $data["positions"] = PositionResource::make($MasterPositionPosition);
+            return $this->returnData($data);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

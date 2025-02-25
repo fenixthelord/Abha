@@ -118,7 +118,7 @@ class UserAuthController extends Controller
                         }
                 }
             }
-       /*     $type = FormType::whereJsonContains('name->en', 'user')->first();
+       /*     $type = FormType::where('name', 'user')->first();
             if (!$type){
                 return $this->badRequest('the type is not defined');
             }
