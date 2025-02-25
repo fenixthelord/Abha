@@ -45,6 +45,7 @@ class ExcelReportController extends Controller
                 case "event":
                     return $this->exportEventsToExcel($request);
                     break;
+
                 default:
                     return $this->badRequest($request->export_type . ' not found 😅');
             }
@@ -138,63 +139,33 @@ class ExcelReportController extends Controller
         }
     }
 
-    public function exportPositionsToExcel(Request $request)
-    {
+    public function exportPositionsToExcel(Request $request) {
         try {
-            $request->validate([
-                'search' => 'nullable|string',
-            ]);
-
-            $query = Position::query();
-
-            if ($request->has("search")) {
-                $query->where("name", "LIKE", "%" . $request->search . "%");
-            }
-
+            $filters = $request->only(['search']);
+            $fields = ['name->ar', 'name->en', 'parent_id'];
             $dateNow = date('Ymd');
             $userId = auth('sanctum')->user()->id;
             $filename = "positions_{$dateNow}_{$userId}.xlsx";
 
-            $positions = $query->get();
+            $transformer = new PositionTransformer();
 
-
-            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $sheet->setCellValue('A1', 'ID');
-            $sheet->setCellValue('B1', 'Name');
-            $sheet->setCellValue('C1', 'Parent ID');
-
-            $row = 2;
-            foreach ($positions as $position) {
-                $sheet->setCellValue('A' . $row, $position->id);
-                $sheet->setCellValue('B' . $row, $position->name);
-                $sheet->setCellValue('C' . $row, $position->parent_id);
-
-                $row++;
-            }
-
-            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $response = response()->stream(
-                function() use ($writer) {
-                    $writer->save('php://output');
-                },
-                200,
-                [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-                ]
+            ExportExcelJob::dispatch(
+                Position::class,
+                $filters,
+                $fields,
+                [],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
             );
 
-            return $response;
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
         } catch (\Exception $e) {
-            return $this->handleException($e);
+               return $this->handleException($e);
         }
     }
-
-
-    public function exportEventsToExcel(Request $request)
-    {
+    public function exportEventsToExcel(Request $request) {
         try {
             $request->validate([
                 'service_id' => 'nullable|exists:services,id',
@@ -236,20 +207,6 @@ class ExcelReportController extends Controller
         }
     }
 
-
-
-
-
-    /**
-     * Export Audit Logs to Excel.
-     *
-     * This method dispatches a job to export Audit Log data into an Excel file.
-     * It gathers filtering criteria from the request, defines a transformation
-     * callback for each audit record, and then dispatches the ExportGenericJob.
-     *
-     * @param Request $request The HTTP request instance.
-     * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
-     */
     public function exportAuditLogsToExcel(Request $request)
     {
         try {
