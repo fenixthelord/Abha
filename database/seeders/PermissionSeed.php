@@ -30,11 +30,13 @@ class PermissionSeed extends Seeder
         }
 
         $this->command->info('Permissions seeded successfully!');
-        $this->MasterRole();
-        $this->OwnerRole();
+
 
         $services = ['notification'];
         $this->createAdditionalPermissions($services);
+
+        $this->MasterRole();
+        $this->OwnerRole();
 
     }
 
@@ -147,6 +149,7 @@ class PermissionSeed extends Seeder
                 }
                 $permissions = Permission::all();
                 if (!$permissions->isEmpty()) {
+                    \Log::info($permissions);
 
                     $masterRole->givePermissionTo($permissions);
                 }

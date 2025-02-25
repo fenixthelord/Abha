@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\Api\Type;
 
 use App\Http\Controllers\Controller;
+
 use App\Http\Resources\Customer\CustomerResource;
 use App\Http\Resources\Forms\FormResource;
-use App\Http\Resources\Forms\FormSubmissionResource;
 use App\Http\Resources\Forms\SubmissionResource;
 use App\Models\Forms\Form;
-use App\Models\Forms\FormSubmissionValue;
-use App\Models\Type;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormSubmission;
 
-class TypeCustomerController extends Controller {
+class CustomerTypeController extends Controller {
     use ResponseTrait;
     protected CustomerService $customerService;
 
@@ -200,5 +198,4 @@ class TypeCustomerController extends Controller {
             return $this->handleException($e);
         }
     }
-
 }
