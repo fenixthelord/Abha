@@ -32,6 +32,10 @@ class PermissionSeed extends Seeder
         $this->command->info('Permissions seeded successfully!');
         $this->MasterRole();
         $this->OwnerRole();
+
+        $services = ['notification'];
+        $this->createAdditionalPermissions($services);
+
     }
 
     /**
@@ -207,5 +211,34 @@ class PermissionSeed extends Seeder
                 echo "Error: " . $e->getMessage() . "\n";
             }
         }
+    }
+    public function getAdditionalPermissions($additionalPermissions)
+    {
+        foreach ($additionalPermissions as $permission) {
+            $permissions[$permission][] = $permission.'.show';
+            $permissions[$permission][] = $permission.'.create';
+            $permissions[$permission][] = $permission.'.update';
+            $permissions[$permission][] = $permission.'.delete';
+        }
+        return $permissions;
+    }
+    public function createAdditionalPermissions($services)
+    {
+
+        foreach ($services as $service) {
+            foreach ($this->actions as $action) {
+                Permission::create(
+                    [
+                        'name' => "$service.$action",
+                        'displaying' => "$service.$action",
+                        'guard_name' => 'sanctum',
+                        'group' => "$service",
+                        'is_admin' => 0
+                    ]
+                );
+            }
+        }
+        $this->command->info('Additional permissions created successfully');
+
     }
 }

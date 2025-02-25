@@ -27,6 +27,8 @@ class TypeCustomerController extends Controller {
     public function getCustomersByType(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
+                'page' => ['nullable', 'integer', 'min:1'],
+                'per_page' => ['nullable', 'integer', 'min:1'],
                 'type_id' => ['nullable', 'exists:types,id'],
                 'search' => ['nullable', 'string'],
             ], [
@@ -40,6 +42,8 @@ class TypeCustomerController extends Controller {
             $data = [
                 'type_id' => $request->type_id,
                 'search' => $request->input('search'),
+                'page' => $request->input('page'),
+                'per_page' => $request->input('per_page'),
             ];
 
             $response = $this->customerService->getCall('service/customers', $data);
@@ -80,11 +84,6 @@ class TypeCustomerController extends Controller {
             $forms = Form::whereHas("types", function ($query) use ($request) {
                 $query->where("id", $request->type_id);
             })->with("fields")->get();
-
-            // return $forms;
-            // $forms = Form::where('form_type_id', $request->type_id)
-            //     ->with('fields')
-            //     ->get();
 
             if ($forms->isEmpty()) {
                 return $this->NotFound(__('validation.custom.type_controller.forms_not_found'));
@@ -140,7 +139,8 @@ class TypeCustomerController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
-                'status' => ['required', 'in:0,1,2,3'],
+                'status' => ['required', 'in:0,1,2'],
+                'reason' => ['nullable', 'string'],
             ], [
                 'form_submission_id.exists' => __('validation.custom.type_controller.form_submission_not_found'),
                 'form_submission_id.required' => __('validation.custom.type_controller.form_submission_required'),
@@ -154,26 +154,22 @@ class TypeCustomerController extends Controller {
 
             $form_submission_id = $request->form_submission_id;
             $status = $request->status;
-
+            $reason = $request->reason;
 
             $data = [
                 'form_submission_id' => $form_submission_id,
                 'status' => $status,
+                'reason' => $reason
             ];
 
             $response = $this->customerService->postCall('service/status', $data);
-            $responseData = json_decode(json_encode($response['data']));
+            $responseData = json_decode(json_encode($response));
 
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
             }
 
-            // return $this->returnSuccessMessage([
-            //     'message' => 'Status updated successfully',
-            //     'data' => $data
-            // ]);
-
-            return $this->returnData('Status updated successfully');
+            return $this->returnSuccessMessage(__('validation.custom.type_controller.status_updated'));
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
@@ -195,10 +191,6 @@ class TypeCustomerController extends Controller {
             $response = $this->customerService->deleteCall('service/delete', $data);
             $responseData = json_decode(json_encode($response));
 
-//            if (!Customer::where('customer_type_id', $request->customer_type_id)->exists()) {
-//                return $this->returnError(__('validation.custom.customer_controller.no_customers_found'));
-//            }
-//        return $responseData;
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
             }
