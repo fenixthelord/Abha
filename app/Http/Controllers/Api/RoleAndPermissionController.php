@@ -23,27 +23,6 @@ class RoleAndPermissionController extends Controller
 
     public $translatable = ["displaying", "description"];
 
-    public function __construct()
-    {
-        $permissions = [
-            'index'  => ['role.show'],
-            'ShowRole'  => ['role.show'],
-            'store' => ['role.create'],
-            'SyncPermission'    => ['role.update'],
-            'assignPermission'    => ['role.update'],
-            'assignRole'    => ['role.update'],
-            'DeleteRole'   => ['role.delete'],
-            'removeRoleFromUser'   => ['user.update'],
-            'GetAllPermissions'   => ['permission.update'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
-
     public function index(Request $request)
     {
         try {
@@ -235,7 +214,7 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validatedData);
         }
         try {
-            $this->authorizePermission('role.update');
+            $this->authorizePermission('permission.create');
 
             $user = User::whereId($request->user_id)->first();
             if (!$user) {
