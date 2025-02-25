@@ -23,6 +23,7 @@ class ExportExcelJob implements ShouldQueue
     // Filter and search criteria.
     protected array $filters;
     // Relationships to eager load.
+    protected array $fields;
     protected array $relations;
     // Name of the output Excel file.
     protected string $filename;
@@ -45,6 +46,7 @@ class ExportExcelJob implements ShouldQueue
     public function __construct(
         string   $modelClass,
         array    $filters = [],
+        array    $fields = [],
         array    $relations = [],
         string   $filename = 'export.xlsx',
         array    $userIds = [],
@@ -54,6 +56,7 @@ class ExportExcelJob implements ShouldQueue
     {
         $this->modelClass = $modelClass;
         $this->filters = $filters;
+        $this->fields = $fields;
         $this->relations = $relations;
         $this->filename = $filename;
         $this->userIds = $userIds;
@@ -87,8 +90,7 @@ class ExportExcelJob implements ShouldQueue
                 $searchTerm = $this->filters['search'];
                 $query->where(function ($q) use ($searchTerm) {
                     // Example: search in 'name' and 'details' columns.
-                    $q->where('name', 'like', "%{$searchTerm}%")
-                        ->orWhere('details', 'like', "%{$searchTerm}%");
+                    $q->whereAny($this->fields, 'like', "%{$searchTerm}%");
                 });
             }
 
@@ -139,7 +141,6 @@ class ExportExcelJob implements ShouldQueue
                 'image' => null,
                 'url' => url($excelFileUrl),
             ];
-
 
             // Send the notification using the NotificationService.
             $notificationResponse = app('App\Services\NotificationService')
