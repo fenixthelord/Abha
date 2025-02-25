@@ -6,9 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Jobs\ExportExcelJob;
 use App\Models\Audit;
+use App\Models\Category;
+use App\Models\Department;
 use App\Models\Service;
+use App\Models\User;
 use App\Services\Excel\AuditTransformer;
+use App\Services\Excel\CategoryTransformer;
+use App\Services\Excel\DepartmentTransformer;
 use App\Services\Excel\ServiceTransformer;
+use App\Services\Excel\UserTransformer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +31,17 @@ class ExcelReportController extends Controller
             switch ($request->export_type) {
                 case "service":
                     return $this->exportServicesToExcel($request);
+                    break;
+
+                case "department":
+                    return $this->exportDepartmentToExcel($request);
+                    break;
+                case "user":
+                    return $this->exportUserToExcel($request);
+                    break;
+
+                case "category":
+                    return $this->exportCategoryToExcel($request);
                     break;
 
                 case "audit":
@@ -49,6 +66,84 @@ class ExcelReportController extends Controller
      * @param Request $request The HTTP request instance.
      * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
      */
+    public function exportDepartmentToExcel(Request $request)
+    {
+        try {
+            $filters = $request->only(['search']);
+            $fields = ['name->ar', 'name->en'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "department_{$dateNow}_{$userId}.xlsx";
+            $transform = new DepartmentTransformer();
+            ExportExcelJob::dispatch(
+                Department::class,
+                $filters,
+                $fields,
+                [],
+                $filename,
+                [$userId],
+                $userId,
+                [$transform, 'transform']
+            );
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
+
+    public function exportCategoryToExcel(Request $request)
+    {
+        try {
+
+            $filters = $request->only(['department_id', 'search']);
+            $fields = ['name->ar', 'name->en', 'parent_id'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "category_{$dateNow}_{$userId}.xlsx";
+            $transform = new CategoryTransformer();
+            ExportExcelJob::dispatch(
+                Category::class,
+                $filters,
+                $fields,
+                ['department', 'parent', 'children'],
+                $filename,
+                [$userId],
+                $userId,
+                [$transform, 'transform']
+            );
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
+
+    public function exportUserToExcel(Request $request)
+    {
+        try {
+
+            $filters = $request->only(['search']);
+            $fields = ['phone', 'email', 'last_name', 'first_name'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "user_{$dateNow}_{$userId}.xlsx";
+            $transform = new UserTransformer();
+            ExportExcelJob::dispatch(
+                User::class,
+                $filters,
+                $fields,
+                ['department',
+                    'position',],
+                $filename,
+                [$userId],
+                $userId,
+                [$transform, 'transform']
+            );
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
+
     public function exportServicesToExcel(Request $request)
     {
         try {
