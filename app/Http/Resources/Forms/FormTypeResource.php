@@ -16,7 +16,7 @@ class FormTypeResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->getTranslations("name"),
+            'name' => $this->name,
             //'forms' => FormResource::collection($this->whenLoaded('forms')),
         ];
     }
