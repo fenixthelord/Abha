@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Jobs\ExportExcelJob;
 use App\Models\Audit;
+use App\Models\Event;
 use App\Models\Position;
 use App\Models\Service;
 use App\Services\Excel\AuditTransformer;
@@ -38,7 +39,11 @@ class ExcelReportController extends Controller
                     break;
 
                 case "position":
-                    return $this->exportPositions($request);
+                    return $this->exportPositionsToExcel($request);
+                    break;
+
+                case "event":
+                    return $this->exportEventsToExcel($request);
                     break;
                 default:
                     return $this->badRequest($request->export_type . ' not found 😅');
@@ -109,7 +114,7 @@ class ExcelReportController extends Controller
         try {
 
             $filters = $request->only(['service_id', 'form_id', 'search']);
-
+            $fields = ['name->ar', 'name->en', 'details->en', 'details->ar'];
             $dateNow = date('Ymd');
             $userId = auth('sanctum')->user()->id;
             $filename = "types_{$dateNow}_{$userId}.xlsx";
@@ -119,6 +124,7 @@ class ExcelReportController extends Controller
             ExportExcelJob::dispatch(
                 \App\Models\Type::class,
                 $filters,
+                $fields,
                 ['service', 'form'],
                 $filename,
                 [$userId],
@@ -131,20 +137,105 @@ class ExcelReportController extends Controller
             return $this->handleException($e);
         }
     }
-    public function exportPositions()
+
+    public function exportPositionsToExcel(Request $request)
     {
         try {
-            $positions = Position::with(['parent', 'children'])->get();
+            $request->validate([
+                'search' => 'nullable|string',
+            ]);
 
-            $transformedPositions = $positions->map(function ($position) {
-                return (new PositionTransformer())->transform($position);
-            });
+            $query = Position::query();
 
-            return $this->exportToExcel($transformedPositions, 'positions_report.xlsx');
+            if ($request->has("search")) {
+                $query->where("name", "LIKE", "%" . $request->search . "%");
+            }
+
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "positions_{$dateNow}_{$userId}.xlsx";
+
+            $positions = $query->get();
+
+
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $sheet->setCellValue('A1', 'ID');
+            $sheet->setCellValue('B1', 'Name');
+            $sheet->setCellValue('C1', 'Parent ID');
+
+            $row = 2;
+            foreach ($positions as $position) {
+                $sheet->setCellValue('A' . $row, $position->id);
+                $sheet->setCellValue('B' . $row, $position->name);
+                $sheet->setCellValue('C' . $row, $position->parent_id);
+
+                $row++;
+            }
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $response = response()->stream(
+                function() use ($writer) {
+                    $writer->save('php://output');
+                },
+                200,
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                ]
+            );
+
+            return $response;
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
+
+
+    public function exportEventsToExcel(Request $request)
+    {
+        try {
+            $request->validate([
+                'service_id' => 'nullable|exists:services,id',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+            ]);
+
+            $filters = [];
+            if ($request->filled('service_id')) {
+                $filters['service_id'] = $request->input('service_id');
+            }
+            if ($request->filled('start_date')) {
+                $filters['start_date'] = Carbon::parse($request->input('start_date'))->startOfDay();
+            }
+            if ($request->filled('end_date')) {
+                $filters['end_date'] = Carbon::parse($request->input('end_date'))->endOfDay();
+            }
+            $fields = ['name->ar', 'name->en'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "events_{$dateNow}_{$userId}.xlsx";
+
+            $transformer = new \App\Services\Excel\EventTransformer();
+
+            ExportExcelJob::dispatch(
+                Event::class,
+                $filters,
+                $fields,
+                [],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
+            );
+
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
 
 
 
