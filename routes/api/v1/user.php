@@ -16,7 +16,7 @@ Route::prefix('user')->group(function () {
             Route::post('restore_user', [UserController::class, 'restoreUser']);
             Route::post('search', [UserController::class, 'searchUser']);
             Route::post('change-email', [UserController::class, 'emailOtp']);
-            Route::put('change-email', [UserController::class, 'cahngeEmail']);
+            Route::put('change-email', [UserController::class, 'changeEmail']);
         });
     });
 });
