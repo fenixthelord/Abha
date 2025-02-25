@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DepartmentResource;
+use App\Http\Traits\HasPermissionTrait;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Http\Traits\ResponseTrait;
@@ -15,27 +16,13 @@ use App\Http\Traits\Paginate;
 
 class DepartmentsControllers extends Controller
 {
-    use ResponseTrait, Paginate;
+    use ResponseTrait, Paginate, HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'index'  => ['department.show'],
-            'show'  => ['department.show'],
-            'store' => ['department.create'],
-            'update' => ['department.update'],
-            'destroy'=> ['department.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
     public function index(Request $request)
     {
         try {
+            $this->authorizePermission('department.show');
+
             /*$pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
                        $departments = Department::query()
@@ -63,8 +50,7 @@ class DepartmentsControllers extends Controller
     public function show(Request $request)
     {
         try {
-
-
+            $this->authorizePermission('department.show');
 
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
@@ -88,8 +74,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
-
-
+            $this->authorizePermission('department.create');
 
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'array', 'max:254'],
@@ -117,6 +102,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('department.update');
 
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'exists:departments,id']
@@ -152,6 +138,7 @@ class DepartmentsControllers extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('department.delete');
 
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:departments,id',

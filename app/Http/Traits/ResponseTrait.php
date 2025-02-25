@@ -6,6 +6,7 @@ use Dotenv\Exception\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 trait ResponseTrait
 {
@@ -122,6 +123,10 @@ trait ResponseTrait
         } elseif ($e instanceof \Illuminate\Database\QueryException) {
 
             return $this->handleQueryException($e);
+        } elseif ($e instanceof AccessDeniedHttpException){
+
+            return $this->Forbidden($e->getMessage());
+
         } else {
 
             return $this->returnError($e->getMessage());

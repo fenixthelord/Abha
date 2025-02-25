@@ -14,6 +14,7 @@ use App\Http\Resources\Chart\HeadChartOrgResource;
 use App\Http\Resources\Org\ChartOrgResource;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Department;
 use App\Models\Organization;
@@ -25,36 +26,18 @@ use Illuminate\Support\Facades\Validator;
 
 class OrganizationController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
     private const HEAD_MANAGER_POSITION = [
         'en' => "head manager",
         'ar' => "رئيس القسم"
     ];
 
-    public function __construct()
-    {
-        $permissions = [
-            //To be reviewed
-            'index'  => ['organization.show'],
-            'delete'  => ['organization.delete'],
-            'getDepartmentManagers'  => ['organization.show'],
-            'getDepartmentEmployees'  => ['organization.show'],
-            'AddEmployee'  => ['organization.create'],
-            'updateEmployee'  => ['organization.create'],
-            'filter'  => ['organization.show','user.show'],
-            'chart'  => ['organization.show','user.show'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
     public function getDepartmentManagers(ManagerRequest $request)
     {
         try {
+            $this->authorizePermission('organization.show');
+
             $department = Department::whereId($request->department_id)->pluck('id')->first();
             $manager = User::whereId($request->manager_id)->pluck('id')->first();
             $employee = Organization::where('department_id', $department)->pluck('employee_id')->toarray();
@@ -91,6 +74,8 @@ class OrganizationController extends Controller
     public function getDepartmentEmployees(AllRequest $request)
     {
         try {
+            $this->authorizePermission('organization.show');
+
             $availableManagers = Organization::getManagersAndEmployees($request->department_id);
             $query = User::query();
             if (!empty($availableManagers)) {
@@ -109,6 +94,8 @@ class OrganizationController extends Controller
     public function AddEmployee(AddOrgRequest $request)
     {
         try {
+            $this->authorizePermission('organization.create');
+
             DB::beginTransaction();
             if ($request->user_id == $request->manager_id) {
                 return $this->badRequest('manager and employee must not be the same');
@@ -166,6 +153,8 @@ class OrganizationController extends Controller
     public function UpdateEmployee(EditOrgRequest $request)
     {
         try {
+            $this->authorizePermission('organization.update');
+
             if ($request->user_id == $request->manager_id) {
                 return $this->badRequest('manager and employee must no be the same');
             }
@@ -210,6 +199,8 @@ class OrganizationController extends Controller
     public function index(OrgFilterRequest $request)
     {
         try {
+            $this->authorizePermission('organization.show');
+
             $perPage      = $request->input('per_page', $this->per_page);
             $pageNumber   = $request->input('page', $this->pageNumber);
             $departmentId = $request->input('department_id');
@@ -254,6 +245,8 @@ class OrganizationController extends Controller
     public function filter(FilterOrgRequest $request)
     {
         try {
+            $this->authorizePermission(['organization.show','user.show']);
+
             $managersIDs = Organization::getManagersAndEmployees($request->department_id);
             $managers = User::whereIn("id", $managersIDs)->get();
             $data["managers"] = UserResource::collection($managers)->each->onlyName();
@@ -266,6 +259,8 @@ class OrganizationController extends Controller
     public function delete(Request $request)
     {
         try {
+            $this->authorizePermission('organization.delete');
+
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'uuid', Rule::exists('organizations', 'id')->where("deleted_at", null)],
@@ -286,6 +281,8 @@ class OrganizationController extends Controller
     public function chart(ChartOrgRequest $request)
     {
         try {
+            $this->authorizePermission(['organization.show','user.show']);
+
             $managerID = Organization::getOnlyHeadManager($request->department_id);
 
             $manager = User::findOrFail($managerID);
