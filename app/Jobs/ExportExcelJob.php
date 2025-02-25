@@ -102,7 +102,6 @@ class ExportExcelJob implements ShouldQueue
             // Initialize an array to collect export data.
             $exportData = [];
 
-
             // Retrieve data in chunks to manage memory usage.
             $query->chunk(100, function ($items) use (&$exportData) {
                 foreach ($items as $item) {
@@ -115,11 +114,11 @@ class ExportExcelJob implements ShouldQueue
                     }
                 }
             });
+
             // Generate the Excel file and obtain its URL.
             // This method is assumed to be defined in the FileExportReportTrait.
             $excelFileUrl = $this->exportData($exportData, $this->filename);
-        //    dd($excelFileUrl);
-
+            \Log::info($excelFileUrl);
             // Retrieve the current user ID using Sanctum authentication.
 
             $dateNow = date('Ymd');

@@ -8,9 +8,12 @@ use App\Jobs\ExportExcelJob;
 use App\Models\Audit;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\Event;
+use App\Models\Position;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\Excel\AuditTransformer;
+use App\Services\Excel\PositionTransformer;
 use App\Services\Excel\CategoryTransformer;
 use App\Services\Excel\DepartmentTransformer;
 use App\Services\Excel\ServiceTransformer;
@@ -46,6 +49,18 @@ class ExcelReportController extends Controller
 
                 case "audit":
                     return $this->exportAuditLogsToExcel($request);
+                    break;
+
+                case "type":
+                    return $this->exportTypesToExcel($request);
+                    break;
+
+                case "position":
+                    return $this->exportPositionsToExcel($request);
+                    break;
+
+                case "event":
+                    return $this->exportEventsToExcel($request);
                     break;
 
                 default:
@@ -190,16 +205,103 @@ class ExcelReportController extends Controller
         }
     }
 
-    /**
-     * Export Audit Logs to Excel.
-     *
-     * This method dispatches a job to export Audit Log data into an Excel file.
-     * It gathers filtering criteria from the request, defines a transformation
-     * callback for each audit record, and then dispatches the ExportGenericJob.
-     *
-     * @param Request $request The HTTP request instance.
-     * @return \Illuminate\Http\JsonResponse  JSON response indicating that the export process has started.
-     */
+    public function exportTypesToExcel(Request $request)
+    {
+        try {
+
+            $filters = $request->only(['service_id', 'form_id', 'search']);
+            $fields = ['name->ar', 'name->en', 'details->en', 'details->ar'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "types_{$dateNow}_{$userId}.xlsx";
+
+            $transformer = new \App\Services\Excel\TypeTransformer();
+
+            ExportExcelJob::dispatch(
+                \App\Models\Type::class,
+                $filters,
+                $fields,
+                ['service', 'form'],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
+            );
+
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function exportPositionsToExcel(Request $request) {
+        try {
+            $filters = $request->only(['search']);
+            $fields = ['name->ar', 'name->en', 'parent_id'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "positions_{$dateNow}_{$userId}.xlsx";
+
+            $transformer = new PositionTransformer();
+
+            ExportExcelJob::dispatch(
+                Position::class,
+                $filters,
+                $fields,
+                [],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
+            );
+
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $e) {
+               return $this->handleException($e);
+        }
+    }
+    public function exportEventsToExcel(Request $request) {
+        try {
+            $request->validate([
+                'service_id' => 'nullable|exists:services,id',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+            ]);
+
+            $filters = [];
+            if ($request->filled('service_id')) {
+                $filters['service_id'] = $request->input('service_id');
+            }
+            if ($request->filled('start_date')) {
+                $filters['start_date'] = Carbon::parse($request->input('start_date'))->startOfDay();
+            }
+            if ($request->filled('end_date')) {
+                $filters['end_date'] = Carbon::parse($request->input('end_date'))->endOfDay();
+            }
+            $fields = ['name->ar', 'name->en'];
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "events_{$dateNow}_{$userId}.xlsx";
+
+            $transformer = new \App\Services\Excel\EventTransformer();
+
+            ExportExcelJob::dispatch(
+                Event::class,
+                $filters,
+                $fields,
+                [],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
+            );
+
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
     public function exportAuditLogsToExcel(Request $request)
     {
         try {

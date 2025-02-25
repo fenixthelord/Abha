@@ -10,9 +10,10 @@ Route::group(["prefix" => "/forms"], function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('activeVerify')->group(function () {
             Route::get('/', [FormBuilderController::class, 'list'])->name('forms.list');
-            Route::post('/', [FormBuilderController::class, 'store'])->name('forms.store');
+            Route::post('/add', [FormBuilderController::class, 'store'])->name('forms.store');
             Route::get('/show', [FormBuilderController::class, 'show'])->name('forms.show');
             Route::put('/update', [FormBuilderController::class, 'update'])->name('forms.update');
+            Route::post('/show/type', [FormBuilderController::class, 'ShowByType'])->name('forms.showType');
             Route::delete('delete', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
             Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
@@ -21,7 +22,7 @@ Route::group(["prefix" => "/forms"], function () {
         });
     });
     /**
-     * This route for Customer Service "FOR TEST ONLY - WITHOUT AUTH""     
+     * This route for Customer Service "FOR TEST ONLY - WITHOUT AUTH""
      */
     Route::post('/submit-customer', [FormSubmissionController::class, 'submitFormCustomer']);
 

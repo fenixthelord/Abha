@@ -13,10 +13,12 @@ use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
 use App\Models\Forms\FormFieldDataSource;
 use App\Models\Forms\FormFieldOption;
+use App\Models\Forms\FormType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+
 
 class FormBuilderController extends Controller
 {
@@ -62,24 +64,67 @@ class FormBuilderController extends Controller
     {
         try {
 
+
             DB::beginTransaction();
-            $form = Form::create([
-                'name' => $request->name,
-                'form_type_id' => $request->form_type_id,
-            ]);
+
+
+               $model="App\\Models\\" . $request->form_type;
+                if (!class_exists($model)) {
+                    return $this->returnError("Invalid form_type: Class '$model' not found.");
+                }
+
+
+
+
+
+
+
+
+
+                 $form_type=FormType::firstOrCreate([
+                     'name'=>$request->form_type,
+                     'form_index'=>$request->form_index??null
+                 ]);
+               $form_id=$form_type->id;
+
+
+
+
+            $form = Form::updateOrCreate(
+               [ 'form_type_id' => $form_id],
+               [ 'name' => $request->name]
+
+            );
 
 
             foreach ($request['fields'] as $field_data) {
-                $form_field = $form->fields()->create($field_data);
-                if (isset($field_data['options']) && in_array($field_data['type'], ['date', 'dropdown', 'radio', 'checkbox']))
+
+                $form_field = $form->fields()->updateOrCreate(
+                    ['id' => $field_data['id'] ?? null],
+                    $field_data
+                );
+
+
+                if (isset($field_data['options']) && in_array($field_data['type'], ['date', 'dropdown', 'radio', 'checkbox'])) {
                     foreach ($field_data['options'] as $option_data) {
-                        $form_field->options()->create($option_data);
+                        $form_field->options()->updateOrCreate(
+                            ['id' => $option_data['id'] ?? null],
+                            $option_data
+                        );
                     }
-                if (isset($field_data['sources']) && $field_data['type'] == 'dropdown')
+                }
+
+
+                if (isset($field_data['sources']) && $field_data['type'] == 'dropdown') {
                     foreach ($field_data['sources'] as $data_source) {
-                        $form_field->sources()->create($data_source);
+                        $form_field->sources()->updateOrCreate(
+                            ['id' => $data_source['id'] ?? null],
+                            $data_source
+                        );
                     }
+                }
             }
+
 
             $form = Form::with(['type', 'fields.options', 'fields.sources'])->findOrFail($form->id);
             $data['form'] =  FormResource::make($form);
@@ -157,6 +202,51 @@ class FormBuilderController extends Controller
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->returnError($e->getMessage());
+        }
+    }
+    public function ShowByType()
+    {
+
+            try {
+
+                $validate = Validator::make(request()->all(), [
+                    'type' => 'required|string|exists:form_types,name',
+                    'form_index' => [
+                        'nullable',
+                        'string',
+                        'exists:form_types,form_index',
+                        request()->input('type') !== 'User' ? 'required' : 'nullable',
+                    ],
+                ]);
+
+
+                if ($validate->fails()) {
+                    return $this->returnValidationError($validate);
+                }
+
+
+                $form = FormType::where('name', request()->input('type'))
+                    ->when(request()->filled('form_index'), function ($query) {
+                        $query->where('form_index', request()->input('form_index'));
+                    })->first();
+
+                if (!$form) {
+                    return $this->badRequest('Form not found');
+                }
+
+
+                $formWithRelations = Form::with(['type', 'fields.options', 'fields.sources'])
+                    ->where('form_type_id', $form->id)
+                    ->firstOrFail();
+
+
+                    $data['form']= FormResource::make($formWithRelations);
+                return $this->returnData($data);
+
+
+
+        } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
     }

@@ -1,12 +1,15 @@
 <?php
 
-namespace App\Http\Requests\Forms;
+namespace App\Http\Requests\Position;
 
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreFormTypeRequest extends FormRequest
+class ChartPositionsRequest extends FormRequest
 {
+
+    use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,9 +26,11 @@ class StoreFormTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-
-
-                 ];
+            "with_employees" => ["sometimes" , "boolean"]
+        ];
+    }
+    public function failedValidation($validator)
+    {
+        throw new HttpResponseException($this->returnValidationError($validator));
     }
 }
