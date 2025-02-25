@@ -11,4 +11,5 @@ Route::group(["prefix" => "position", "middleware" => ["auth:sanctum", "activeVe
     Route::delete('/delete', [PositionController::class, 'delete']);    
     
     Route::match(['put', 'patch', 'post'], '/update/user', [PositionController::class, 'updateUserPosition']);
+    Route::delete('/user/delete', [PositionController::class, 'deleteUser']);
 });
