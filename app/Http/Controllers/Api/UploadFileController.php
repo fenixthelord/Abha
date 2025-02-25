@@ -17,9 +17,9 @@ class UploadFileController extends Controller
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'document' => 'required|file|size:' . SELF::FILE_SIZE,
+            'document' => 'required|file|max:' . SELF::FILE_SIZE,
         ], [
-            'document.size' =>  "The document field must be " . SELF::FILE_SIZE / 1024 . " MB or less."
+            'document.max' =>  "The document field must be " . SELF::FILE_SIZE / 1024 . " MB or less."
         ]);
 
         if ($validator->fails()) {
