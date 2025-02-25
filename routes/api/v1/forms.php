@@ -13,6 +13,7 @@ Route::group(["prefix" => "/forms"], function () {
             Route::post('/add', [FormBuilderController::class, 'store'])->name('forms.store');
             Route::get('/show', [FormBuilderController::class, 'show'])->name('forms.show');
             Route::put('/update', [FormBuilderController::class, 'update'])->name('forms.update');
+            Route::post('/show/type', [FormBuilderController::class, 'ShowByType'])->name('forms.showType');
             Route::delete('delete', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
             Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
