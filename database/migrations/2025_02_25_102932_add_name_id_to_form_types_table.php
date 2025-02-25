@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_types', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('name');
-            $table->softDeletes();
-            $table->timestamps();
+        Schema::table('form_types', function (Blueprint $table) {
+            $table->uuid('form_index')->nullable();
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('form_types');
+        Schema::table('form_types', function (Blueprint $table) {
+            //
+        });
     }
 };
