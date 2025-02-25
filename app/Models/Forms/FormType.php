@@ -12,8 +12,8 @@ class FormType extends BaseModel
 {
     use HasTranslations, SoftDeletes;
 
-    protected $fillable = ['name'];
-    private $translatable = ['name'];
+    protected $fillable = ['name','form_index'];
+
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
