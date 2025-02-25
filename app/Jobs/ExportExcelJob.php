@@ -116,7 +116,7 @@ class ExportExcelJob implements ShouldQueue
             // Generate the Excel file and obtain its URL.
             // This method is assumed to be defined in the FileExportReportTrait.
             $excelFileUrl = $this->exportData($exportData, $this->filename);
-
+            \Log::info($excelFileUrl);
             // Retrieve the current user ID using Sanctum authentication.
 
             $dateNow = date('Ymd');

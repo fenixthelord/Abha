@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use App\Jobs\ExportExcelJob;
 use App\Models\Audit;
+use App\Models\Position;
 use App\Models\Service;
 use App\Services\Excel\AuditTransformer;
+use App\Services\Excel\PositionTransformer;
 use App\Services\Excel\ServiceTransformer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,6 +33,13 @@ class ExcelReportController extends Controller
                     return $this->exportAuditLogsToExcel($request);
                     break;
 
+                case "type":
+                    return $this->exportTypesToExcel($request);
+                    break;
+
+                case "position":
+                    return $this->exportPositions($request);
+                    break;
                 default:
                     return $this->badRequest($request->export_type . ' not found 😅');
             }
@@ -93,6 +102,51 @@ class ExcelReportController extends Controller
             return $this->handleException($e);
         }
     }
+
+    public function exportTypesToExcel(Request $request)
+    {
+        try {
+
+            $filters = $request->only(['service_id', 'form_id', 'search']);
+
+            $dateNow = date('Ymd');
+            $userId = auth('sanctum')->user()->id;
+            $filename = "types_{$dateNow}_{$userId}.xlsx";
+
+            $transformer = new \App\Services\Excel\TypeTransformer();
+
+            ExportExcelJob::dispatch(
+                \App\Models\Type::class,
+                $filters,
+                ['service', 'form'],
+                $filename,
+                [$userId],
+                $userId,
+                [$transformer, 'transform']
+            );
+
+            return $this->returnSuccessMessage('Export process started. You will receive a notification when it is ready.');
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+    public function exportPositions()
+    {
+        try {
+            $positions = Position::with(['parent', 'children'])->get();
+
+            $transformedPositions = $positions->map(function ($position) {
+                return (new PositionTransformer())->transform($position);
+            });
+
+            return $this->exportToExcel($transformedPositions, 'positions_report.xlsx');
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+
+
 
     /**
      * Export Audit Logs to Excel.
