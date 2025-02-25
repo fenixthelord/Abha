@@ -13,10 +13,12 @@ use App\Models\Forms\Form;
 use App\Models\Forms\FormField;
 use App\Models\Forms\FormFieldDataSource;
 use App\Models\Forms\FormFieldOption;
+use App\Models\Forms\FormType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+
 
 class FormBuilderController extends Controller
 {
@@ -62,10 +64,46 @@ class FormBuilderController extends Controller
     {
         try {
 
+
             DB::beginTransaction();
+
+            if($request->form_type!="User"){
+               $model="App\\Models\\" . $request->form_type;
+                if (!class_exists($model)) {
+                    return $this->returnError("Invalid form_type: Class '$model' not found.");
+                }
+
+                $formType = FormType::where('name', $request->form_type)
+                    ->where("form_index", $request->form_index)
+                    ->first();
+
+
+                if($formType){
+                    $formType->forcedelete();
+                }
+
+
+
+               $index=  $model::where('id',$request->form_index);
+
+               if(!$index){
+                   return $this->returnError("Form Index Not Found");
+               }
+                 $form_type=FormType::create([
+                     'name'=>$request->form_type,
+                     'form_index'=>$request->form_index
+                 ]);
+               $form_id=$form_type->id;
+             }
+
+            else{
+                $formType = FormType::where('name', 'User')->first();
+                $form_id = $formType ? $formType->id : null;
+            }
+
             $form = Form::create([
                 'name' => $request->name,
-                'form_type_id' => $request->form_type_id,
+                'form_type_id' => $form_id,
             ]);
 
 
