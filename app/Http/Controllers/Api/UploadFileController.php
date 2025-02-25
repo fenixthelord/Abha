@@ -12,7 +12,7 @@ class UploadFileController extends Controller
 {
     use FileUploader, ResponseTrait;
 
-    private const FILE_SIZE = 15360;
+    private const FILE_SIZE = 15 * 1024; // 15 MB
 
     public function upload(Request $request)
     {
