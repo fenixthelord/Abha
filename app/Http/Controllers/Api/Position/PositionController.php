@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Position;
 
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Requests\Position\CreatePositionRequest;
@@ -17,6 +18,7 @@ use App\Models\Position;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PositionController extends Controller
 {
@@ -195,6 +197,36 @@ class PositionController extends Controller
 
             DB::commit();
             return $this->returnSuccessMessage("position updated sussefully");
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+
+    public function deleteUser(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validation = Validator::make($request->all(), [
+                'user_ids' => 'required|array',
+                'user_ids.*' => 'required|exists:users,id,deleted_at,NULL',
+            ]);
+
+            if ($validation->fails()) {
+                return $this->returnValidationError($validation);
+            }
+
+
+            foreach ($request->user_ids as $user_id) {
+                $selected_user = User::findOrFail($user_id);
+                if ($selected_user->hasRole("Master") || $selected_user->id == '11953802-99ad-4961-b7a6-bed53b1004ea') {
+                    return $this->Forbidden(__('validation.custom.userController.master_can_not_be_deleted'));
+                }
+                $selected_user->delete();
+            }   
+
+            DB::commit();
+            return $this->returnSuccessMessage("users deleted sussefully");
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
