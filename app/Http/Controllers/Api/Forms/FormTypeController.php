@@ -43,7 +43,7 @@ class FormTypeController extends Controller
             $pageNumber = $request->input('page', 1);
             $perPage = $request->input('perPage', 10);
 
-            $formTypes = FormType::with('forms')->paginate($perPage, ['*'], 'page', $pageNumber);
+            $formTypes = FormType::with('forms')->distinct()->paginate($perPage, ['*'], 'page', $pageNumber);
             $data['form_types'] = FormTypeResource::collection($formTypes);
 
             return $this->PaginateData($data, $formTypes);
