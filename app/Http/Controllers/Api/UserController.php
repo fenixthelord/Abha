@@ -6,6 +6,7 @@ use App\Events\SendOtpPhone;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\FileUploader;
+use App\Http\Traits\HasPermissionTrait;
 use App\Mail\OtpMail;
 use App\Models\Role\Role;
 use Carbon\Carbon;
@@ -29,29 +30,13 @@ class UserController extends Controller
     use FileUploader;
     use ResponseTrait;
     use Paginate;
+    use HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'index' => ['user.show'],
-            'store' => ['user.create'],
-            'updateAdmin' => ['user.update'],
-            'deleteUser' => ['user.delete'],
-            'showDeleteUser' => ['user.delete'],
-            'restoreUser' => ['user.restore'],
-            'active' => ['user.restore'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
 
     public function index(Request $request)
     {
         try {
+            $this->authorizePermission('user.show');
 
             /* $perPage = request()->input('perPage', 10);
              $pageNumber = request()->input('page', 1);*/
@@ -77,6 +62,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.update');
+
             $user = auth()->user();
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|regex:/^[\p{Arabic}a-zA-Z\s]+$/u|min:3|max:255',
@@ -129,6 +116,11 @@ class UserController extends Controller
 
     public function emailOtp(Request $request)
     {
+        try {
+            $this->authorizePermission('user.update');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users,email',
         ]);
@@ -147,6 +139,11 @@ class UserController extends Controller
 
     public function cahngeEmail(Request $request)
     {
+        try {
+            $this->authorizePermission('user.update');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users,email',
             'otp' => 'required|string|min:6|max:6|',
@@ -176,6 +173,8 @@ class UserController extends Controller
 //        }
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.update');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|string|exists:users,id',
             ], messageValidation());
@@ -255,6 +254,8 @@ class UserController extends Controller
 //        }
 
         try {
+            $this->authorizePermission('user.restore');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|string|exists:users,id',
                 'active' => 'required|in:0,1',
@@ -294,6 +295,8 @@ class UserController extends Controller
 
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.delete');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|string|exists:users,id',
             ], messageValidation());
@@ -322,6 +325,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.show');
+
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             $search = $request->search;
@@ -353,6 +358,8 @@ class UserController extends Controller
     public function searchUser(Request $request)
     {
         try {
+            $this->authorizePermission('user.show');
+
             $pageNumber = request()->input('page', 1);
             $perPage = request()->input('perPage', 10);
             $query = User::query();
@@ -380,6 +387,8 @@ class UserController extends Controller
     {
 
         try {
+            $this->authorizePermission('user.show');
+
             $user = auth()->user();
 //            if (!$user->hasPermissionTo('user.delete')) {
 //                return $this->Forbidden(__('validation.custom.userController.permission_denied'));
@@ -407,6 +416,9 @@ class UserController extends Controller
 //        }
         DB::beginTransaction();
         try {
+
+            $this->authorizePermission('user.restore');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|string|exists:users,id',
             ], messageValidation());
@@ -430,6 +442,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.update');
+
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'type' => 'required|string',
@@ -462,6 +476,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.update');
+
             $user = auth()->user();
             if (Carbon::now()->lessThan($user->otp_expires_at) || $user->otp_verified == true) {
                 return $this->badRequest(__('validation.custom.userController.otp_expired'));
@@ -485,6 +501,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('user.update');
+
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|string',
             ], messageValidation());
@@ -512,6 +530,7 @@ class UserController extends Controller
 
     public function userProfile()
     {
+
         $user = auth()->user();
         $data = [
             'user' => UserResource::make($user),
@@ -523,6 +542,8 @@ class UserController extends Controller
     public function show(Request $request)
     {
         try {
+            $this->authorizePermission('user.show');
+
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required|string|exists:users,id',
             ]);
