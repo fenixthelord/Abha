@@ -113,7 +113,7 @@ class CustomerTypeController extends Controller {
             ];
 
             $response = $this->customerService->getCall('service/get-status', $data);
-            $responseData = json_decode(json_encode($response['data']));
+            $responseData = json_decode(json_encode($response));
 
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
