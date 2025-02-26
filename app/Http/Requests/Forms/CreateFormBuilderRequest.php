@@ -24,7 +24,7 @@ class CreateFormBuilderRequest extends FormRequest
                 'nullable',
                 'string',
                 'exists:form_types,form_index',
-                request()->input('type') !== 'User' ? 'required' : 'nullable',
+                Rule::requiredIf(request()->input('form_type') !== 'User') // Correct condition
             ],
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
