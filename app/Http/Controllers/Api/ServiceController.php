@@ -20,7 +20,7 @@ class ServiceController extends Controller {
 
     public function index(Request $request) {
         try {
-            $this->authorizePermission('service.show');
+//            $this->authorizePermission('service.show');
 
             $validator = Validator::make($request->all(), [
                 'page' => ['nullable', 'integer', 'min:1'],
