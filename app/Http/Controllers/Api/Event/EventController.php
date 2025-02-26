@@ -7,10 +7,11 @@ use App\Http\Requests\Events\CreateEventRequest;
 use App\Http\Requests\Events\ListEventsRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Resources\EventResource;
+use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
-use App\Models\Service;
+use App\Models\Forms\FormType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -158,6 +159,24 @@ class EventController extends Controller
             return $this->returnData($data);
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->handleException($e);
+        }
+    }
+    public function getForm()
+    {
+        try {
+            $validation = Validator::make(request()->all(), [
+                'id' => 'required|exists:events,id',
+            ]);
+            if ($validation->fails()) {
+                return $this->returnValidationError($validation);
+            }
+            $event = Event::find(request()->input('id'));
+            $formType = FormType::where("name", "Event")->where("form_index",$event->id)->first();
+            $formId = $formType->forms()->with(['type', 'fields.options', 'fields.sources'])->get();
+            $data['form'] =  FormResource::collection($formId);
+            return $this->returnData($data);
+        }catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
