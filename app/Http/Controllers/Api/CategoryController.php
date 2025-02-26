@@ -9,6 +9,7 @@ use App\Http\Requests\Categories\DeleteCategoryRequest;
 use App\Http\Requests\Categories\FilterRequest;
 use App\Http\Requests\Categories\UpdateCategoriesRequest;
 use App\Http\Resources\CategoryResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Category;
 use App\Models\Department;
@@ -19,23 +20,7 @@ use Illuminate\Testing\Constraints\CountInDatabase;
 
 class CategoryController extends Controller
 {
-    use ResponseTrait;
-    public function __construct()
-    {
-        $permissions = [
-            'list'  => ['category.show'],
-            'filter'  => ['category.show'],
-            'create' => ['category.create'],
-            'update'    => ['category.update'],
-            'delete'   => ['category.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
+    use ResponseTrait, HasPermissionTrait;
 
     /**
      * List of categories , All parent categories That the parentID is null
@@ -46,6 +31,8 @@ class CategoryController extends Controller
     public function list(ListOfCategoriesRequest $request)
     {
         try {
+            $this->authorizePermission('category.show');
+
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
@@ -92,6 +79,8 @@ class CategoryController extends Controller
     public function filter(FilterRequest $request)
     {
         try {
+            $this->authorizePermission('category.show');
+
             $department = Department::findOrFail($request->department_id);
 
             $categories = Category::query()
@@ -116,6 +105,8 @@ class CategoryController extends Controller
     public function delete(DeleteCategoryRequest $request)
     {
         try {
+            $this->authorizePermission('category.delete');
+
             DB::beginTransaction();
 
             $category = Category::whereId($request->id)->firstOrFail();
@@ -138,6 +129,8 @@ class CategoryController extends Controller
     public function update(UpdateCategoriesRequest $request)
     {
         try {
+            $this->authorizePermission('category.update');
+
             DB::beginTransaction();
 
             $department = Department::findOrFail($request->department_id);
@@ -168,7 +161,11 @@ class CategoryController extends Controller
      */
     private function updateCategories($department, $categories, $parentId = null)
     {
-
+        try {
+            $this->authorizePermission('category.show');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         $current_ids = collect($categories)->pluck('category_id')->filter()->toArray();
         // Delete existing children not present in the current request
         Category::where('parent_id', $parentId)
@@ -218,6 +215,8 @@ class CategoryController extends Controller
     public function create(CreateCategoriesRequest $request)
     {
         try {
+            $this->authorizePermission('category.create');
+
             DB::beginTransaction();
             $department = Department::findOrFail($request->department_id);
 
@@ -251,6 +250,8 @@ class CategoryController extends Controller
     private function createCategories($departmentId, $categories, $parentId = null, $status = 'create')
     {
         try {
+            $this->authorizePermission('category.create');
+
             foreach ($categories as $categoryData) {
                 // dd($categories);
                 // log::info($categoryData['category_id']);

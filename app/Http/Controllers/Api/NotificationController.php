@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Notifications\NotificationResource;
 use App\Http\Traits\Firebase;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,29 +15,16 @@ use App\Http\Traits\Paginate;
 
 class NotificationController extends Controller
 {
-    use Firebase, ResponseTrait, Paginate;
-    public function __construct()
-    {
-        $permissions = [
-            'getUserNotifications'  => ['notification.show'],
-            'allNotification'  => ['notification.show'],
-            'sendNotification' => ['notification.create'],
-            'store' => ['notification.create'],
-            'processRecipient'    => ['notification.update'],
-        ];
+    use Firebase, ResponseTrait, Paginate, HasPermissionTrait;
 
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
     public function sendNotification(Request $request)
     {
         global $status;
         DB::beginTransaction();
 
         try {
+            $this->authorizePermission('notification.create');
+
             // Validate request
             $request->validate([
                 'title' => 'required|string',
@@ -101,6 +89,11 @@ class NotificationController extends Controller
 
     public function store(Request $request)
     {
+        try {
+            $this->authorizePermission('notification.create');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -154,6 +147,11 @@ class NotificationController extends Controller
 
     private function processRecipient(Notification $notification, string $recipient)
     {
+        try {
+            $this->authorizePermission('notification.update');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         if ($recipient == '*') {
             $notification->for_all = true;
             $notification->save();
@@ -179,6 +177,8 @@ class NotificationController extends Controller
     public function getUserNotifications(Request $request)
     {
         try {
+            $this->authorizePermission('notification.show');
+
             $validator = Validator::make($request->all(), [
                 'perPage' => 'nullable|integer|min:9',
                 'id' => 'required|exists:users,id',
@@ -215,6 +215,8 @@ class NotificationController extends Controller
     public function allNotification(Request $request)
     {
         try {
+            $this->authorizePermission('notification.show');
+
             /*            $pageNumber = $request->input('page', 1);
             $perPage = $request->input("perPage", 10);
 
