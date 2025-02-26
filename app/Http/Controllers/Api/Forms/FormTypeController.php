@@ -47,7 +47,7 @@ class FormTypeController extends Controller
     {
         DB::beginTransaction();
         try {
-           $this->authorizePermission('formtype.craate');
+            $this->authorizePermission('formtype.create');
 
             $formType = FormType::create($request->validated());
             $data['form'] = FormTypeResource::make($formType);

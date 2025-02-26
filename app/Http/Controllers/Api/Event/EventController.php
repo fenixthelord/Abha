@@ -165,6 +165,24 @@ class EventController extends Controller
             return $this->handleException($e);
         }
     }
+    public function getForm()
+    {
+        try {
+            $validation = Validator::make(request()->all(), [
+                'id' => 'required|exists:events,id',
+            ]);
+            if ($validation->fails()) {
+                return $this->returnValidationError($validation);
+            }
+            $event = Event::find(request()->input('id'));
+            $formType = FormType::where("name", "Event")->where("form_index",$event->id)->first();
+            $formId = $formType->forms()->with(['type', 'fields.options', 'fields.sources'])->get();
+            $data['form'] =  FormResource::collection($formId);
+            return $this->returnData($data);
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
     public function showEventForm(Request $request)
     {try{
         $event=Event::where("id",$request->id)->first();
