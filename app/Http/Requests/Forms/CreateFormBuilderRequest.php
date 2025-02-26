@@ -19,8 +19,13 @@ class CreateFormBuilderRequest extends FormRequest
     {
         return [
 
-            'form_type' => 'required',
-            'form_index'=>"nullable|uuid",
+            'form_type' => 'required|string|exists:form_types,name',
+            'form_index' => [
+                'nullable',
+                'string',
+                'exists:form_types,form_index',
+                request()->input('type') !== 'User' ? 'required' : 'nullable',
+            ],
             'name' => 'required|array|min:2|max:2',
             'name.en' => [
                 'required',
