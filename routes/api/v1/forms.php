@@ -17,10 +17,10 @@ Route::group(["prefix" => "/forms"], function () {
             Route::delete('delete', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
             Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
-            Route::get('/submissions', [FormSubmissionController::class, 'showFormWithSubmissions']);
-            Route::post('/submit', [FormSubmissionController::class, 'store']);
         });
     });
+            Route::get('/submissions', [FormSubmissionController::class, 'showFormWithSubmissions']);
+            Route::post('/submit', [FormSubmissionController::class, 'store']);
     /**
      * This route for Customer Service "FOR TEST ONLY - WITHOUT AUTH""
      */
