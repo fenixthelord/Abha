@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\HasPermissionTrait;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Http\Traits\ResponseTrait;
@@ -15,7 +16,7 @@ use Illuminate\Validation\Rule;
 use App\Models\Department;
 
 class ServiceController extends Controller {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
     public function index(Request $request) {
         try {
