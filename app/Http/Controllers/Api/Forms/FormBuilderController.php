@@ -239,6 +239,9 @@ class FormBuilderController extends Controller
                 $formWithRelations = Form::with(['type', 'fields.options', 'fields.sources'])
                     ->where('form_type_id', $form->id)
                     ->firstOrFail();
+                if(!$formWithRelations){
+                    return $this->badRequest('Form not found');
+                }
 
 
                     $data['form']= FormResource::make($formWithRelations);
