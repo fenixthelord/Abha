@@ -7,6 +7,7 @@ use App\Http\Requests\Forms\StoreFormTypeRequest;
 use App\Http\Requests\Forms\UpdateFormTypeRequest;
 use App\Http\Resources\Forms\FormResource;
 use App\Http\Resources\Forms\FormTypeResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormType;
 use Illuminate\Http\Request;
@@ -15,24 +16,8 @@ use Illuminate\Support\Facades\Validator;
 
 class FormTypeController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'index'  => ['formtype.show'],
-            'store'  => ['formtype.create'],
-            'show'  => ['formtype.show'],
-            'update'  => ['formtype.update'],
-            'destroy'  => ['formtype.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
 
     /**
      * Display a listing of the resource.
@@ -40,10 +25,12 @@ class FormTypeController extends Controller
     public function index(Request $request)
     {
         try {
+            $this->authorizePermission('formtype.show');
+
             $pageNumber = $request->input('page', 1);
             $perPage = $request->input('perPage', 10);
 
-            $formTypes = FormType::with('forms')->paginate($perPage, ['*'], 'page', $pageNumber);
+            $formTypes = FormType::with('forms')->distinct()->paginate($perPage, ['*'], 'page', $pageNumber);
             $data['form_types'] = FormTypeResource::collection($formTypes);
 
             return $this->PaginateData($data, $formTypes);
@@ -60,6 +47,8 @@ class FormTypeController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('formtype.store');
+
             $formType = FormType::create($request->validated());
             $data['form'] = FormTypeResource::make($formType);
             DB::commit();
@@ -76,6 +65,8 @@ class FormTypeController extends Controller
     public function show()
     {
         try {
+            $this->authorizePermission('formtype.show');
+
             $validate = Validator::make(request()->all(), [
                 'id' => 'required|string|exists:form_types,id',
             ]);
@@ -98,6 +89,8 @@ class FormTypeController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('formtype.update');
+
             $id = $request->input('id');
             $formType = FormType::findOrFail($id);
             $formType->update([
@@ -120,6 +113,8 @@ class FormTypeController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('formtype.delete');
+
             $validate = Validator::make(request()->all(), [
                 'id' => 'required|string|exists:form_types,id',
             ]);

@@ -7,6 +7,7 @@ use App\Http\Requests\Events\CreateEventRequest;
 use App\Http\Requests\Events\ListEventsRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
 use App\Http\Resources\EventResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
 use App\Models\Service;
@@ -17,25 +18,13 @@ use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'createEvent'  => ['event.create'],
-            'deleteEvent' => ['event.delete'],
-            'updateEvent'   => ['event.update'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
     public function list(ListEventsRequest $request)
     {
         try {
+//            $this->authorizePermission('event.show');
+
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
 
@@ -68,6 +57,8 @@ class EventController extends Controller
     public function createEvent(CreateEventRequest $request)
     {
         try {
+            $this->authorizePermission('event.create');
+
             DB::beginTransaction();
             $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");
             $formateEndDate = Carbon::parse($request->end_date)->format("Y-m-d");
@@ -90,6 +81,8 @@ class EventController extends Controller
     public function deleteEvent(Request $request)
     {
         try {
+            $this->authorizePermission('event.delete');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:events,id',
             ], [
@@ -125,6 +118,8 @@ class EventController extends Controller
     public function showEvent()
     {
         try {
+//            $this->authorizePermission('event.show');
+
             $validation = Validator::make(
                 request()->all(),
                 ['id' => 'required|exists:events,id']
@@ -144,6 +139,8 @@ class EventController extends Controller
     public function updateEvent(UpdateEventRequest $request)
     {
         try {
+            $this->authorizePermission('event.update');
+
             DB::beginTransaction();
 
             $formateStartDate = Carbon::parse($request->start_date)->format("Y-m-d");

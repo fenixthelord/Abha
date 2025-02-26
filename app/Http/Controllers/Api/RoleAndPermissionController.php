@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Permissions\NewPermissionsResource;
 use App\Http\Resources\Permissions\PermissionsResource;
 use App\Http\Resources\Roles\RolesResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Role\Permission;
 use App\Models\Role\Role;
@@ -14,36 +15,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\Paginate;
+use Illuminate\Testing\Fluent\Concerns\Has;
 
 class RoleAndPermissionController extends Controller
 {
-    use ResponseTrait, Paginate;
+    use ResponseTrait, Paginate, HasPermissionTrait;
 
     public $translatable = ["displaying", "description"];
 
-    public function __construct()
-    {
-        $permissions = [
-            'index'  => ['role.show'],
-            'ShowRole'  => ['role.show'],
-            'store' => ['role.create'],
-            'SyncPermission'    => ['role.update'],
-            'assignPermission'    => ['permission.create'],
-            'assignRole'    => ['role.update'],
-            'DeleteRole'   => ['role.delete'],
-            'removeRoleFromUser'   => ['user.update'],
-            'GetAllPermissions'   => ['permission.show'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
-
     public function index(Request $request)
     {
+        try {
+            $this->authorizePermission('role.show');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
 //        if (!auth()->user()->hasPermissionTo("role.show")) {
 //            return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
 //        }
@@ -62,6 +48,8 @@ class RoleAndPermissionController extends Controller
         \Log::info('Current authenticated user:', [auth()->user()]);
         DB::beginTransaction();
         try {
+            $this->authorizePermission('role.create');
+
 //            if (!auth()->user()->hasPermissionTo("role.create")) {
 //                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
 //            }
@@ -141,6 +129,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+            $this->authorizePermission('role.update');
+
             if ($this->isMasterRole($request->roleName)) {
                 return $this->Forbidden(__('validation.custom.roleAndPerm.not_allowed_assign_permissions_to_role'));
             }
@@ -190,6 +180,8 @@ class RoleAndPermissionController extends Controller
         }
 
         try {
+            $this->authorizePermission('role.update');
+
             $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
@@ -222,6 +214,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validatedData);
         }
         try {
+            $this->authorizePermission('permission.create');
+
             $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
@@ -270,6 +264,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+            $this->authorizePermission('user.update');
+
             $user = User::whereId($request->user_id)->first();
             if (!$user) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.user_not_found'));
@@ -448,6 +444,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+            $this->authorizePermission('role.update');
+
             // Prevent Master Role Updates
             if ($request->roleName === "Master") {
                 return $this->returnError(__('validation.custom.roleAndPerm.cannot_update_Master_role'));
@@ -500,6 +498,8 @@ class RoleAndPermissionController extends Controller
     public function GetAllPermissions()
     {
         try {
+            $this->authorizePermission('permission.show');
+
 //            if (!auth()->user()->hasPermissionTo("permission.show")) {
 //                return $this->Forbidden(__('validation.custom.roleAndPerm.dont_have_permission'));
 //            }
@@ -527,6 +527,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+            $this->authorizePermission('role.delete');
+
             DB::beginTransaction();
             $user = auth()->user();
             foreach ($request->roleName as $role) {
@@ -566,6 +568,8 @@ class RoleAndPermissionController extends Controller
             return $this->returnValidationError($validator);
         }
         try {
+            $this->authorizePermission('role.show');
+
             $roles = Role::findByName($request->roleName);
             if (!$roles) {
                 return $this->NotFound(__('validation.custom.roleAndPerm.role_not_found'));

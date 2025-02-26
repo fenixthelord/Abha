@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Workflows;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Workflows\WorkflowRequest;
 use App\Http\Resources\Workflows\WorkflowResource;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Workflows\Workflow;
 use Exception;
@@ -13,28 +14,14 @@ use Illuminate\Support\Facades\DB;
 
 class WorkflowController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'index'  => ['workflow.show'],
-            'show'  => ['workflow.show'],
-            'store' => ['workflow.create'],
-            'update'    => ['workflow.update'],
-            'destroy'   => ['workflow.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
 
     public function index(Request $request)
     {
         try {
+            $this->authorizePermission('workflow.show');
+
             $pageNumber = $request->input('page', 1);
             $perPage = $request->input('perPage', 10);
             $forms = Workflow::orderByAll($request->sortBy, $request->sortType)
@@ -52,6 +39,8 @@ class WorkflowController extends Controller
     public function show($id)
     {
         try {
+            $this->authorizePermission('workflow.show');
+
             $workflow = Workflow::with('blocks')->findOrFail($id);
             $data['workflow'] =  WorkflowResource::make($workflow);
             return $this->returnData($data);
@@ -63,6 +52,8 @@ class WorkflowController extends Controller
     public function store(WorkflowRequest $request)
     {
         try {
+            $this->authorizePermission('workflow.create');
+
             DB::beginTransaction();
             $validated = $request->validated();
             $workflow = Workflow::create($validated);
@@ -82,6 +73,8 @@ class WorkflowController extends Controller
     public function update(WorkflowRequest $request, $id)
     {
         try {
+            $this->authorizePermission('workflow.update');
+
             DB::beginTransaction();
             $validated = $request->validated();
             $workflow = Workflow::findOrFail($id);
@@ -109,6 +102,7 @@ class WorkflowController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('workflow.delete');
 
             $workflow = Workflow::findOrFail($id);
             $workflow->forceDelete();

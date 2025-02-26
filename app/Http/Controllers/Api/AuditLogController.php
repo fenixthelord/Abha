@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use OwenIt\Auditing\Models\Audit;
@@ -11,29 +12,17 @@ use Carbon\Carbon;
 
 class AuditLogController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
-    public function __construct()
-    {
-       /* $permissions = [
-            //To be reviewed
-            'index'  => ['audit.show'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }*/
-    }
 
     public function index(Request $request)
     {
-     /*   $user = auth()->user();
 
-     if (!$user->hasPermissionTo('audit.show')) {
-            return $this->Forbidden("you don't have permission to access this page");
-       }*/
+        try {
+            $this->authorizePermission('audit.show');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         $request->validate([
             'model_type' => 'nullable|string',
             'user_type' => 'nullable|string',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\UserResource;
+use App\Http\Traits\HasPermissionTrait;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Http\Traits\ResponseTrait;
@@ -15,24 +16,12 @@ use Illuminate\Validation\Rule;
 use App\Models\Department;
 
 class ServiceController extends Controller {
-    use ResponseTrait;
+    use ResponseTrait, HasPermissionTrait;
 
-    public function __construct()
-    {
-        $permissions = [
-            'store' => ['service.create'],
-            'update'    => ['service.update'],
-            'destroy'   => ['service.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-    }
     public function index(Request $request) {
         try {
+//            $this->authorizePermission('service.show');
+
             $validator = Validator::make($request->all(), [
                 'page' => ['nullable', 'integer', 'min:1'],
                 'per_page' => ['nullable', 'integer', 'min:1'],
@@ -77,6 +66,8 @@ class ServiceController extends Controller {
     public function show(Request $request) {
         DB::beginTransaction();
         try {
+//            $this->authorizePermission('service.show');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:services,id',
             ], [
@@ -106,6 +97,8 @@ class ServiceController extends Controller {
     public function store(Request $request) {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('service.create');
+
             $validator = Validator::make($request->all(), [
                 'department_id' => ['required', 'exists:departments,id,deleted_at,NULL'],
                 'name' => ['required', 'array', 'max:255'],
@@ -141,6 +134,8 @@ class ServiceController extends Controller {
     public function update(Request $request) {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('service.update');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:services,id',
                 'name' => ['nullable', 'array'],
@@ -202,6 +197,8 @@ class ServiceController extends Controller {
     public function destroy(Request $request) {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('service.delete');
+
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:services,id',
             ], [

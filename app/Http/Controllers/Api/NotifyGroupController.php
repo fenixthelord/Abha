@@ -7,6 +7,7 @@ use App\Http\Requests\Group\AddGroupRequest;
 use App\Http\Requests\Group\editGroupRequest;
 use App\Http\Requests\Group\idGroupRequest;
 use App\Http\Resources\Group\GroupResource;
+use App\Http\Traits\HasPermissionTrait;
 use Illuminate\Http\Request;
 use App\Http\Traits\Firebase;
 use App\Http\Traits\ResponseTrait;
@@ -17,29 +18,12 @@ use App\Services\NotificationService;
 
 class NotifyGroupController extends Controller
 {
-    use Firebase, ResponseTrait, Paginate;
+    use Firebase, ResponseTrait, Paginate, HasPermissionTrait;
 
     protected $notificationService;
 
     public function __construct(NotificationService $notificationService)
     {
-        $permissions = [
-            'allGroup'  => ['notification.show'],
-            'groupDetail'  => ['notification.show'],
-            'createNotifyGroup' => ['notification.create'],
-            'sendNotificationToNotifyGroup' => ['notification.create'],
-            'editGroup'    => ['notification.update'],
-            'addUsersToNotifyGroup'    => ['notification.update'],
-            'removeUsersFromNotifyGroup'    => ['notification.update'],
-            'deleteNotifyGroup'    => ['notification.delete'],
-        ];
-
-        foreach ($permissions as $method => $permissionGroup) {
-            foreach ($permissionGroup as $permission) {
-                $this->middleware("permission:{$permission}")->only($method);
-            }
-        }
-
         $this->notificationService = $notificationService;
     }
 
@@ -48,6 +32,8 @@ class NotifyGroupController extends Controller
     {
 
         try {
+            $this->authorizePermission('notification.create');
+
             $params = [
                 'owner_id' => $owner = auth('sanctum')->user()->getAuthIdentifier(),
                 'group_type' => $request->type,
@@ -83,6 +69,8 @@ class NotifyGroupController extends Controller
     public function addUsersToNotifyGroup(Request $request, $notifyGroupUuid)
     {
         try {
+            $this->authorizePermission('notification.update');
+
             DB::beginTransaction();
             $request->validate([
                 'user_uuids' => 'required|array',
@@ -106,6 +94,8 @@ class NotifyGroupController extends Controller
     public function removeUsersFromNotifyGroup(Request $request, $notifyGroupUuid)
     {
         try {
+            $this->authorizePermission('notification.update');
+
             DB::beginTransaction();
             $request->validate([
                 'user_uuids' => 'required|array',
@@ -127,6 +117,11 @@ class NotifyGroupController extends Controller
     // Send notification to a notify group
     public function sendNotificationToNotifyGroup(Request $request, $notifyGroupUuid)
     {
+        try {
+            $this->authorizePermission('notification.create');
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
         if ($notifyGroup = NotifyGroup::where('uuid', $notifyGroupUuid)->first()) {
 
             $userIds = $notifyGroup->users()->pluck('users.id');
@@ -164,6 +159,8 @@ class NotifyGroupController extends Controller
     public function allGroup(Request $request)
     {
         try {
+            $this->authorizePermission('notification.show');
+
             $params = $request->all();
 
             $method = '/group/';
@@ -189,6 +186,8 @@ class NotifyGroupController extends Controller
     public function groupDetail(idGroupRequest $request)
     {
         try {
+            $this->authorizePermission('notification.show');
+
             $params = [
                 'group_id' => $request->input('id'),
             ];
@@ -208,6 +207,8 @@ class NotifyGroupController extends Controller
     {
         DB::beginTransaction();
         try {
+            $this->authorizePermission('notification.update');
+
             $params = [
                 'group_id' => $request->group_id,
                 'owner_id' =>auth('sanctum')->user()->getAuthIdentifier(),
@@ -242,6 +243,8 @@ class NotifyGroupController extends Controller
     public function deleteNotifyGroup(idGroupRequest $request)
     {
         try {
+            $this->authorizePermission('notification.delete');
+
             $params = [
                 'group_id' => $request->id,
             ];
