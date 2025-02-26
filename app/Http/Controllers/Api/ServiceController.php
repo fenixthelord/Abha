@@ -66,7 +66,7 @@ class ServiceController extends Controller {
     public function show(Request $request) {
         DB::beginTransaction();
         try {
-            $this->authorizePermission('service.show');
+//            $this->authorizePermission('service.show');
 
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:services,id',

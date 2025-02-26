@@ -23,7 +23,7 @@ class EventController extends Controller
     public function list(ListEventsRequest $request)
     {
         try {
-            $this->authorizePermission('event.show');
+//            $this->authorizePermission('event.show');
 
             $perPage = $request->input('per_page', $this->per_page);
             $pageNumber = $request->input('page', $this->pageNumber);
@@ -118,7 +118,7 @@ class EventController extends Controller
     public function showEvent()
     {
         try {
-            $this->authorizePermission('event.show');
+//            $this->authorizePermission('event.show');
 
             $validation = Validator::make(
                 request()->all(),
