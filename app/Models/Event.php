@@ -24,6 +24,7 @@ class Event extends BaseModel implements Auditable
         'start_date',
         'end_date',
         'file',
+        'customer_type_id',
     ];
 
     protected $casts = [
