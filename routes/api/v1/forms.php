@@ -17,6 +17,9 @@ Route::group(["prefix" => "/forms"], function () {
             Route::delete('delete', [FormBuilderController::class, 'destroy'])->name('forms.destroy');
             Route::post('/{form_id}/fields', [FormFieldController::class, 'store']);
             Route::delete('/fields/{id}', [FormFieldController::class, 'destroy']);
+
+            Route::get('/customer/submissions', [FormSubmissionController::class, 'customerForms'])->name('forms.customer');
+            Route::get('/event/customer/submissions', [FormSubmissionController::class, 'customerFormsByEvent'])->name('forms.customer');
         });
     });
             Route::get('/submissions', [FormSubmissionController::class, 'showFormWithSubmissions']);
