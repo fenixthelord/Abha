@@ -11,6 +11,7 @@ use App\Models\Forms\FormSubmission;
 use App\Models\Forms\FormSubmissionValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class FormSubmissionController extends Controller
 {
@@ -31,7 +32,7 @@ class FormSubmissionController extends Controller
     public function showFormWithSubmissions()
     {
         $validate = Validator::make(request()->all(), [
-            'id' => 'required|string|exists:forms,id',
+            'id' => 'required|string|exists:users,id',
         ]);
         if ($validate->fails()) {
             return $this->returnValidationError($validate);
@@ -125,7 +126,7 @@ class FormSubmissionController extends Controller
     }
 
     /**
-     * This route for Customer Service "FOR TEST ONLY - WITHOUT AUTH""     
+     * This route for Customer Service "FOR TEST ONLY - WITHOUT AUTH""
      */
     public function submitFormCustomer(Request $request)
     {
@@ -195,5 +196,46 @@ class FormSubmissionController extends Controller
         } catch (\Exception $e) {
             return $this->returnError($e->getMessage());
         }
+    }
+
+    public function customerForms(Request $request)
+    {
+        $forms = Form::with([
+            'type',
+            'submissions' => function ($query) {
+                $query->where('submitter_service', 'customer');
+                },
+            'submissions.values.field'
+        ])->get();
+
+        $data['forms'] = FormSubmissionResource::collection($forms);
+        return $this->returnData($data);    }
+
+    public function customerFormsByEvent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|string|exists:events,id',
+        ], messageValidation());
+
+        if ($validator->fails()) {
+            return $this->returnValidationError($validator);
+        }
+
+        $id = request()->input('id');
+        $forms = Form::with([
+            'event',
+            'type',
+            'submissions' => function ($query){
+                $query->where('submitter_service', 'customer');
+                },
+            'submissions.values.field'
+        ])
+            ->whereHas('type', function ($query) use ($id){
+                $query->where('name', 'Event')
+                    ->where('form_index', $id);
+            })->get();
+
+        $data['forms'] = FormSubmissionResource::collection($forms);
+        return $this->returnData($data);
     }
 }
