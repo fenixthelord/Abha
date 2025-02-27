@@ -43,7 +43,8 @@ class UpdateEventRequest extends FormRequest
             "start_date" => ["required", "date", "after_or_equal:today"],
             "end_date" => ["required", "date", "after_or_equal:start_date"],
             "image" => ["required", "string", "max:255"],
-            "file" => ["nullable", "string", "max:255"]
+            "file" => ["nullable", "string", "max:255"],
+            'customer_type_id' => ['nullable']
         ];
     }
 
