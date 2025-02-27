@@ -52,7 +52,7 @@ class FormTypeController extends Controller
             $formType = FormType::create($request->validated());
             $data['form'] = FormTypeResource::make($formType);
             DB::commit();
-            return $this->returnData($data, "Form created successfully");
+            return $this->returnData($data, "Form type created successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->returnError($e->getMessage());

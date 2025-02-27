@@ -35,6 +35,11 @@ class Form extends BaseModel
         return $this->hasMany(FormSubmission::class);
     }
 
+    public function event()
+    {
+        return $this->hasOneThrough(Event::class, FormType::class, 'id', 'id', 'form_type_id', 'form_index');
+    }
+
     public function scopeOrderByAll($query, $sortBy, $sortType)
     {
         if ($sortBy == 'name' && $sortType)
