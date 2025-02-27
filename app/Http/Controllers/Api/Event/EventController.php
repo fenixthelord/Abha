@@ -6,15 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\CreateEventRequest;
 use App\Http\Requests\Events\ListEventsRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
+use App\Http\Resources\EventFormResource;
 use App\Http\Resources\EventResource;
+use App\Http\Resources\Forms\FormResource;
 use App\Http\Traits\HasPermissionTrait;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Event;
+use App\Models\Forms\Form;
 use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Forms\FormType;
 
 class EventController extends Controller
 {
@@ -161,4 +165,45 @@ class EventController extends Controller
             return $this->handleException($e);
         }
     }
+    public function getForm()
+    {
+        try {
+            $validation = Validator::make(request()->all(), [
+                'id' => 'required|exists:events,id',
+            ]);
+            if ($validation->fails()) {
+                return $this->returnValidationError($validation);
+            }
+            $event = Event::find(request()->input('id'));
+            $formType = FormType::where("name", "Event")->where("form_index",$event->id)->first();
+            $formId = $formType->forms()->with(['type', 'fields.options', 'fields.sources'])->get();
+            $data['form'] =  FormResource::collection($formId);
+            return $this->returnData($data);
+        }catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+    public function showEventForm(Request $request)
+    {try{
+        $event=Event::where("id",$request->id)->first();
+
+        if(!$event){
+            return $this->badRequest("Event not found");
+        }
+        $form_type=FormType::where('form_index',$request->id)->first();
+        if(!$form_type){
+            return $this->badRequest("this event does not have a form");
+        }
+
+        $form=Form::with(['type', 'fields.options', 'fields.sources'])->where('form_type_id',$form_type->id)->first();
+
+
+        $data['event']=EventFormResource::make($event);
+        return $this->returnData($data);
+
+    }
+    catch (\Exception $e) {
+    return $this->handleException($e);}
+    }
+
 }
