@@ -18,17 +18,17 @@ class MemberResource extends JsonResource
         $firstName = '';
         $lastName  = '';
 
-        // Determine if the member is a customer or a user
-        if (($this->resource['member_type'] ?? '') === 'customers') { // Corrected from 'customers' to 'customer'
+
+        if (($this->resource['member_type'] ?? '') === 'customers') {
             // Handle customer case
-            $customerData = $this->resource['user']['data']['customer'] ?? []; // Fix: It was under 'user'
+            $customerData = $this->resource['user']['data']['customer'] ?? [];
             if (!empty($customerData)) {
                 $firstName = $customerData['first_name'] ?? '';
                 $lastName  = $customerData['last_name'] ?? '';
             }
-        } elseif (($this->resource['member_type'] ?? '') === 'users') { // Corrected from 'users' to 'user'
-            // Handle user case
-            $userData = $this->resource['user']['data']['user'] ?? $this->resource['user']['data'] ?? []; // Fix: Some responses may not have 'user' inside 'data'
+        } elseif (($this->resource['member_type'] ?? '') === 'users') {
+
+            $userData = $this->resource['user']['data']['user'] ?? $this->resource['user']['data'] ?? [];
             if (!empty($userData)) {
                 $firstName = $userData['first_name'] ?? '';
                 $lastName  = $userData['last_name'] ?? '';
