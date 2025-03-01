@@ -27,7 +27,7 @@ class MemberResource extends JsonResource
         $lastName  = '';
 
         // Check member type if available
-        if (($this->resource['member_type'] ?? '') === 'customer') {
+        if (($this->resource['member_type'] ?? '') === 'customers') {
             // For customer, the data should be under the "customer" key.
             // Sometimes it might be an indexed array, sometimes an associative array.
             if (isset($data['customer'])) {
