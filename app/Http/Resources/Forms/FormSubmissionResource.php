@@ -18,6 +18,7 @@ class FormSubmissionResource extends JsonResource
             'form_id' => $this->id,
             'form_name' => $this->name,
             'form_type' => $this->type->name,
+            'event' => $this->whenLoaded('event'),
             'submissions' =>SubmissionResource::collection($this->submissions)
         ];
     }

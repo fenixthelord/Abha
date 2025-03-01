@@ -28,6 +28,7 @@ class EventResource extends JsonResource
             'end_date' => $this->formatDateTime($this->end_date),
             'start_date_hijri' => $this->hijri['start_date_hijri'],
             'end_date_hijri' => $this->hijri['end_date_hijri'],
+            'customer_type_id' => $this->customer_type_id,
         ];
     }
 

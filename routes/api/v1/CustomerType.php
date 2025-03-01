@@ -9,4 +9,7 @@ Route::prefix('typeCustomer')->group(function () {
     Route::get('/get-form-submission-values', [CustomerTypeController::class, 'getFormSubmissionValues']);
     Route::post('/update-form-submission-status', [CustomerTypeController::class, 'updateStatus']);
     Route::delete('/delete-customer-type', [CustomerTypeController::class, 'deleteCustomersByType']);
+
+    Route::get('/get-customer-forms', [CustomerTypeController::class, 'getCustomerForms']);
+
 });

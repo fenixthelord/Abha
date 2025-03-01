@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\Customer\CustomerResource;
 use App\Http\Resources\Forms\FormResource;
+use App\Http\Resources\Type\FormSubmissionResource;
 use App\Http\Resources\Forms\SubmissionResource;
 use App\Models\Forms\Form;
 use App\Services\CustomerService;
@@ -14,15 +15,19 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Forms\FormSubmission;
 
-class CustomerTypeController extends Controller {
+class CustomerTypeController extends Controller
+{
     use ResponseTrait;
+
     protected CustomerService $customerService;
 
     public function __construct(CustomerService $customerService)
     {
         $this->customerService = $customerService;
     }
-    public function getCustomersByType(Request $request) {
+
+    public function getCustomersByType(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'page' => ['nullable', 'integer', 'min:1'],
@@ -54,11 +59,11 @@ class CustomerTypeController extends Controller {
             // return $responseData;
             $customersCollection = CustomerResource::collection($responseData->data->customers);
             $data = [
-                "customers"      => $customersCollection,
-                "current_page"   => $responseData->current_page ?? null,
-                "next_page"      => $responseData->next_page ?? null,
-                "previous_page"  => $responseData->previous_page ?? null,
-                "total_pages"    => $responseData->total_pages ?? null,
+                "customers" => $customersCollection,
+                "current_page" => $responseData->current_page ?? null,
+                "next_page" => $responseData->next_page ?? null,
+                "previous_page" => $responseData->previous_page ?? null,
+                "total_pages" => $responseData->total_pages ?? null,
             ];
 
             return $this->returnData($data);
@@ -67,7 +72,8 @@ class CustomerTypeController extends Controller {
         }
     }
 
-    public function getFormsWithFields(Request $request) {
+    public function getFormsWithFields(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'type_id' => ['required', 'exists:types,id'],
@@ -95,7 +101,8 @@ class CustomerTypeController extends Controller {
         }
     }
 
-    public function getFormSubmissionValues(Request $request) {
+    public function getFormSubmissionValues(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
@@ -113,7 +120,7 @@ class CustomerTypeController extends Controller {
             ];
 
             $response = $this->customerService->getCall('service/get-status', $data);
-            $responseData = json_decode(json_encode($response['data']));
+            $responseData = json_decode(json_encode($response));
 
             if (isset($responseData->error)) {
                 return $this->returnError($responseData->error);
@@ -125,7 +132,7 @@ class CustomerTypeController extends Controller {
 
             return $this->returnData([
                 'form_submission_id' => $request->form_submission_id,
-                'submission' =>  SubmissionResource::collection($formSubmissionValues)
+                'submission' => SubmissionResource::collection($formSubmissionValues)
             ]);
 
         } catch (\Exception $e) {
@@ -133,7 +140,8 @@ class CustomerTypeController extends Controller {
         }
     }
 
-    public function updateStatus(Request $request) {
+    public function updateStatus(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'form_submission_id' => ['required', 'exists:form_submissions,id'],
@@ -173,7 +181,8 @@ class CustomerTypeController extends Controller {
         }
     }
 
-    public function deleteCustomersByType(Request $request) {
+    public function deleteCustomersByType(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'id' => ['required'],
@@ -194,6 +203,34 @@ class CustomerTypeController extends Controller {
             }
 
             return $this->returnSuccessMessage(__('validation.custom.type_controller.customer_type_deleted'));
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function getCustomerForms(Request $request) { // with Events
+        try {
+            $validator = Validator::make($request->all(), [
+                'customer_id' => ['required'],
+            ], [
+                'customer_id.required' => __('validation.custom.customer_id_required'),
+            ]);
+
+            if ($validator->fails()) {
+                return $this->returnValidationError($validator);
+            }
+
+            $customerForms = FormSubmission::with(['form.type', 'values.field'])
+                ->where('submitter_id', $request->customer_id)
+                ->get();
+
+            if ($customerForms->isEmpty()) {
+                return $this->notFound(__('validation.custom.no_forms_found'));
+            }
+
+            return $this->returnData([
+                'FormsData' => FormSubmissionResource::collection($customerForms),
+            ]);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
