@@ -442,6 +442,7 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'type' => 'required|string',
