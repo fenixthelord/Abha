@@ -542,7 +542,7 @@ class UserController extends Controller
     public function show(Request $request)
     {
         try {
-            $this->authorizePermission('user.show');
+         //   $this->authorizePermission('user.show');
 
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required|string|exists:users,id',
