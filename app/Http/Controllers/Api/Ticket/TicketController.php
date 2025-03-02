@@ -48,6 +48,10 @@ class TicketController extends Controller
                 $q->where("form_index", $request->category_id);
             })->pluck("id")->first();
 
+            if (!$formID) {
+                return $this->returnError("Form not found");
+            }
+
             $data = [
                 'submitter_id' => auth()->user()->id,
                 'submitter_service' => "user",
