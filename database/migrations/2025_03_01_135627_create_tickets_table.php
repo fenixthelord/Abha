@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string("name", 500);
             $table->foreignUuid('department_id')->constrained('departments')->onDelete('cascade');
-            $table->foreignUuid('position_id')->constrained('positions')->onDelete('cascade');
-            $table->foreignUuid('parent_id')->nullable()->constrained('positions')->onDelete('cascade');
+            $table->foreignUuid('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignUuid('parent_id')->nullable()->constrained('tickets')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

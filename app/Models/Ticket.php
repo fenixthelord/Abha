@@ -14,7 +14,7 @@ class Ticket extends BaseModel
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['id', 'name', 'department_id', 'position_id', 'parent_id'];
+    protected $fillable = ['id', 'name', 'department_id', 'category_id', 'parent_id'];
 
     protected $casts = [
         'name' => 'array',
@@ -25,9 +25,9 @@ class Ticket extends BaseModel
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function position()
+    public function category()
     {
-        return $this->belongsTo(Position::class, 'position_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function parentTicket()
