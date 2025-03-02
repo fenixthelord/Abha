@@ -442,7 +442,6 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            $this->authorizePermission('user.update');
 
             $validator = Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -542,7 +541,7 @@ class UserController extends Controller
     public function show(Request $request)
     {
         try {
-            $this->authorizePermission('user.show');
+         //   $this->authorizePermission('user.show');
 
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required|string|exists:users,id',

@@ -131,7 +131,7 @@ class EventController extends Controller
             if ($validation->fails()) {
                 return $this->ReturnError($validation->errors()->first());
             }
-            $id=request()->input('id');
+            $id = request()->input('id');
             $event = Event::find($id);
 
             $data["event"] = EventResource::make($event)->allInfo();
@@ -140,6 +140,7 @@ class EventController extends Controller
             return $this->handleException($e);
         }
     }
+
     public function updateEvent(UpdateEventRequest $request)
     {
         try {
@@ -165,6 +166,7 @@ class EventController extends Controller
             return $this->handleException($e);
         }
     }
+
     public function getForm()
     {
         try {
@@ -175,35 +177,40 @@ class EventController extends Controller
                 return $this->returnValidationError($validation);
             }
             $event = Event::find(request()->input('id'));
-            $formType = FormType::where("name", "Event")->where("form_index",$event->id)->first();
-            $formId = $formType->forms()->with(['type', 'fields.options', 'fields.sources'])->get();
-            $data['form'] =  FormResource::collection($formId);
-            return $this->returnData($data);
-        }catch (\Exception $e) {
+            if ($formType = FormType::where("name", "Event")->where("form_index", $event->id)->first()) {
+                $formId = $formType->forms()->with(['type', 'fields.options', 'fields.sources'])->get();
+                $data['form'] = FormResource::collection($formId);
+                return $this->returnData($data);
+            } else {
+                return $this->returnError("Event dose not have form");
+            }
+        } catch (\Exception $e) {
             return $this->handleException($e);
         }
     }
+
     public function showEventForm(Request $request)
-    {try{
-        $event=Event::where("id",$request->id)->first();
+    {
+        try {
+            $event = Event::where("id", $request->id)->first();
 
-        if(!$event){
-            return $this->badRequest("Event not found");
+            if (!$event) {
+                return $this->badRequest("Event not found");
+            }
+            $form_type = FormType::where('form_index', $request->id)->first();
+            if (!$form_type) {
+                return $this->badRequest("this event does not have a form");
+            }
+
+            $form = Form::with(['type', 'fields.options', 'fields.sources'])->where('form_type_id', $form_type->id)->first();
+
+
+            $data['event'] = EventFormResource::make($event);
+            return $this->returnData($data);
+
+        } catch (\Exception $e) {
+            return $this->handleException($e);
         }
-        $form_type=FormType::where('form_index',$request->id)->first();
-        if(!$form_type){
-            return $this->badRequest("this event does not have a form");
-        }
-
-        $form=Form::with(['type', 'fields.options', 'fields.sources'])->where('form_type_id',$form_type->id)->first();
-
-
-        $data['event']=EventFormResource::make($event);
-        return $this->returnData($data);
-
-    }
-    catch (\Exception $e) {
-    return $this->handleException($e);}
     }
 
 }
