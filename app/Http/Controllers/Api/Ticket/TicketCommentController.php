@@ -15,6 +15,8 @@ class TicketCommentController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user()?->id;
+        $request['user_id'] = $user;
         $request->validate([
             'ticket_id' => 'required|exists:tickets,id',
             'user_id' => 'required|exists:users,id',
