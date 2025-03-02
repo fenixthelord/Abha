@@ -40,6 +40,8 @@ class SubmissionResource extends JsonResource
         }
         elseif ($this->submitter_service == 'User' || $this->submitter_service == 'user') {
             $user = User::find($this->submitter_id);
+            return ['name' => $user['full_name'],
+                'image' => $user['image']];
         }
     }
 }
