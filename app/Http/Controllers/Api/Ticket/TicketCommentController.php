@@ -48,11 +48,12 @@ class TicketCommentController extends Controller
         // Store Mentions
         if (!empty($validatedData['mentions'])) {
             foreach ($validatedData['mentions'] as $mention) {
+
                 CommentMention::create([
                     'comment_id' => $comment->id,
                     'type'       => $mention['type'],
                     'identifier' => $mention['identifier'],
-                    'user_id'    => $mention['id'] ?? null,
+                    'type_id'    => $mention['id'] ?? null,
                 ]);
 
                 // تجميع الـ ids حسب النوع
@@ -127,7 +128,7 @@ class TicketCommentController extends Controller
                     'comment_id' => $comment->id,
                     'type'       => $mention['type'],
                     'identifier' => $mention['identifier'],
-                    'user_id'    => $mention['id'] ?? null,
+                    'type_id'    => $mention['id'] ?? null,
                 ]);
 
                 if ($mention['type'] === 'department' && !empty($mention['id'])) {
