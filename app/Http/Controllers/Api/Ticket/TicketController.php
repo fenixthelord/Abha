@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Ticket;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Resources\TicketResource;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -30,19 +31,11 @@ class TicketController extends Controller
     /**
      * Create a new ticket.
      */
-    public function store(Request $request)
+    public function store(StoreTicketRequest $request)
     {
-        $request->validate([
-            "name" => ["required", "array"],
-            "name.en" => ["required", "string", "min:2", "max:255"],
-            "name.ar" => ["required", "string", "min:2", "max:255"],
-            "department_id" => "required|exists:departments,id",
-            "position_id" => "required|exists:positions,id",
-            "parent_id" => "nullable|exists:tickets,id",
-        ]);
-
-        $ticket = Ticket::create($request->all());
-        return $this->returnData($ticket);
+        $validatedData = $request->validated();
+        $ticket = Ticket::create($validatedData);
+        return $this->returnData(TicketResource::make($ticket));
         //return response()->json(['message' => 'Ticket created successfully', 'ticket' => $ticket], 201);
     }
 
