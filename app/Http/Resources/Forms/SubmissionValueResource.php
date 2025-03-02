@@ -15,7 +15,7 @@ class SubmissionValueResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'label' => $this->field->label ,
+            'label' => $this->field->getTranslations("label") ,
             'placeholder' => $this->field->placeholder ,
             'type' => $this->field->type ,
             'required' => $this->field->required ,
