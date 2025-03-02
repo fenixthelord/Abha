@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use app\services\NotificationService;
+use App\Services\NotificationService;
 use App\Services\UserNotificationService;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Role\Role;
