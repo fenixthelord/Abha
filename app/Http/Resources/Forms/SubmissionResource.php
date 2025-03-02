@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Forms;
 
+use App\Models\User;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +21,7 @@ class SubmissionResource extends JsonResource
             'submitter_id' => $this->submitter_id,
             'submitter_service' => $this->submitter_service,
             'customer' => $this->nameCustomer(),
-            'values' => SubmissionValueResource::collection($this->values),
+            'fields' => SubmissionValueResource::collection($this->values),
         ];
     }
 
@@ -36,6 +37,9 @@ class SubmissionResource extends JsonResource
                 return ['name' => $customer['full_name'],
                     'image' => $customer['image']];
             }
+        }
+        elseif ($this->submitter_service == 'User' || $this->submitter_service == 'user') {
+            $user = User::find($this->submitter_id);
         }
     }
 }
