@@ -22,8 +22,12 @@ class UpdateTicketCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:ticket_comments,id',
-            'content' => 'required|string',
+            'id'                => 'required|exists:ticket_comments,id',
+            'content'           => 'required|string',
+            'mentions'          => 'nullable|array',
+            'mentions.*.type'   => 'required|string|in:user,department,position',
+            'mentions.*.identifier' => 'required|string',
+            'mentions.*.id'     => 'nullable|string'
         ];
     }
 }
