@@ -7,18 +7,25 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
+use App\Http\Traits\Paginate;
 use Illuminate\Validation\Rule;
 
 class TicketController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, Paginate;
 
-    public function index(Request $request){
-
-        $tickets = Ticket::with(['department', 'position', 'parentTicket'])->get();
-        return $this->returnData($tickets);
-
+    public function index(Request $request)
+    {
+        try {
+            $fields = ['name', 'department_id', 'category_id', 'parent_id'];
+            $tickets = $this->allWithSearch(new Ticket(), $fields, $request);
+            $data['tickets'] = TicketResource::collection($tickets);
+            return $this->PaginateData($data, $tickets);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
     }
+
     /**
      * Create a new ticket.
      */
