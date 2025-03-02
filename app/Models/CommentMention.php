@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class CommentMention extends Model
+class CommentMention extends BaseModel
 {
     use HasFactory;
 
@@ -15,15 +15,6 @@ class CommentMention extends Model
 
     protected $fillable = ['id', 'comment_id', 'type', 'identifier', 'user_id'];
 
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (!$model->id) {
-                $model->id = Str::uuid()->toString();
-            }
-        });
-    }
 
     public function comment()
     {
