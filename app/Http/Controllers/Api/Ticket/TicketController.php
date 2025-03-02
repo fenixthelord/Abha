@@ -11,6 +11,10 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Http\Traits\Paginate;
+use App\Models\Forms\Form;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 
 class TicketController extends Controller
@@ -34,10 +38,37 @@ class TicketController extends Controller
      */
     public function store(StoreTicketRequest $request)
     {
-        $validatedData = $request->validated();
-        $ticket = Ticket::create($validatedData);
-        return $this->returnData(TicketResource::make($ticket));
-        //return response()->json(['message' => 'Ticket created successfully', 'ticket' => $ticket], 201);
+
+        try {
+            DB::beginTransaction();
+            $validatedData = $request->validated();
+            $ticket = Ticket::create($validatedData);
+
+            $formID = Form::whereHas("type", function ($q) use ($request) {
+                $q->where("form_index", $request->category_id);
+            })->pluck("id")->first();
+
+            $data = [
+                'submitter_id' => auth()->user()->id,
+                'submitter_service' => "user",
+                'id' => $formID
+            ];
+
+            // add form-id and values-of-form to $data
+            $data = array_merge($data, $request->all());
+
+            $response = Http::post(url('/api/v1/forms/submit-customer'), $data)->json();
+
+            if ($response['code'] != 200) {
+                return $this->returnError($response["message"]);
+            }
+
+            return $this->returnData(TicketResource::make($ticket));
+            //return response()->json(['message' => 'Ticket created successfully', 'ticket' => $ticket], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->handleException($e);
+        }
     }
 
     /**
