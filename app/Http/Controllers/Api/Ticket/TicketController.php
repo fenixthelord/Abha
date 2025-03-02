@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Ticket;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TicketResource;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
