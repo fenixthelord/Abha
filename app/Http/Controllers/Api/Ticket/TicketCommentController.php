@@ -27,8 +27,9 @@ class TicketCommentController extends Controller
         return response()->json(['message' => 'Comment added', 'comment' => $comment], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
+        $id = $request->input('id');
         $comment = TicketComment::findOrFail($id);
         $comment->update($request->only('content'));
         $comment->mentions()->delete();
