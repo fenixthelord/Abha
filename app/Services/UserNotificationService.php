@@ -64,6 +64,7 @@ class UserNotificationService
             'channel' => $data['channel'] ?? 'fcm',
             'image' => $data['image'] ?? null,
             'url' => $data['url'] ?? null,
+            'object_data'=>$data['object_data'] ?? null,
         ];
 
         return $this->notificationService->postCall('/send-notification', $notificationData);
