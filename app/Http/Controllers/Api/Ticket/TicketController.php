@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Ticket;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\StoreTicketRequest;
+use App\Http\Requests\Ticket\UpdateTicketRequest;
 use App\Http\Resources\TicketResource;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -42,31 +43,11 @@ class TicketController extends Controller
     /**
      * Update an existing ticket.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateTicketRequest $request)
     {
-        $ticket = Ticket::findOrFail($id);
-
-        $request->validate([
-            "name" => ["required", "array"],
-            "name.en" => [
-                "required",
-                "string",
-                "min:2",
-                "max:255"
-            ],
-            "name.ar" => [
-                "required",
-                "string",
-                "min:2",
-                "max:255"
-            ],
-            'department_id' => 'sometimes|required|exists:departments,id',
-            'position_id' => 'sometimes|required|exists:positions,id',
-            'parent_id' => 'nullable|exists:tickets,id',
-        ]);
-
-        $ticket->update($request->all());
-
-        return response()->json(['message' => 'Ticket updated successfully', 'ticket' => $ticket]);
+        $validatedData = $request->validated();
+        $ticket = Ticket::findOrFail($request['id']);
+        $ticket->update($validatedData);
+        return $this->returnData(TicketResource::make($ticket));
     }
 }
