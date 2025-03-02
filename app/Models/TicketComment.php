@@ -10,28 +10,18 @@ use App\Models\Department;
 use App\Models\Position;
 use App\Models\CommentMention;
 
-class TicketComment extends Model
+class TicketComment extends BaseModel
 {
     use HasFactory;
 
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['id', 'ticket_id', 'user_id', 'content', 'mentions'];
+    protected $fillable = ['id', 'ticket_id', 'user_id', 'content'];
 
     protected $casts = [
         'mentions' => 'array',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (!$model->id) {
-                $model->id = Str::uuid()->toString();
-            }
-        });
-    }
 
     public function ticket()
     {
