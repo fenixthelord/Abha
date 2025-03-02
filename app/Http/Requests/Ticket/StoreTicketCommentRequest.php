@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Ticket;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreTicketCommentRequest extends FormRequest
 {
@@ -30,5 +31,9 @@ class StoreTicketCommentRequest extends FormRequest
             'mentions.*.identifier' => 'required|string',
             'mentions.*.id' => 'nullable|string', // Store only if available
         ];
+    }
+    public function failedValidation($validator)
+    {
+        throw new HttpResponseException($this->returnValidationError($validator));
     }
 }
