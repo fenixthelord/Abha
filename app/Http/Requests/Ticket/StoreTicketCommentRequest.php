@@ -25,6 +25,10 @@ class StoreTicketCommentRequest extends FormRequest
             'ticket_id' => 'required|exists:tickets,id',
             'user_id' => 'required|exists:users,id',
             'content' => 'required|string',
+            'mentions' => 'nullable|array',
+            'mentions.*.type' => 'required|string|in:user,department,position',
+            'mentions.*.identifier' => 'required|string',
+            'mentions.*.id' => 'nullable|string', // Store only if available
         ];
     }
 }
