@@ -20,22 +20,29 @@ class UserNotificationService
     {
         $userIds = [];
 
-        if (!empty($data['department_id'])) {
-            $department = Department::find($data['department_id']);
-            if (!$department) {
-                throw new Exception("Department not found");
+        // معالجة مصفوفة department_ids
+        if (!empty($data['department_ids']) && is_array($data['department_ids'])) {
+            $departments = Department::whereIn('id', $data['department_ids'])->get();
+            if ($departments->isEmpty()) {
+                throw new Exception("No departments found");
             }
-            $userIds = array_merge($userIds, $department->employees()->pluck('id')->toArray());
+            foreach ($departments as $department) {
+                $userIds = array_merge($userIds, $department->employees()->pluck('id')->toArray());
+            }
         }
 
-        if (!empty($data['position_id'])) {
-            $position = Position::find($data['position_id']);
-            if (!$position) {
-                throw new Exception("Position not found");
+        // معالجة مصفوفة position_ids
+        if (!empty($data['position_ids']) && is_array($data['position_ids'])) {
+            $positions = Position::whereIn('id', $data['position_ids'])->get();
+            if ($positions->isEmpty()) {
+                throw new Exception("No positions found");
             }
-            $userIds = array_merge($userIds, $position->users()->pluck('id')->toArray());
+            foreach ($positions as $position) {
+                $userIds = array_merge($userIds, $position->users()->pluck('id')->toArray());
+            }
         }
 
+        // معالجة user_ids المُرسلة مباشرة
         if (!empty($data['user_ids']) && is_array($data['user_ids'])) {
             $userIds = array_merge($userIds, User::whereIn('id', $data['user_ids'])->pluck('id')->toArray());
         }
@@ -52,21 +59,22 @@ class UserNotificationService
         }
 
         $notificationData = [
-            'sender_id' => $userAuth->id,
-            'sender_type' => $data['sender_type'] ?? 'user',
-            'sender_service' => $data['sender_service'] ?? 'user_service',
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'user_ids' => $userIds,
+            'sender_id'        => $userAuth->id,
+            'sender_type'      => $data['sender_type'] ?? 'user',
+            'sender_service'   => $data['sender_service'] ?? 'user_service',
+            'title'            => $data['title'],
+            'body'             => $data['body'],
+            'user_ids'         => $userIds,
             'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service',
-            'receiver_type' => $data['model'] ?? 'user',
-            'group_id' => $data['group_id'] ?? null,
-            'channel' => $data['channel'] ?? 'fcm',
-            'image' => $data['image'] ?? null,
-            'url' => $data['url'] ?? null,
-            'object_data'=>$data['object_data'] ?? null,
+            'receiver_type'    => $data['model'] ?? 'user',
+            'group_id'         => $data['group_id'] ?? null,
+            'channel'          => $data['channel'] ?? 'fcm',
+            'image'            => $data['image'] ?? null,
+            'url'              => $data['url'] ?? null,
+            'object_data'      => $data['object_data'] ?? null,
         ];
 
         return $this->notificationService->postCall('/send-notification', $notificationData);
     }
+
 }
