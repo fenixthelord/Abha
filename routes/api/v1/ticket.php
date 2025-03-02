@@ -10,9 +10,9 @@ Route::prefix('tickets')->group(function () {
 
         Route::get('/all', [TicketController::class, 'index']);
         Route::post('/create', [TicketController::class, 'store']);
-        Route::put('/update/{id}', [TicketController::class, 'update']);
+        Route::put('/update', [TicketController::class, 'update']);
 
         Route::post('/comments', [TicketCommentController::class, 'store']);
-        Route::put('/comments/{id}', [TicketCommentController::class, 'update']);
+        Route::put('/comments/update', [TicketCommentController::class, 'update']);
     });
 });
