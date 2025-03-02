@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Ticket;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateTicketCommentRequest extends FormRequest
 {
@@ -29,5 +30,9 @@ class UpdateTicketCommentRequest extends FormRequest
             'mentions.*.identifier' => 'required|string',
             'mentions.*.id'     => 'nullable|string'
         ];
+    }
+    public function failedValidation($validator)
+    {
+        throw new HttpResponseException($this->returnValidationError($validator));
     }
 }
