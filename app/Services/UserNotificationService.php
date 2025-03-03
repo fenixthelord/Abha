@@ -97,8 +97,9 @@ class UserNotificationService
             'url'              =>  null,
             'object_data'      => $data['object_data'] ?? null,
         ];
+
         $dd = $this->notificationService->postCall('/send-notification', $notificationData);
-        dd($dd);
+
         return $dd;
     }
 

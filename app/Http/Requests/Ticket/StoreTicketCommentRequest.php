@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Ticket;
 
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreTicketCommentRequest extends FormRequest
 {
+    use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -24,7 +26,7 @@ class StoreTicketCommentRequest extends FormRequest
     {
         return [
             'ticket_id' => 'required|exists:tickets,id',
-            'user_id' => 'required|exists:users,id',
+
             'content' => 'required|string',
             'mentions' => 'nullable|array',
             'mentions.*.type' => 'required|string|in:user,department,position',
