@@ -13,7 +13,7 @@ class CommentMention extends BaseModel
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['id', 'comment_id', 'type', 'identifier', 'user_id'];
+    protected $fillable = ['id', 'comment_id', 'type', 'identifier', 'type_id'];
 
 
     public function comment()

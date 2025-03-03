@@ -54,7 +54,7 @@ class TicketComment extends BaseModel
                         'comment_id' => $this->id,
                         'type' => 'user',
                         'identifier' => $username,
-                        'user_id' => $user->id
+                        'type_id' => $user->id
                     ]);
                     $mentionsData[] = ['type' => 'user', 'identifier' => $username];
                 }
@@ -67,7 +67,7 @@ class TicketComment extends BaseModel
                             'comment_id' => $this->id,
                             'type' => 'department',
                             'identifier' => $departmentName,
-                            'user_id' => $user->id
+                            'type_id' => $user->id
                         ]);
                     }
                     $mentionsData[] = ['type' => 'department', 'identifier' => $departmentName];
@@ -81,7 +81,7 @@ class TicketComment extends BaseModel
                             'comment_id' => $this->id,
                             'type' => 'position',
                             'identifier' => $positionName,
-                            'user_id' => $user->id
+                            'type_id' => $user->id
                         ]);
                     }
                     $mentionsData[] = ['type' => 'position', 'identifier' => $positionName];

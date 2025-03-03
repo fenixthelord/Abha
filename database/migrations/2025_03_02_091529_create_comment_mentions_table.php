@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('comment_id')->constrained('ticket_comments')->onDelete('cascade');
             $table->enum('type', ['user', 'department', 'position']);
             $table->string('identifier'); // username, department name, position name
-            $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->uuid('type_id');
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Ticket;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateTicketRequest extends FormRequest
 {
@@ -40,5 +41,9 @@ class UpdateTicketRequest extends FormRequest
                 'position_id' => 'sometimes|required|exists:positions,id',
                 'parent_id' => 'nullable|exists:tickets,id',
         ];
+    }
+    public function failedValidation($validator)
+    {
+        throw new HttpResponseException($this->returnValidationError($validator));
     }
 }
