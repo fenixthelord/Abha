@@ -186,7 +186,6 @@ class NotificationController extends Controller
 
             $response = $this->notificationService->getCall('/notifications', $requestData);
             $response = json_decode(json_encode($response, true));
-            // dd($response->data->current_page, 123);
             if (isset($response->error)) {
                 return $this->returnError($response->error);
             }

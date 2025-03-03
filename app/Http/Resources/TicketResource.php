@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Notifications;
+namespace App\Http\Resources;
 
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DetailResource extends JsonResource
+class TicketResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,13 +15,12 @@ class DetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+//        return parent::toArray($request);
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'image' => $this->image,
-            'url' => $this->url,
-            'object_data'=>$this->object_data,
+            'name' => $this->name,
+            'department' => DepartmentResource::make($this->department),
+            'category' => CategoryResource::make($this->category),
         ];
     }
 }

@@ -2,13 +2,19 @@
 
 namespace App\Providers;
 
+use App\Services\NotificationService;
+use App\Services\UserNotificationService;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Role\Role;
 use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void {
+        $this->app->singleton(UserNotificationService::class, function ($app) {
+            return new UserNotificationService($app->make(NotificationService::class));
+        });
+    }
 
     public function boot(): void
     {
