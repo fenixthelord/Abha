@@ -72,11 +72,14 @@ class TicketCommentController extends Controller
 
 
         $notificationData = [
-            'title'       => 'New Comment on Ticket: ' . $ticket->name,
+            'title'       => 'New Comment on Ticket: ' . $ticket->getTranslation('name', 'en'),
             'body'        => $validatedData['content'],
             'object_data' => [
                 'id'   => $ticket->id,
-                'name' => $ticket->name,
+                'name' => [
+                    'en' => $ticket->getTranslation('name', 'en'),
+                    'ar' => $ticket->getTranslation('name', 'ar')
+                ]
             ],
         ];
 
