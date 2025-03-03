@@ -60,10 +60,10 @@ class CustomerTypeController extends Controller
             $customersCollection = CustomerResource::collection($responseData->data->customers);
             $data = [
                 "customers" => $customersCollection,
-                "current_page" => $responseData->current_page ?? null,
-                "next_page" => $responseData->next_page ?? null,
-                "previous_page" => $responseData->previous_page ?? null,
-                "total_pages" => $responseData->total_pages ?? null,
+                "current_page" => $responseData->data->current_page ?? null,
+                "next_page" => $responseData->data->next_page ?? null,
+                "previous_page" => $responseData->data->previous_page ?? null,
+                "total_pages" => $responseData->data->total_pages ?? null,
             ];
 
             return $this->returnData($data);
