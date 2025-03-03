@@ -200,19 +200,28 @@ class FormSubmissionController extends Controller
 
     public function customerForms(Request $request)
     {
+        $pageNumber = $request->input('page', 1);
+        $perPage = $request->input('perPage', 10);
+
         $forms = Form::with([
             'type',
             'submissions' => function ($query) {
                 $query->where('submitter_service', 'customer');
                 },
             'submissions.values.field'
-        ])->get();
+        ])
+            ->filter($request->only('search'))
+            ->paginate($perPage, ['*'], 'page', $pageNumber);
 
         $data['forms'] = FormSubmissionResource::collection($forms);
-        return $this->returnData($data);    }
+        return $this->PaginateData($data, $forms);
+    }
 
     public function customerFormsByEvent(Request $request)
     {
+        $pageNumber = $request->input('page', 1);
+        $perPage = $request->input('perPage', 10);
+
         $validator = Validator::make($request->all(), [
             'id' => 'required|string|exists:events,id',
         ], messageValidation());
@@ -233,9 +242,11 @@ class FormSubmissionController extends Controller
             ->whereHas('type', function ($query) use ($id){
                 $query->where('name', 'Event')
                     ->where('form_index', $id);
-            })->get();
+            })
+            ->filter($request->only('search'))
+            ->paginate($perPage, ['*'], 'page', $pageNumber);
 
         $data['forms'] = FormSubmissionResource::collection($forms);
-        return $this->returnData($data);
+        return $this->PaginateData($data, $forms);
     }
 }
