@@ -19,6 +19,7 @@ class SubmissionValueResource extends JsonResource
             'placeholder' => $this->field->placeholder ,
             'type' => $this->field->type ,
             'required' => $this->field->required ,
+            'options' => $this->field->options ?? null,
             'order' => $this->field->order ,
             'value' => $this->value ,
         ];
