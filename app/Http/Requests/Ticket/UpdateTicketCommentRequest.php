@@ -5,7 +5,7 @@ namespace App\Http\Requests\Ticket;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreTicketRequest extends FormRequest
+class UpdateTicketCommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,12 +23,12 @@ class StoreTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-                "name" => ["required", "array"],
-                "name.en" => ["required", "string", "min:2", "max:255"],
-                "name.ar" => ["required", "string", "min:2", "max:255"],
-                "department_id" => "required|exists:departments,id",
-                "category_id" => "required|exists:categories,id",
-                "parent_id" => "nullable|exists:tickets,id",
+            'id'                => 'required|exists:ticket_comments,id',
+            'content'           => 'required|string',
+            'mentions'          => 'nullable|array',
+            'mentions.*.type'   => 'required|string|in:user,department,position',
+            'mentions.*.identifier' => 'required|string',
+            'mentions.*.id'     => 'nullable|string'
         ];
     }
     public function failedValidation($validator)

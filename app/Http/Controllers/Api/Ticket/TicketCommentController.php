@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\Paginate;
 use App\Http\Traits\ResponseTrait;
 use App\Models\CommentMention;
+use App\Http\Requests\Ticket\StoreTicketCommentRequest;
+use App\Http\Requests\Ticket\UpdateTicketCommentRequest;
 use App\Models\Ticket;
 use App\Services\UserNotificationService;
-use Illuminate\Http\Request;
 use App\Models\TicketComment;
 
 class TicketCommentController extends Controller
@@ -23,21 +24,11 @@ class TicketCommentController extends Controller
         $this->middleware('auth');
     }
 
-    public function store(Request $request)
+    public function store(StoreTicketCommentRequest $request)
     {
         $user = auth()->user()?->id;
         $request['user_id'] = $user;
-
-        $validatedData = $request->validate([
-            'ticket_id' => 'required|exists:tickets,id',
-            'user_id' => 'required|exists:users,id',
-            'content' => 'required|string',
-            'mentions' => 'nullable|array',
-            'mentions.*.type' => 'required|string|in:user,department,position',
-            'mentions.*.identifier' => 'required|string',
-            'mentions.*.id' => 'nullable|string', // Store only if available
-        ]);
-
+        $validatedData = $request->validated();
         // Create Comment
         $comment = TicketComment::create([
             'ticket_id' => $validatedData['ticket_id'],
@@ -66,11 +57,7 @@ class TicketCommentController extends Controller
                 }
             }
         }
-
-
         $ticket = Ticket::find($validatedData['ticket_id']);
-
-
         $notificationData = [
             'title'       => 'New Comment on Ticket: ' . $ticket->getTranslation('name', 'en'),
             'body'        => $validatedData['content'],
@@ -82,8 +69,6 @@ class TicketCommentController extends Controller
                 ]
             ],
         ];
-
-
         if (!empty($departmentIds)) {
             $notificationData['department_ids'] = array_unique($departmentIds);
         }
@@ -93,38 +78,26 @@ class TicketCommentController extends Controller
         if (!empty($userIds)) {
             $notificationData['user_ids'] = array_unique($userIds);
         }
-
-
         $this->userNotificationService->sendNotification($notificationData, auth()->user());
-
-            return $this->returnData($comment->load('mentions'));
-
+       return $this->returnData($comment->load('mentions'));
     }
 
 
-    public function update(Request $request)
+    public function update(UpdateTicketCommentRequest $request)
     {
-
-        $validatedData = $request->validate([
-            'id'                => 'required|exists:ticket_comments,id',
-            'content'           => 'required|string',
-            'mentions'          => 'nullable|array',
-            'mentions.*.type'   => 'required|string|in:user,department,position',
-            'mentions.*.identifier' => 'required|string',
-            'mentions.*.id'     => 'nullable|string',
-        ]);
-
-
+        $validatedData = $request->validated();
         $comment = TicketComment::findOrFail($validatedData['id']);
         $comment->update(['content' => $validatedData['content']]);
+        $id = $request->input('id');
+        $comment = TicketComment::findOrFail($id);
+        if ($comment->user_id != $request->user()->id) {
+            return $this->badRequest('You cannot edit this comment.');
+        }
+        $comment->update($request->only('content'));
         $comment->mentions()->delete();
-
-
         $departmentIds = [];
         $positionIds   = [];
         $userIds       = [];
-
-
         if (!empty($validatedData['mentions'])) {
             foreach ($validatedData['mentions'] as $mention) {
                 CommentMention::create([
@@ -133,7 +106,6 @@ class TicketCommentController extends Controller
                     'identifier' => $mention['identifier'],
                     'type_id'    => $mention['id'] ?? null,
                 ]);
-
                 if ($mention['type'] === 'department' && !empty($mention['id'])) {
                     $departmentIds[] = $mention['id'];
                 } elseif ($mention['type'] === 'position' && !empty($mention['id'])) {
@@ -143,14 +115,9 @@ class TicketCommentController extends Controller
                 }
             }
         } else {
-
             $comment->parseMentions();
         }
-
-
         $ticket = Ticket::find($comment->ticket_id);
-
-
         $notificationData = [
             'title'       => 'Comment Updated on Ticket: ' . $ticket->name,
             'body'        => $validatedData['content'],
@@ -159,8 +126,6 @@ class TicketCommentController extends Controller
                 'name' => $ticket->name,
             ],
         ];
-
-
         if (!empty($departmentIds)) {
             $notificationData['department_ids'] = array_unique($departmentIds);
         }
@@ -170,14 +135,11 @@ class TicketCommentController extends Controller
         if (!empty($userIds)) {
             $notificationData['user_ids'] = array_unique($userIds);
         }
-
-
         try {
             $this->userNotificationService->sendNotification($notificationData, auth()->user());
         } catch (Exception $e) {
-
+            return $this->handleException($e);
         }
-
         return response()->json([
             'message' => 'Comment updated',
             'comment' => $comment->load('mentions')
