@@ -81,6 +81,7 @@ class UserNotificationService
             throw new Exception("No users found for the provided parameters");
         }
 
+
         $notificationData = [
             'sender_id'        => $userAuth->id,
             'sender_type'      => $data['sender_type'] ?? 'user',
@@ -88,16 +89,17 @@ class UserNotificationService
             'title'            => $data['title'],
             'body'             => $data['body'],
             'user_ids'         => $userIds,
-            'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service',
-            'receiver_type'    => $data['model'] ?? 'user',
-            'group_id'         => $data['group_id'] ?? null,
-            'channel'          => $data['channel'] ?? 'fcm',
-            'image'            => $data['image'] ?? null,
-            'url'              => $data['url'] ?? null,
+            'receiver_service' =>  'user_service',
+            'receiver_type'    =>  'user',
+            'group_id'         =>  null,
+            'channel'          =>  'fcm',
+            'image'            =>  null,
+            'url'              =>  null,
             'object_data'      => $data['object_data'] ?? null,
         ];
-
-        return $this->notificationService->postCall('/send-notification', $notificationData);
+        $dd = $this->notificationService->postCall('/send-notification', $notificationData);
+        dd($dd);
+        return $dd;
     }
 
 }
