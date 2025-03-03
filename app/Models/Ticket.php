@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class Ticket extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasTranslations;
+
+    protected $translatable = ['name'];
 
     protected $keyType = 'string';
     public $incrementing = false;

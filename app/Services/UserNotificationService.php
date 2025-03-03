@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace app\Services;
 
 use App\Models\Department;
 use App\Models\Position;
@@ -18,37 +18,60 @@ class UserNotificationService
 
     public function getUserIds($data)
     {
-        $userIds = [];
+        $result = collect();
 
-        // معالجة مصفوفة department_ids
+
         if (!empty($data['department_ids']) && is_array($data['department_ids'])) {
             $departments = Department::whereIn('id', $data['department_ids'])->get();
             if ($departments->isEmpty()) {
                 throw new Exception("No departments found");
             }
             foreach ($departments as $department) {
-                $userIds = array_merge($userIds, $department->employees()->pluck('id')->toArray());
+
+                foreach ($department->employees as $employee) {
+                    $result->push([
+                        'user_id'       => $employee->id,
+                        'department_id' => $employee->department_id,
+                    ]);
+                }
             }
         }
 
-        // معالجة مصفوفة position_ids
+
         if (!empty($data['position_ids']) && is_array($data['position_ids'])) {
             $positions = Position::whereIn('id', $data['position_ids'])->get();
             if ($positions->isEmpty()) {
                 throw new Exception("No positions found");
             }
             foreach ($positions as $position) {
-                $userIds = array_merge($userIds, $position->users()->pluck('id')->toArray());
+
+                foreach ($position->users as $user) {
+                    $result->push([
+                        'user_id'       => $user->id,
+                        'department_id' => $user->department_id,
+                    ]);
+                }
             }
         }
 
-        // معالجة user_ids المُرسلة مباشرة
+
         if (!empty($data['user_ids']) && is_array($data['user_ids'])) {
-            $userIds = array_merge($userIds, User::whereIn('id', $data['user_ids'])->pluck('id')->toArray());
+            $users = User::whereIn('id', $data['user_ids'])->get()->keyBy('id');
+            $transformed = collect($data['user_ids'])->map(function ($userId) use ($users) {
+                return [
+                    'user_id'       => $userId,
+                    'department_id' => $users->has($userId) ? $users[$userId]->department_id : null,
+                ];
+            });
+            $result = $result->merge($transformed);
         }
 
-        return array_unique($userIds);
+
+        $result = $result->unique('user_id');
+
+        return $result->toArray();
     }
+
 
     public function sendNotification($data, $userAuth)
     {
@@ -58,6 +81,7 @@ class UserNotificationService
             throw new Exception("No users found for the provided parameters");
         }
 
+
         $notificationData = [
             'sender_id'        => $userAuth->id,
             'sender_type'      => $data['sender_type'] ?? 'user',
@@ -65,16 +89,17 @@ class UserNotificationService
             'title'            => $data['title'],
             'body'             => $data['body'],
             'user_ids'         => $userIds,
-            'receiver_service' => $data['model'] == 'user' ? 'user_service' : 'customer_service',
-            'receiver_type'    => $data['model'] ?? 'user',
-            'group_id'         => $data['group_id'] ?? null,
-            'channel'          => $data['channel'] ?? 'fcm',
-            'image'            => $data['image'] ?? null,
-            'url'              => $data['url'] ?? null,
+            'receiver_service' =>  'user_service',
+            'receiver_type'    =>  'user',
+            'group_id'         =>  null,
+            'channel'          =>  'fcm',
+            'image'            =>  null,
+            'url'              =>  null,
             'object_data'      => $data['object_data'] ?? null,
         ];
-
-        return $this->notificationService->postCall('/send-notification', $notificationData);
+        $dd = $this->notificationService->postCall('/send-notification', $notificationData);
+        dd($dd);
+        return $dd;
     }
 
 }
