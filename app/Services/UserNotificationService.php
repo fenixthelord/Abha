@@ -78,7 +78,8 @@ class UserNotificationService
         $userIds = $this->getUserIds($data);
 
         if (empty($userIds)) {
-            throw new Exception("No users found for the provided parameters");
+            return true;
+            //throw new Exception("No users found for the provided parameters");
         }
 
 
