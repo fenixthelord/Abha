@@ -209,7 +209,9 @@ class FormSubmissionController extends Controller
                 $query->where('submitter_service', 'customer');
                 },
             'submissions.values.field'
-        ])->paginate($perPage, ['*'], 'page', $pageNumber);
+        ])
+            ->filter($request->only('search'))
+            ->paginate($perPage, ['*'], 'page', $pageNumber);
 
         $data['forms'] = FormSubmissionResource::collection($forms);
         return $this->PaginateData($data, $forms);
@@ -240,7 +242,9 @@ class FormSubmissionController extends Controller
             ->whereHas('type', function ($query) use ($id){
                 $query->where('name', 'Event')
                     ->where('form_index', $id);
-            })->paginate($perPage, ['*'], 'page', $pageNumber);
+            })
+            ->filter($request->only('search'))
+            ->paginate($perPage, ['*'], 'page', $pageNumber);
 
         $data['forms'] = FormSubmissionResource::collection($forms);
         return $this->PaginateData($data, $forms);
