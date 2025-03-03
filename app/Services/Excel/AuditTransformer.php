@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Excel;
+namespace app\Services\Excel;
 
 use App\Models\Audit;
 use Carbon\Carbon;
