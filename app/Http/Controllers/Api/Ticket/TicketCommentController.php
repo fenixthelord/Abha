@@ -27,12 +27,12 @@ class TicketCommentController extends Controller
     public function store(StoreTicketCommentRequest $request)
     {
         $user = auth()->user()?->id;
-        $request['user_id'] = $user;
+
         $validatedData = $request->validated();
         // Create Comment
         $comment = TicketComment::create([
             'ticket_id' => $validatedData['ticket_id'],
-            'user_id' => $validatedData['user_id'],
+            'user_id' => $user,
             'content' => $validatedData['content'],
         ]);
 
@@ -47,7 +47,7 @@ class TicketCommentController extends Controller
                     'type_id'    => $mention['id'] ?? null,
                 ]);
 
-                // تجميع الـ ids حسب النوع
+
                 if ($mention['type'] === 'department' && !empty($mention['id'])) {
                     $departmentIds[] = $mention['id'];
                 } elseif ($mention['type'] === 'position' && !empty($mention['id'])) {
