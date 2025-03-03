@@ -78,7 +78,9 @@ class TicketCommentController extends Controller
         if (!empty($userIds)) {
             $notificationData['user_ids'] = array_unique($userIds);
         }
-        $this->userNotificationService->sendNotification($notificationData, auth()->user());
+        (count($notificationData) > 0) ?
+            $this->userNotificationService->sendNotification($notificationData, auth()->user())
+        :" ";
        return $this->returnData($comment->load('mentions'));
     }
 
