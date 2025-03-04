@@ -96,6 +96,12 @@ class FormBuilderController extends Controller
 
             );
 
+            $field_ids = $request->input('fields.*.id');
+
+            $missing_field_ids = array_diff($form->fields()->pluck('id')->toArray(), $field_ids);
+
+            $res = FormField::whereIn('id', $missing_field_ids)->forceDelete();
+
 
             foreach ($request['fields'] as $field_data) {
 
