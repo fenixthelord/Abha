@@ -102,6 +102,7 @@ class TypeController extends Controller {
                 'name.ar' => ['required', 'max:500', Rule::unique('types', 'name->ar')],
                 'service_id' => ['required', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['required', 'exists:forms,id,deleted_at,NULL'],
+                'image' => ['nullable', 'string'],
             ], [
                 'name.required' => __('validation.custom.type_controller.name_required'),
                 'name.en.required' => __('validation.custom.type_controller.name_en_required'),
@@ -122,6 +123,7 @@ class TypeController extends Controller {
                 'name' => $request->name,
                 'service_id' => $request->service_id,
                 'form_id' => $request->form_id,
+                'image' => $request->image,
             ]);
 
             DB::commit();
@@ -142,6 +144,7 @@ class TypeController extends Controller {
                 'name.ar' => ['nullable', 'max:500', Rule::unique('types', 'name->ar')->ignore($request->id)],
                 'service_id' => ['nullable', 'exists:services,id,deleted_at,NULL'],
                 'form_id' => ['nullable', 'exists:forms,id,deleted_at,NULL'],
+                'image' => ['nullable', 'string'],
             ], [
                 'id.required' => __('validation.custom.type_controller.id_required'),
                 'id.exists' => __('validation.custom.type_controller.id_exists'),
@@ -160,8 +163,8 @@ class TypeController extends Controller {
                 'name',
                 'service_id',
                 'form_id',
+                'image',
             ]));
-
 
             DB::commit();
             return $this->returnData(['type' => new TypeResource($type)]);
