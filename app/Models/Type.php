@@ -17,6 +17,7 @@ class Type extends BaseModel implements Auditable {
         'name',
         'service_id',
         'form_id',
+        'image'
     ];
 
     public function service(): object
