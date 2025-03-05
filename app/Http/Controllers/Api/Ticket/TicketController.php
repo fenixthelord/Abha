@@ -8,6 +8,7 @@ use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Requests\Ticket\UpdateTicketRequest;
 use App\Http\Resources\TicketResource;
 use App\Http\Traits\ResponseTrait;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Http\Traits\Paginate;
@@ -31,6 +32,20 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             return $this->handleException($e);
         }
+    }
+    public function show()
+    {
+        $validate = Validator::make(request()->all(), [
+            'id' => 'required|exists:tickets,id'
+        ]);
+        if ($validate->fails()) {
+            return $this->returnValidationError($validate);
+        }
+        $ticket = Ticket::find(request()->id)?? null;
+        if (!$ticket) {
+            return $this->returnError('Ticket not found');
+        }
+        return $this->returnData(TicketResource::make($ticket));
     }
 
     /**
