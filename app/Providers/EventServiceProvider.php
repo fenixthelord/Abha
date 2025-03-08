@@ -2,35 +2,54 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use App\Events\UserLogin;
+use App\Events\UserRegistered;
+use App\Events\Workflows\WorkflowTriggered;
+use App\Listeners\SendLoginOtpEmail;
+use App\Listeners\SendOtpEmail;
+use App\Listeners\Workflows\HandleSystemErrorListener;
+use App\Listeners\Workflows\ProcessWorkflowListener;
+use App\Models\Category;
+use App\Models\Event;
+use App\Observers\CategoryObserver;
+use App\Observers\EventObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Log\Events\MessageLogged;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event to listener mappings for the application.
-     *
-     * @var array<class-string, array<int, class-string>>
-     */
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
+        UserRegistered::class => [
+            SendOtpEmail::class,
+        ],
+        UserLogin::class => [
+            SendLoginOtpEmail::class,
+        ],
+        WorkflowTriggered::class => [
+            ProcessWorkflowListener::class,
+        ],
+        MessageLogged::class => [
+            HandleSystemErrorListener::class,
         ],
     ];
 
-    /**
-     * Register any events for your application.
-     */
     public function boot(): void
     {
-        //
+        Category::observe(CategoryObserver::class);
+        Event::observe(EventObserver::class);
+        // $models = collect(File::allFiles(app_path('Models')))
+        //     ->map(function ($file) {
+        //         return 'App\\Models\\' . str_replace('.php', '', $file->getFilename());
+        //     });
+
+        // foreach ($models as $model) {
+        //     $observer = 'App\\Observers\\' . class_basename($model) . 'Observer';
+        //     if (class_exists($observer)) {
+        //         $model::observe($observer);
+        //     }
+        // }
     }
 
-    /**
-     * Determine if events and listeners should be automatically discovered.
-     */
     public function shouldDiscoverEvents(): bool
     {
         return false;
